@@ -1,5 +1,6 @@
 {
   "name": "sunoku-marketplace",
+  "description": "Marketplace for Sunoku — the living record of your product: validation, PRD, roadmap, journal.",
   "owner": { "name": "Patrick Villanueva", "email": "patrick@webicient.com" },
   "plugins": [
     { "name": "sunoku", "source": "./", "description": "Living product record: validate, define, plan, track." }
