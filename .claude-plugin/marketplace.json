@@ -1,0 +1,7 @@
+{
+  "name": "sunoku-marketplace",
+  "owner": { "name": "Patrick Villanueva", "email": "patrick@webicient.com" },
+  "plugins": [
+    { "name": "sunoku", "source": "./", "description": "Living product record: validate, define, plan, track." }
+  ]
+}
