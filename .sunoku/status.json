@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "product": "Sunoku",
+  "origin": "existing",
+  "lifecycle": "live",
+  "tracking": true,
+  "last_reconciled_sha": "76789887ed1553c40d068f573af7d0634ab138cd",
+  "created": "2026-07-02T13:26:16Z",
+  "updated": "2026-07-02T13:37:19Z"
+}
