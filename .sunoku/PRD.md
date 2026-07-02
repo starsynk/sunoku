@@ -46,7 +46,7 @@ recollection.
 | 13 | Mute switch — `tracking:false` silences hooks while preserving the record | P1 | skills/status/SKILL.md:79-83; hooks/scripts/session-start.sh:17 (AB-18) |
 | 14 | Drift + reconcile — count commits since `last_reconciled_sha`, offer to diff/group/re-triage | P1 | skills/status/SKILL.md:59-77; hooks/scripts/session-start.sh:27-37 |
 | 15 | Eight single-purpose subagents dispatched hub-and-spoke, each a tool-scoped Markdown contract | P0 | agents/*.md (AB-5, AB-6, AB-14); reference/canon.md:67-96 |
-| 16 | Hook regression suite (10 assertions) exercising both scripts in isolated repos | P2 | tests/test-hooks.sh:46-96 (AB-52) |
+| 16 | Hook regression suite (12 assertions) exercising both scripts in isolated repos | P2 | tests/test-hooks.sh:46-96 (AB-52) |
 | 17 | Scenario regression log — 8 headless full-plugin runs (A, B, C, D1–D5) | P2 | tests/scenarios.md:28-197 (AB-54–AB-58) |
 
 ## Architecture
