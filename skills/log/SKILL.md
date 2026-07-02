@@ -82,7 +82,9 @@ accurate as it was before the change, no more ceremony than that requires.
       - `sunoku:design-lead` for the UX section — its dispatch names only the affected
         journeys/screens, not the whole design doc.
       - `sunoku:delivery-planner` (RESHAPE hat) then `sunoku:delivery-critic` for the affected
-        roadmap/task slices only.
+        roadmap/task slices only. `delivery-critic` writes `research/.fragments/plan-critique.md`;
+        once its findings are folded into the checkpoint delta (step c), delete the critique
+        fragment.
       Never dispatch the validation machinery (researcher, red-team, market/feasibility
       VALIDATE hats) for a RESHAPE — that machinery answers "should we build this at all,"
       which this event does not reopen.

@@ -39,6 +39,9 @@ optionally act (reconcile, mute/unmute) only when the user asks or accepts an of
    - **Drift** — run `git rev-list --count <last_reconciled_sha>..HEAD` read-only and check for
      a dirty working tree (`git status --porcelain`). Report as "N commits since last reconcile"
      (plus "working tree has uncommitted changes" if dirty). N=0 and clean → report "up to date."
+     **Empty `last_reconciled_sha`**: `""..HEAD` is not a valid range and silently yields 0 — if
+     `last_reconciled_sha` is empty, treat all current history as unreconciled instead: drift
+     count = `git rev-list --count HEAD`.
    - **Suggested next action** — exactly one, chosen by this priority order: (1) offer reconcile
      if drift > 0 or the tree is dirty; (2) else prompt to answer the highest-stakes open
      question if one exists; (3) else, if `lifecycle` is `live` with no roadmap
@@ -60,6 +63,10 @@ optionally act (reconcile, mute/unmute) only when the user asks or accepts an of
    ("reconcile"):
    - Read the actual code diff: `git diff <last_reconciled_sha>..HEAD` (code-reading is the
      evidence; never substitute commit-message summaries for reading the diff, per canon).
+     **Empty `last_reconciled_sha`**: `""..HEAD` is not a valid range and would silently read as
+     an empty diff — if `last_reconciled_sha` is empty, read the full current tree instead of a
+     diff (e.g. `git diff $(git hash-object -t tree /dev/null)..HEAD`, or read the tracked files
+     directly) before triaging, so nothing since arming is skipped.
    - **Size gate**: if the diff touches ≲20 files AND ≲2k changed lines, read it inline
      yourself. If it exceeds either threshold, dispatch `sunoku:codebase-analyst` with the
      RECONCILE hat, scoped per canon Dispatch (absolute `.sunoku/` path, the exact sha range to

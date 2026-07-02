@@ -98,7 +98,8 @@ fans out to a subagent and reports back to you; agents never message each other.
       retries). Then YOU compose `validation/<YYYY-MM-DD>-validation.md` from the validation-report
       template: verdict (GO / NO-GO / GO-IF with named conditions), the per-claim evidence table with
       strength self-ratings, the red-team's fetched-source verification notes, and assumptions
-      carried. This file is immutable once finalized. **Checkpoint = the go/no-go.** If the retry cap
+      carried, then delete the critique fragment. This file is immutable once finalized.
+      **Checkpoint = the go/no-go.** If the retry cap
       was hit with a blocking objection still open, present this checkpoint labeled **NON-CONVERGED**
       and let the user break the tie. If ≥3 high-stakes assumptions have accrued, surface them inside
       this checkpoint using canon's verbatim line.
@@ -117,7 +118,8 @@ fans out to a subagent and reports back to you; agents never message each other.
       conflict loop (≤3). Then YOU assemble `PRD.md` from the section fragments into the template's
       section order (Problem, Personas, Features, Architecture, UX, Out of scope, Success metrics,
       Commercial, Change Log), leave the Change Log table empty, delete the PRD sentinel, and delete
-      the section fragments after assembly. **Checkpoint: approve the PRD** — surface ≥3 high-stakes
+      the section fragments after assembly — including `research/.fragments/define-critique.md`, not
+      just the drafted PRD section fragments. **Checkpoint: approve the PRD** — surface ≥3 high-stakes
       assumptions inside it per canon if that many have accrued.
 
    e. **PLAN (optional).** Offer it once: "want a build plan here? Planning elsewhere is fine —
@@ -125,8 +127,9 @@ fans out to a subagent and reports back to you; agents never message each other.
       `lifecycle` to `planning`, dispatch `sunoku:delivery-planner` (full-plan hat, reads `PRD.md`,
       writes `ROADMAP.md` + `TASKS.md`) → then `sunoku:delivery-critic` (reads `ROADMAP.md` +
       `TASKS.md` + `PRD.md`, writes `research/.fragments/plan-critique.md`) → fix loop ≤3
-      (re-dispatch delivery-planner for any blocking finding, never edit the plan yourself) →
-      **checkpoint: approve the roadmap.** Declined → skip planning entirely; go to arming.
+      (re-dispatch delivery-planner for any blocking finding, never edit the plan yourself), then
+      delete the critique fragment → **checkpoint: approve the roadmap.** Declined → skip planning
+      entirely; go to arming.
 
    f. **Arm TRACK** (one step, in this exact order): set `lifecycle` to `live`, `tracking` to `true`,
       and `last_reconciled_sha` to the current `git HEAD` (empty string `""` if the repo has no
@@ -153,10 +156,11 @@ fans out to a subagent and reports back to you; agents never message each other.
 
    c. **ACCURACY GATE.** YOU draft `PRD.md` from `research/as-built.md` — every section grounded in
       the `file:line` evidence, no aspirational claims — plus an explicit **GAP LIST** of must-have
-      features not yet built (seeded from the analyst's Gaps & TODOs). Delete the PRD sentinel.
-      Present it: "here is what I understood your product to be — correct me." Apply the user's
-      corrections and re-present until they approve. Misreads die here; what the user approves becomes
-      canon. This is the PRD-approve checkpoint for this flow.
+      features not yet built (seeded from the analyst's Gaps & TODOs), written as a `## Gap List`
+      section appended to the draft `PRD.md` — there is no separate gap-list file. Delete the PRD
+      sentinel. Present it: "here is what I understood your product to be — correct me." Apply the
+      user's corrections and re-present until they approve. Misreads die here; what the user
+      approves becomes canon. This is the PRD-approve checkpoint for this flow.
 
    d. **MEMORY FIRST.** Immediately on approval, arm — BEFORE the gap question. In one step: set
       `lifecycle` to `live`, `tracking` to `true`, `last_reconciled_sha` to current `git HEAD` (`""`
@@ -166,9 +170,11 @@ fans out to a subagent and reports back to you; agents never message each other.
 
    e. **Gap roadmap (exactly ONE optional question).** Ask once: "want a gap roadmap over the
       must-haves that aren't built yet?" Yes → scaffold `ROADMAP.md` + `TASKS.md`, dispatch
-      `sunoku:delivery-planner` (gap-plan hat, reads the approved gap list + `research/as-built.md`,
-      writes `ROADMAP.md` + `TASKS.md`) → `sunoku:delivery-critic` (writes
-      `research/.fragments/plan-critique.md`) → fix loop ≤3 → **checkpoint: approve the roadmap**,
+      `sunoku:delivery-planner` (gap-plan hat, reads the approved gap list — `PRD.md`'s `## Gap
+      List` section — + `research/as-built.md`, writes `ROADMAP.md` + `TASKS.md`) →
+      `sunoku:delivery-critic` (writes
+      `research/.fragments/plan-critique.md`) → fix loop ≤3, then delete the critique fragment →
+      **checkpoint: approve the roadmap**,
       all while `lifecycle` stays `live`. No → done; zero further ceremony. Either way, tell the user
       the three-command surface.
 
