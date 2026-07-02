@@ -206,3 +206,27 @@ the live guard made zero writes. Runs ~1 min each.
   exercised run; no plugin defect was found. The only non-pass was D4's first attempt, which was
   weak model-following (sonnet paused at the reconcile offer) resolved by the sanctioned one-retry
   with `--model opus` — an assertion was never weakened.
+
+---
+
+## Scenario E — fresh scaffold routes to greenfield (boilerplate detection)
+
+**Fixture:** fake `create-next-app` output — default `app/layout.tsx` + `app/page.tsx`, framework
+README, deps = starter defaults, single commit "Initial commit from create-next-app". No domain
+code. Prompt: habit-tracker idea ("Cadence"), already committed, approve PRD, skip PLAN, confirm
+any scaffold reading.
+
+**Assertions**
+
+- [x] init applied the substance test and routed GREENFIELD (`"origin": "greenfield"`), not
+      existing-code — transcript states: one generator commit, no domain code, defaults only,
+      "nothing lost if regenerated"
+- [x] no `research/as-built.md`, no RECONSTRUCT dispatch (fixture never documented as a product)
+- [x] scaffold recorded as the given starting stack in `BRIEF.md` Constraints (Next.js 15.4.0,
+      React 19, "not existing product code")
+- [x] scaffold reading confirmed inside the scoping batch, not as a separate gate
+- [x] committed skip honored: no `validation/`, journal `— decision` entry, ends `live` + tracking
+
+**Result: PASS.** First run stalled awaiting a product display name (prompt gap, not plugin
+defect — headless prompts must supply a name; scaffold's `my-app` is correctly not trusted).
+Re-run with name supplied passed everything.
