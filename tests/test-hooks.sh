@@ -6,7 +6,15 @@ SN="$HERE/hooks/scripts/stop-nudge.sh"
 PASS=0; FAIL=0
 
 check() { # name expected_exit expected_stdout_substr actual_exit actual_out
-  if [ "$4" -eq "$2" ] && { [ -z "$3" ] && [ -z "$5" ] || printf '%s' "$5" | grep -q "$3"; }; then
+  ok=0
+  if [ "$4" -eq "$2" ]; then
+    if [ -z "$3" ]; then
+      [ -z "$5" ] && ok=1
+    else
+      printf '%s' "$5" | grep -q "$3" && ok=1
+    fi
+  fi
+  if [ "$ok" -eq 1 ]; then
     echo "PASS: $1"; PASS=$((PASS+1))
   else
     echo "FAIL: $1 (exit=$4 out=$5)"; FAIL=$((FAIL+1))
