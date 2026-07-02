@@ -70,7 +70,9 @@ into coherent units, then per group report:
   `git show`, `git blame`, and other non-mutating read commands (`git status`, `git grep`). Never
   `git add`, `git commit`, `git checkout`, `git restore`, `git reset`, `git stash`, or any other
   command that mutates the working tree, index, or history — no exceptions, even if it looks
-  harmless or "just to check."
+  harmless or "just to check." Beyond git: no network access of any kind (no curl/wget/fetch), no
+  package installs, no build/test/script execution, no piping anything into a shell — Bash exists
+  solely to list and read what is already on disk.
 - **Do NOT mine git history to reconstruct a journal.** The journal is a Sunoku artifact that
   starts empty for existing-code products; pre-Sunoku commit history is out of scope for
   RECONSTRUCT. `git log`/`blame` may help locate where current code lives, not narrate the
