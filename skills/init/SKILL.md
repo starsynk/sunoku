@@ -41,11 +41,27 @@ fans out to a subagent and reports back to you; agents never message each other.
      "Resuming DEFINE: PRD Problem/Personas/Features done, picking up at the UX section"). Then
      proceed into the matching flow (step 4 greenfield / step 5 existing) at that step.
    - **absent** → fresh init. Detect the product type: run `git ls-files` (fall back to a directory
-     listing if the repo is not initialized) and look for source files beyond docs, config, and
-     dotfiles. Source present → existing-code flow (step 5). Empty or docs-only → greenfield flow
-     (step 4). Genuinely ambiguous → do NOT ask separately; fold the type question into the scoping
-     batch of whichever flow you lean toward, and let the answer confirm or switch. Then scaffold
-     (step 3) and run the chosen flow.
+     listing if the repo is not initialized). Empty or docs-only → greenfield flow (step 4). Source
+     present → do NOT assume existing-code yet; source can be a freshly generated scaffold
+     (create-next-app, cargo new, rails new, a starter template — any generator, any stack). Apply
+     the substance test: **"if this repo were deleted and its generator re-run, would anything of
+     substance be lost?"** Judge it from signals, not a framework list:
+       - git history shape — one or two generator-style commits ("Initial commit") vs real history
+         with domain-specific messages;
+       - domain vocabulary — files/identifiers named after a business domain (invoices, workouts,
+         listings) vs only framework-generic names (app, page, layout, index, home, example, demo);
+       - divergence from generator output — framework-default README, sample assets and demo pages
+         still in place, dependencies ≈ the starter's defaults vs added domain libraries;
+       - wiring — real user-facing routes/commands/endpoints beyond the starter's default page.
+     Nothing of substance would be lost → **greenfield flow** (step 4): the scaffold is the chosen
+     starting stack, not the product — record it in BRIEF.md Constraints and pass it to
+     feasibility-assessor as an architecture given; confirm inside the scoping batch ("this repo
+     holds a fresh <stack> scaffold with no product code — treating this as a new product to
+     define on that stack; correct?"). Any real domain work present, however thin → existing-code
+     flow (step 5); a thin product just yields a short as-built PRD and a longer gap list, which
+     the accuracy gate handles. Signals genuinely conflicting → do NOT ask separately; fold the
+     type question into the scoping batch of whichever flow you lean toward, and let the answer
+     confirm or switch. Then scaffold (step 3) and run the chosen flow.
 
 3. **Scaffold (fresh init only).** Create `.sunoku/` and its `research/` and `research/.fragments/`
    subdirectories. Copy `sunoku.gitignore` → `.sunoku/.gitignore` (verbatim). Copy the template

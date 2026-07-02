@@ -100,7 +100,10 @@ is armed, and `sunoku:init` itself will refuse to re-initialize a live record an
 status instead.
 
 - **`sunoku:init`** — start here, always. Validates and defines a new product, or reads an
-  existing codebase and drafts its as-built PRD. Arms tracking when it's done.
+  existing codebase and drafts its as-built PRD. Arms tracking when it's done. A freshly
+  generated scaffold (create-next-app, rails new, any starter) counts as a new product, not an
+  existing codebase — the scaffold becomes your recorded starting stack, and Sunoku confirms
+  that reading during scoping.
 - **`sunoku:log`** — record a change or decision. Usually you won't call this directly; the
   session-stop hook nudges you to run it when code changed but the journal didn't. Runs the
   SILENT / TRACK / RESHAPE triage and does exactly as much ceremony as the answer requires.
