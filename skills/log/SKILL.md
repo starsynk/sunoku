@@ -19,7 +19,10 @@ accurate as it was before the change, no more ceremony than that requires.
    `lifecycle` value is not `live`, tell the user plainly there is no live record to log against
    and route them to `sunoku:init` (name it by that skill name). Do nothing else — no journal
    write, no file read beyond status.json. If `lifecycle` is `shelved`, the same guard applies:
-   there is nothing live to track.
+   there is nothing live to track. Note `status.json`'s `tracking` flag is orthogonal to this
+   guard: `tracking: false` mutes the AMBIENT layer only (hooks stop nudging), while an explicit
+   user invocation of `sunoku:log` still runs the full triage — a direct request to record
+   something always beats the mute.
 
 3. **Establish the subject.** Two triggers:
    - **User-stated** — the user's own sentence ("we decided...", "we're dropping X...") is the
@@ -36,9 +39,10 @@ accurate as it was before the change, no more ceremony than that requires.
      A SILENT change that gets a journal entry is a canon violation, not caution.
    - **TRACK** — append one journal entry (format in step 5). If a roadmap exists
      (`.sunoku/ROADMAP.md` / `TASKS.md` present and not stub-sentineled) and the work is
-     genuinely new scope-fitting work — not just an implementation detail of an existing task —
-     append a task row to TASKS.md. No subagents, no checkpoint; this lane is zero-ceremony by
-     canon design.
+     genuinely new in-scope work (work consistent with the current scope — distinct from a
+     change TO the scope, which is RESHAPE) — not just an implementation detail of an existing
+     task — append a task row to TASKS.md. No subagents, no checkpoint; this lane is
+     zero-ceremony by canon design.
    - **Ambiguous** (you cannot confidently place it in SILENT or RESHAPE) — default to TRACK
      (append the journal entry as above), and additionally append a flagged entry to
      QUESTIONS.md per canon's Assumption format, naming what's ambiguous about the
@@ -64,8 +68,8 @@ accurate as it was before the change, no more ceremony than that requires.
 6. **RESHAPE procedure** — exactly one checkpoint, no more, per canon Checkpoints:
 
    a. **Scope the blast radius.** Name explicitly which PRD sections (`Problem`, `Personas`,
-      `Features`, `Architecture`, `Out of scope`, `Success metrics`, `Commercial`) and which
-      roadmap/task slices are invalidated by this change. Be specific — "Features and
+      `Features`, `Architecture`, `UX`, `Out of scope`, `Success metrics`, `Commercial`) and
+      which roadmap/task slices are invalidated by this change. Be specific — "Features and
       Architecture" not "parts of the PRD."
 
    b. **Re-dispatch only the owning agents for the named slices**, per canon Dispatch (absolute
@@ -75,6 +79,8 @@ accurate as it was before the change, no more ceremony than that requires.
         patching only the named PRD sections.
       - `sunoku:feasibility-assessor` DEFINE hat for architecture changes — patching only the
         architecture section.
+      - `sunoku:design-lead` for the UX section — its dispatch names only the affected
+        journeys/screens, not the whole design doc.
       - `sunoku:delivery-planner` (RESHAPE hat) then `sunoku:delivery-critic` for the affected
         roadmap/task slices only.
       Never dispatch the validation machinery (researcher, red-team, market/feasibility
