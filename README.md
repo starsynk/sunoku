@@ -1,3 +1,125 @@
 # Sunoku
 
-The living record of your product. Full README lands after implementation (see plan Task 10).
+A Claude Code plugin that keeps a living record of a software product — why it exists, what it
+actually is right now, and what changed since the last time you looked.
+
+## The living record
+
+Most planning tools produce a document, then let it rot. Sunoku produces a record that keeps
+being true. The record lives in `.sunoku/` at the root of your repo: a journal of what changed
+and why, an evidence trail behind every research claim, an open-questions list, and a PRD.
+
+The PRD is not the deliverable. It's a snapshot — the current-state view of an ongoing chronicle
+that the journal keeps writing. Every time something reshapes the product (a scope change, a
+pivot on the core bet, a new target segment, a different architecture, a pricing change), Sunoku
+reconciles the PRD forward and leaves a journal entry explaining why. Every time something doesn't
+reshape the product (a bugfix, a refactor, a style pass), Sunoku stays silent — the record doesn't
+get noisier just because the repo did.
+
+This is the test the whole plugin is built to pass: come back in six months and ask "what is this
+product now, what changed since March, and why did we drop feature X?" A good record answers all
+three with evidence — file:line citations, dated journal entries, an evidence ledger behind every
+research claim — not with a stale doc and someone's fuzzy memory of a Slack thread.
+
+## The four phases
+
+**VALIDATE.** For a greenfield idea, Sunoku first asks whether it's worth building at all.
+Research and feasibility agents work in parallel to build an evidence table, a red-team pass
+stress-tests the claims, and the whole thing resolves to one checkpoint: go, no-go, or go-if. A
+no-go is not a failure state — it's a shelved record with an immutable report explaining exactly
+why the idea died, so nobody re-litigates it from scratch next year. VALIDATE is also optional: if
+you tell Sunoku you're already committed to building this, it skips validation entirely and moves
+straight to defining the product — that's a first-class path, not a shortcut you have to fight for.
+
+**DEFINE.** Product, design, and architecture get drafted in parallel from the validated brief (or
+the commitment, if VALIDATE was skipped), then red-teamed for gaps and contradictions. The output
+is `PRD.md` — problem, personas, features, architecture, UX, out of scope, success metrics,
+commercial, and a change log that starts empty and fills in over the product's life. Approving the
+PRD is a checkpoint: nothing downstream treats it as current-state truth until you've signed off.
+
+**PLAN** *(optional)*. Sunoku offers a build plan once — a milestone roadmap and task breakdown —
+and takes no for an answer. Planning somewhere else (Linear, a whiteboard, your own head) is a
+completely reasonable choice; skipping this phase costs you a roadmap, not your tracking. If you
+accept, you get one more checkpoint: approve the roadmap before it's the plan of record.
+
+**TRACK.** This is the phase that never ends. Once armed, Sunoku runs a standing triage on every
+change: would the PRD or roadmap need editing to stay accurate? If no, it says nothing — silence
+is correct, not a bug. If yes, it appends a journal entry (and a task row, if there's a roadmap).
+If the change reshapes the product, it runs a scoped re-dispatch to the owning agents, presents
+the full delta as one checkpoint, and reconciles the journal, PRD, and roadmap together. The
+journal only earns entries that actually change the story — that's what keeps it worth reading
+later.
+
+## Onboarding both product types
+
+**Greenfield.** Point Sunoku at an empty repo or a one-line idea and it runs the scoping →
+VALIDATE → DEFINE → PLAN → TRACK sequence above, asking at most a handful of batched questions
+along the way (segment, wedge, monetization, constraints, and whether you're already committed).
+
+**Existing codebase.** Sunoku joins like a new tech lead. It reads the repo — source tree,
+manifests, existing docs — and writes down what it learned as an as-built PRD, every claim cited
+`file:line`. Then it hands that read back to you with one line: "here is what I understood your
+product to be — correct me." That's the accuracy gate: a single checkpoint where misreads get
+fixed before anything becomes canon. The moment you approve, Sunoku arms tracking immediately —
+memory-first, before it even asks the next question. Only after tracking is live does it offer a
+one-time extra: a gap roadmap over the must-have features it noticed aren't built yet. Say no and
+you still walk away with a fully live, tracking record.
+
+There's no separate "onboarding mode" to pick. Both paths run through the same command, and Sunoku
+figures out which one you're in by looking at whether the repo has source code yet.
+
+## Install
+
+Add this repo as its own plugin marketplace, then install the plugin:
+
+```
+/plugin marketplace add starsynk/sunoku
+/plugin install sunoku
+```
+
+(Substitute the actual path or URL you cloned/forked this repo to — the marketplace source is
+just this repo's root.)
+
+For local development, skip the marketplace and point Claude Code straight at your checkout:
+
+```
+claude --plugin-dir /path/to/sunoku
+```
+
+**Windows note:** Sunoku's ambient hooks (session-start context injection, the stop-time nudge to
+log undocumented changes) are Bash scripts invoked via `bash "${CLAUDE_PLUGIN_ROOT}/..."`. On
+Windows you need Git Bash available on PATH for these to run — without it, the hooks silently
+no-op and you lose the ambient nudges, though the three commands below still work normally.
+
+## The three commands
+
+There's exactly one command to learn: **`sunoku:init`**. It creates the record if none exists,
+resumes one that's mid-phase, or hands off to status if the record is already live. Everything
+else is discovered from there — `sunoku:log` and `sunoku:status` get surfaced to you once tracking
+is armed, and `sunoku:init` itself will refuse to re-initialize a live record and route you to
+status instead.
+
+- **`sunoku:init`** — start here, always. Validates and defines a new product, or reads an
+  existing codebase and drafts its as-built PRD. Arms tracking when it's done.
+- **`sunoku:log`** — record a change or decision. Usually you won't call this directly; the
+  session-stop hook nudges you to run it when code changed but the journal didn't. Runs the
+  SILENT / TRACK / RESHAPE triage and does exactly as much ceremony as the answer requires.
+- **`sunoku:status`** — the ongoing surface. Current product state, recent journal entries, open
+  questions, a drift check against the last reconciled commit (with a reconcile offer), and
+  answers to history questions straight from the journal and PRD change log.
+
+Sample prompts:
+
+- "is this worth building?" — kicks off VALIDATE on a new idea.
+- "document this repo" — kicks off the existing-codebase flow on a repo that already has code.
+- "what changed since May?" — asks `sunoku:status` to answer from the journal and change log.
+
+To go quiet without losing history, mute tracking: ask `sunoku:status` to turn tracking off (it
+flips `tracking: false` in `status.json`), and the ambient hooks stop nudging while the record
+stays intact for whenever you turn it back on. Drift and reconcile work together: if commits land
+without a matching journal entry, `sunoku:status` reports how many and offers to reconcile, which
+reads the actual diff, groups it, and runs each group through the same triage as `sunoku:log`.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
