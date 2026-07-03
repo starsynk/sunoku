@@ -48,6 +48,7 @@ recollection.
 | 15 | Eight single-purpose subagents dispatched hub-and-spoke, each a tool-scoped Markdown contract | P0 | agents/*.md (AB-5, AB-6, AB-14); reference/canon.md:67-96 |
 | 16 | Hook regression suite (12 assertions) exercising both scripts in isolated repos | P2 | tests/test-hooks.sh:46-96 (AB-52) |
 | 17 | Scenario regression log — 8 headless full-plugin runs (A, B, C, D1–D5) | P2 | tests/scenarios.md:28-197 (AB-54–AB-58) |
+| 18 | `sunoku:work` execution loop — arms /loop, one task per iteration, 3-attempt blocking, milestone-gated with PR offer | P1 | skills/work/SKILL.md; reference/canon.md (Work loop) |
 
 ## Architecture
 
@@ -77,8 +78,9 @@ substrate. There is no compiled runtime and no package manifest (`git ls-files` 
 - **Ambient layer**: two hooks (`hooks/hooks.json`, AB-8) gated on `tracking:true` + `lifecycle:live`
   — SessionStart injects the triage rule and drift count; Stop nudges once per session when code
   changed but the journal didn't. Both are `bash "${CLAUDE_PLUGIN_ROOT}/..."` invocations (AB-50).
-- **Prime directive**: never writes application code, never touches the consumer repo outside
-  `.sunoku/` (`reference/canon.md:9-11`, AB-19).
+- **Prime directive**: planning agents never write application code and Sunoku itself writes only
+  `.sunoku/`; the single execution surface is `sunoku:work`, which drives the main assistant on
+  explicit invocation (`reference/canon.md` Prime directive + Work loop).
 
 ### Rejected alternative
 
@@ -94,7 +96,7 @@ not need.
 
 ## UX
 
-Words-only; there is no GUI. The entire surface is three Claude Code skill invocations plus two
+Words-only; there is no GUI. The entire surface is four Claude Code skill invocations plus two
 ambient hooks.
 
 - **Onboarding an existing repo (the flow just run)**: user invokes `sunoku:init`. Sunoku detects
@@ -120,7 +122,9 @@ ambient hooks.
 
 ## Out of scope
 
-- Writing or modifying consumer application code — hard boundary (`reference/canon.md:9-11`).
+- Sunoku agents writing consumer application code — planning stays code-free; execution happens
+  only through `sunoku:work` driving the main assistant, explicitly invoked
+  (`reference/canon.md` Prime directive, Work loop).
 - Any write outside `.sunoku/` at the consumer repo root; no external exports or third-party sync
   (`reference/canon.md:9-14`).
 - Calendar/time estimates in roadmaps — sizes are S/M/L only (`reference/templates/ROADMAP.md:4`).
@@ -175,3 +179,4 @@ gap roadmap over these is optional and, given none are must-haves, not warranted
 ## Change Log
 | Date | Change | Why | Journal ref |
 |---|---|---|---|
+| 2026-07-03 | Added feature 18 (`sunoku:work` execution loop); prime directive scoped to planning agents; out-of-scope and UX surface updated | Complete the loop: plan → execute → track without leaving the record | 2026-07-03 — reshape |
