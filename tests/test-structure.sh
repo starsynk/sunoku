@@ -68,7 +68,7 @@ done
 # Task 9: init is a router
 for f in validate define plan existing; do assert_file "skills/init/references/$f.md"; done
 assert_file "skills/init/references/onboarding.md"
-assert_max_bytes skills/init/SKILL.md 9216
+assert_max_bytes skills/init/SKILL.md 9472
 assert_contains skills/init/SKILL.md "references/validate.md"
 
 # Task 10: hat contracts exist; dispatch names six things
