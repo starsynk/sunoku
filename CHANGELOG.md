@@ -4,6 +4,22 @@ Notable changes to the Sunoku plugin. Record-schema changes additionally land as
 [reference/MIGRATIONS.md](reference/MIGRATIONS.md), which skills apply to legacy records
 automatically on the first touch after an upgrade.
 
+## 1.3.0 — 2026-07-04
+
+Token optimization: progressive disclosure across the plugin.
+
+- Canon split: always-read core (Prime directive, Coexistence, Triage, Disclosure map) plus
+  per-section files under `reference/canon/`; skills load sections per lane.
+- Guards now run before any canon read; dead invocations cost ~200 tokens.
+- Lane files: `log` RESHAPE, `status` reconcile, all four `init` phases, and first-run onboarding load on demand.
+- Multi-hat agent contracts split into `reference/contracts/<agent>-<hat>.md`; dispatches name
+  the contract file (dispatch item 6).
+- Hook context compressed; version-skew nudge is direction-aware (newer record -> update plugin).
+- Skill/agent descriptions trimmed to routing triggers.
+- status.json gains a summary index (`one_liner`, `open_questions`, `high_stakes`,
+  `last_entry`); pre-1.3.0 records self-migrate on first touch.
+- JOURNAL.md rolls entries past 30KB into `.sunoku/journal/<year>.md`.
+
 ## 1.2.0 — 2026-07-03
 
 ### Removed

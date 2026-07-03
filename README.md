@@ -97,6 +97,13 @@ skew and points the way; running `sunoku:status` once migrates immediately). Wha
 release is in [CHANGELOG.md](CHANGELOG.md); the exact record fixes live in
 [reference/MIGRATIONS.md](reference/MIGRATIONS.md).
 
+## Layout
+
+- `reference/canon.md` — always-read core rulebook; per-lane sections live in `reference/canon/`
+  and load on demand (see the canon Disclosure map).
+- `reference/contracts/` — per-hat output contracts for multi-hat agents, named in dispatches.
+- `skills/*/references/` — lane and phase procedures loaded only when that branch runs.
+
 ## The three commands
 
 There's exactly one command to learn: **`sunoku:init`**. It creates the record if none exists,
