@@ -29,4 +29,13 @@ awk '/^## Flow/{f=1} f && /canon.md/{print NR; exit}' skills/status/SKILL.md > /
 awk '/^## Flow/{f=1} f && /status.json/{print NR; exit}' skills/status/SKILL.md > /tmp/sun_guard_line
 [ "$(cat /tmp/sun_guard_line)" -lt "$(cat /tmp/sun_canon_line)" ] && ok "status: guard before canon" || fail "status: canon read precedes guard"
 
+# Task 3: canon core + section files
+for f in checkpoints assumptions dispatch fragments garbage-output conflict sentinels-resume statusfile record-migrations execution-contract; do
+  assert_file "reference/canon/$f.md"
+done
+assert_contains reference/canon.md "## Disclosure map"
+assert_absent reference/canon.md "## Dispatch (hub-and-spoke)"
+assert_absent reference/canon.md "## StatusFile"
+assert_max_bytes reference/canon.md 4096
+
 exit $FAIL
