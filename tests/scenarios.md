@@ -326,3 +326,50 @@ runs. Three test-harness (not plugin) adjustments, honestly noted:
   showed the loop then legitimately treats M2 as the current milestone and works T-4 — expected per
   the eligibility rule, not a boundary breach; the gate is only exercised when the loop completes a
   milestone's last task *within* an iteration, which F2-faithful does.
+
+---
+
+## Scenario F3 — legacy record self-migrates on first touch (1.0.0 → 1.1.0)
+
+**Fixture:** 1.0.0-shaped live record — `status.json` without `sunokuVersion`, planned `TASKS.md`
+with the pre-1.1.0 five-column table (no `Status`, no `## Blocked`), journal with 1 entry,
+`last_reconciled_sha` = HEAD. Prompt: "Run `/sunoku:status` and give me the status report."
+Headless opus, `--permission-mode bypassPermissions --add-dir <plugin-root>`, **and
+`env -u CLAUDE_PROJECT_DIR -u CLAUDE_PLUGIN_ROOT`** (see harness note below). One counted run
+(~1m30s) after one discarded mis-targeted run.
+
+**Assertions**
+
+- [x] `TASKS.md` migrated in place: header gained `| Status |`, both rows `| todo |`, `## Blocked`
+      section appended with commented header, Status legend line added under the intro blockquote
+- [x] `status.json` gained `"sunokuVersion": "1.1.0"` in canonical position (key order
+      `version, sunokuVersion, product, origin, lifecycle, tracking, last_reconciled_sha, created,
+      updated` verified by JSON parse)
+- [x] hook-critical byte patterns survived migration: `"tracking": true` and `"lifecycle": "live"`
+      grep intact; file valid JSON; `updated` bumped, `created` untouched
+- [x] migration was SILENT: journal entry count unchanged (1); final output states migrations are
+      "SILENT by canon — mechanical shape-fixes, no journal entry"
+- [x] migration named in output: final message cites "the two 1.1.0 record migrations
+      (status.json, TASKS.md)" — the canon one-line-trace contract
+- [ ] status report text captured — not assertable: `-p` surfaces only the final assistant message,
+      and the stop-nudge triage response displaced the earlier report message (same `-p`
+      single-message limitation documented in Scenario F). Migration correctness is fully carried
+      by the file-state assertions above.
+- [x] version-skew session nudge — not assertable from `-p` stdout (hook context never prints);
+      covered deterministically by `tests/test-hooks.sh` assertions 11–13 (mismatch injects,
+      missing key injects, match quiet), 15/15 PASS
+
+**Result: PASS.** Both MIGRATIONS.md rows applied on first touch, silently, with the record's
+hook-facing bytes intact and the skill's real work proceeding after migration.
+
+**Harness note (important for future headless runs):** the first attempt ran with the parent
+session's `CLAUDE_PROJECT_DIR` still in the environment — the child session's hooks and skill
+resolved the *plugin repo's* record instead of the fixture's, answered about the wrong repo
+(read-only; verified no writes), and never touched the fixture. Headless fixture runs must
+`env -u CLAUDE_PROJECT_DIR -u CLAUDE_PLUGIN_ROOT` (or set them to the fixture) before invoking
+`claude -p`. Harness-only fix; no plugin defect — the plugin correctly operated on the record
+`CLAUDE_PROJECT_DIR` pointed at.
+
+## Fixes made during this run (F3)
+
+- None to plugin files. One test-harness fix (environment scrubbing, above).
