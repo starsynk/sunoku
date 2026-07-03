@@ -39,8 +39,9 @@ PRD is a checkpoint: nothing downstream treats it as current-state truth until y
 
 **PLAN** *(optional)*. Sunoku offers a build plan once — a milestone roadmap and task breakdown —
 and takes no for an answer. Planning somewhere else (Linear, a whiteboard, your own head) is a
-completely reasonable choice; skipping this phase costs you a roadmap, not your tracking. If you
-accept, you get one more checkpoint: approve the roadmap before it's the plan of record.
+completely reasonable choice; skipping this phase costs you a roadmap (and `sunoku:work` to
+execute it), not your tracking. If you accept, you get one more checkpoint: approve the roadmap
+before it's the plan of record.
 
 **TRACK.** This is the phase that never ends. Once armed, Sunoku runs a standing triage on every
 change: would the PRD or roadmap need editing to stay accurate? If no, it says nothing — silence
@@ -91,13 +92,13 @@ log undocumented changes) are Bash scripts invoked via `bash "${CLAUDE_PLUGIN_RO
 Windows you need Git Bash available on PATH for these to run — without it, the hooks silently
 no-op and you lose the ambient nudges, though the three commands below still work normally.
 
-## The three commands
+## The four commands
 
 There's exactly one command to learn: **`sunoku:init`**. It creates the record if none exists,
 resumes one that's mid-phase, or hands off to status if the record is already live. Everything
-else is discovered from there — `sunoku:log` and `sunoku:status` get surfaced to you once tracking
-is armed, and `sunoku:init` itself will refuse to re-initialize a live record and route you to
-status instead.
+else is discovered from there — `sunoku:log`, `sunoku:status`, and `sunoku:work` get surfaced to
+you once tracking is armed, and `sunoku:init` itself will refuse to re-initialize a live record
+and route you to status instead.
 
 - **`sunoku:init`** — start here, always. Validates and defines a new product, or reads an
   existing codebase and drafts its as-built PRD. Arms tracking when it's done. A freshly
@@ -110,12 +111,24 @@ status instead.
 - **`sunoku:status`** — the ongoing surface. Current product state, recent journal entries, open
   questions, a drift check against the last reconciled commit (with a reconcile offer), and
   answers to history questions straight from the journal and PRD change log.
+- **`sunoku:work`** — execute the plan. Arms a continuous loop (Claude Code's built-in `/loop`)
+  that works `TASKS.md` one task at a time — implement, verify, commit on a `sunoku/m<n>`
+  milestone branch, mark done — and stops at the milestone boundary for your review; invoking it
+  again after review opens the next milestone. A task that won't verify gets three attempts, then
+  a `blocked` mark and the loop moves on to tasks that don't depend on it. It only ever runs when
+  you invoke it, asks nothing mid-run (decisions become flagged assumptions or blocked tasks),
+  and never pushes on its own — it offers a push + PR only in the milestone report, with you
+  present. Run it in a session whose permission mode can edit and run commands without prompting
+  (e.g. acceptEdits), or the first permission dialog will stall the unattended run. On a Claude
+  Code without the built-in loop skill, each invocation completes one task instead — repeat to
+  progress.
 
 Sample prompts:
 
 - "is this worth building?" — kicks off VALIDATE on a new idea.
 - "document this repo" — kicks off the existing-codebase flow on a repo that already has code.
 - "what changed since May?" — asks `sunoku:status` to answer from the journal and change log.
+- "work the backlog" — arms `sunoku:work` to execute `TASKS.md` until the milestone boundary.
 
 To go quiet without losing history, mute tracking: ask `sunoku:status` to turn tracking off (it
 flips `tracking: false` in `status.json`), and the ambient hooks stop nudging while the record
