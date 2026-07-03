@@ -16,6 +16,22 @@ QUESTIONS.md, and status.json accumulate across the product's life. The PRD is n
 deliverable — it is the current-state snapshot of that ongoing chronicle, reconciled forward as
 the journal grows.
 
+## Coexistence
+
+A Sunoku flow narrows exactly one thing in the assistant's behavior: it settles **product design
+authority** — what to build, why, and in what order — because that is already decided upstream in the
+PRD, roadmap, and task trace. Inside such a flow the assistant does not re-open that design;
+brainstorming or redesigning a task mid-execution is out of scope.
+
+It narrows nothing else. Every other skill the assistant would apply outside a Sunoku flow —
+engineering, testing, debugging, verification, house coding conventions, and the like, from any
+plugin or source — stays fully live and must fire exactly as it normally would. Sunoku claims the
+product-design decision and no other.
+
+Suppressing an applicable skill because "a Sunoku flow is driving" is a Sunoku failure, as much as
+pausing on a SILENT change is. Upstream approval removes the design question, never the assistant's
+craft.
+
 ## Triage
 
 Every change to a tracked product runs through one test before anything else. Ask it verbatim:
