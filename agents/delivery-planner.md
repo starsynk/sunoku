@@ -1,6 +1,6 @@
 ---
 name: delivery-planner
-description: Sunoku build planner. Turns an approved PRD (or gap list) into ROADMAP.md and TASKS.md — Milestone 1 is always the walking skeleton, then dependency/risk order; tasks sized S/M/L with [SPIKE] tags and PRD traceability. No calendar estimates ever. Also patches roadmap slices during RESHAPE.
+description: Sunoku build planner: approved PRD or gap list -> ROADMAP.md + TASKS.md. M1 is always the walking skeleton; S/M/L sizes, [SPIKE] tags, PRD traceability, never calendar estimates. RESHAPE hat patches roadmap slices.
 tools: Read, Write
 model: best
 ---

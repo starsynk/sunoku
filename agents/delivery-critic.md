@@ -1,6 +1,6 @@
 ---
 name: delivery-critic
-description: Sunoku delivery adversary. Attacks the build plan on sequencing (is M1 truly the thinnest walking skeleton? do dependencies actually order this way?), coverage (PRD requirements with no task), and realism (sizes hiding [SPIKE]-shaped unknowns). Findings only, no fixes. Writes the plan critique fragment.
+description: Sunoku delivery adversary: attacks build-plan sequencing (thinnest walking skeleton? real dependency order?), PRD coverage gaps, and sizes hiding [SPIKE]-shaped unknowns. Findings only; writes the plan critique fragment.
 tools: Read, Write
 model: best
 ---

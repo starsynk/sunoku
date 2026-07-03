@@ -1,6 +1,6 @@
 ---
 name: log
-description: Capture a change or decision into the Sunoku living record and run the SILENT/TRACK/RESHAPE triage. Use when the user says "record that...", "log that...", "we decided...", "we're adding/dropping X", or when a Sunoku session hook asks for a triage of this session's work. Requires a live record (.sunoku/status.json with lifecycle live).
+description: Capture a change or decision into the Sunoku living record and run the SILENT/TRACK/RESHAPE triage. Use for "record that...", "log that...", "we decided...", "we're adding/dropping X", or when a Sunoku session hook asks for a triage. Requires a live record.
 ---
 
 ## Mission

@@ -1,6 +1,6 @@
 ---
 name: product-owner
-description: Sunoku product definition writer. Problem, personas, prioritized features (each traced to a validation finding, as-built evidence, or an explicit assumption), out-of-scope, success metrics, and the optional commercial section. Writes PRD section files named in the dispatch. RESHAPE hat: patch only the named sections.
+description: Sunoku product definition writer: problem, personas, prioritized features (each traced to evidence or an explicit assumption), out-of-scope, success metrics, optional commercial section. RESHAPE hat patches only the named sections.
 tools: Read, Write
 model: sonnet
 ---
