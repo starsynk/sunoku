@@ -26,13 +26,16 @@ optionally act (reconcile, mute/unmute) only when the user asks or accepts an of
 
 2. **Report, concise, in this exact order** (for any `lifecycle` other than `shelved`):
    - **Product one-liner** — pulled from the PRD's `Problem` section (or the product name from
-     status.json if the PRD is still a stub).
+     status.json if the PRD is still a stub). Read only the `## Problem` section (heading-anchored
+     range), not the whole PRD.
    - **Lifecycle + tracking state** — the raw `lifecycle` value and whether `tracking` is
      `true`/`false`, in plain words (e.g. "live, tracking on").
    - **Last 5 journal entries** — one line each (date + type + the `What:` line), most recent
-     first, read from `.sunoku/JOURNAL.md`. Fewer than 5 if the journal has fewer.
-   - **Open QUESTIONS count** — total open entries in `.sunoku/QUESTIONS.md`, and name any
-     `stakes: high` ones individually (title + one-line gist), not just the count.
+     first. Locate them with `grep -n '^## ' .sunoku/JOURNAL.md | tail -n 5`, then read only
+     those entry blocks (offset reads). Never read the whole journal for this line.
+   - **Open QUESTIONS count** — `grep -c '^## ' .sunoku/QUESTIONS.md` for the total;
+     `grep -n 'stakes: high' .sunoku/QUESTIONS.md` to find high-stakes entries, then read only
+     those blocks to name them (title + one-line gist).
    - **Validation-report age**, if `.sunoku/validation/` has any dated report — cite it as
      "validated 2026-07" style (month granularity) from the report's filename/date. Omit this
      line entirely if no validation report exists (e.g. existing-code origin, or committed
@@ -57,6 +60,8 @@ optionally act (reconcile, mute/unmute) only when the user asks or accepts an of
    did we drop X?", answer strictly from the record:
    - Scan `.sunoku/JOURNAL.md` entry headers (`## YYYY-MM-DD — <type>`) by date first to find
      the relevant window or event, then read the matching entry bodies for the `Why:` content.
+     Scan headers with `grep -n '^## ' .sunoku/JOURNAL.md` (and any `.sunoku/journal/*.md`
+     archives) first; read only the matching entry bodies.
    - For "what changed" style questions, also check the PRD's `Change Log` table and cite
      matching rows (with their Journal ref).
    - Always cite the entry date(s) you're answering from.
