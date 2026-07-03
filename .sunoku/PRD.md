@@ -46,9 +46,10 @@ recollection.
 | 13 | Mute switch — `tracking:false` silences hooks while preserving the record | P1 | skills/status/SKILL.md:88-91; hooks/scripts/session-start.sh:17 (AB-18) |
 | 14 | Drift + reconcile — count commits since `last_reconciled_sha`, offer to diff/group/re-triage | P1 | skills/status/SKILL.md:39-86; hooks/scripts/session-start.sh:27-37 |
 | 15 | Eight single-purpose subagents dispatched hub-and-spoke, each a tool-scoped Markdown contract | P0 | agents/*.md (AB-5, AB-6, AB-14); reference/canon.md:67-96 |
-| 16 | Hook regression suite (12 assertions) exercising both scripts in isolated repos | P2 | tests/test-hooks.sh:46-96 (AB-52) |
+| 16 | Hook regression suite (15 assertions) exercising both scripts in isolated repos | P2 | tests/test-hooks.sh:46-118 (AB-52) |
 | 17 | Scenario regression log — 10 headless full-plugin runs (A, B, C, D1–D5, E, F) | P2 | tests/scenarios.md:28-328 (AB-54–AB-58) |
 | 18 | `sunoku:work` execution loop — arms /loop, one task per iteration, 3-attempt blocking, milestone-gated with PR offer | P1 | skills/work/SKILL.md; reference/canon.md (Work loop) |
+| 19 | Self-migrating record schema — MIGRATIONS.md registry applied on first touch, `sunokuVersion` stamp, version-skew session nudge | P1 | reference/MIGRATIONS.md; reference/canon.md (Record migrations); hooks/scripts/session-start.sh:40-52 |
 
 ## Architecture
 
@@ -161,7 +162,7 @@ repo. The non-commercial stance is carried as flagged assumption `Q-1`.
 <!-- Must-have features not yet built (existing-code flow). Seeded from as-built Gaps & TODOs. -->
 
 The core product — VALIDATE / DEFINE / PLAN / TRACK, the four skills, eight agents, two hooks, the
-living-record schema — is **fully built and internally wired** (all 18 features above trace to
+living-record schema — is **fully built and internally wired** (all 19 features above trace to
 shipped source). No core product capability is missing. The open items are **hardening / ops gaps,
 not absent must-have features**, and are classified as such:
 

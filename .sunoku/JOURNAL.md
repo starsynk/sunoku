@@ -17,3 +17,8 @@
 **What:** Added `sunoku:work` — a loop-armed execution skill that works TASKS.md one task per iteration, blocks failures after 3 attempts, and gates at milestone boundaries.
 **Why:** The record could plan builds it couldn't drive; scope now includes executing the approved plan. Planning agents still never write code — the work skill drives the main assistant, on explicit invocation only.
 **Refs:** dbda593 f3b3995 03fd0d4 bc891da 45de720 e1e6ce4 dc24069 6aeb33f
+
+## 2026-07-03 — track
+**What:** Self-migrating record schema: `reference/MIGRATIONS.md` registry applied via a new canon "Record migrations" rule, `sunokuVersion` stamped on every record write, version-skew nudge in the SessionStart hook (read-only), CHANGELOG.md added.
+**Why:** 1.0.0-written records lack the new TASKS.md Status column — upgrades must not strand existing records. Legacy shapes now upgrade silently on the first skill touch; hooks detect skew but never write.
+**Refs:** e84d637
