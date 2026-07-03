@@ -143,6 +143,46 @@ Executors that update `Status` keep the record realtime. Executors that never to
 nothing: the next reconcile reads the actual diff and flips landed tasks to `done`. Either way
 the journal stays milestone-grained and the record stays true.
 
+### With Claude Code's `/loop`
+
+The built-in `/loop` skill re-fires a prompt until you stop it — pair it with a
+one-task-per-iteration prompt and you get a hands-off executor whose state lives in `TASKS.md`,
+not in the conversation:
+
+```
+/loop Work exactly one task from .sunoku/TASKS.md this iteration: resume the `doing` row if one
+exists, else take the first `todo` in the current milestone whose "Depends on" IDs are all done.
+Mark it doing first, implement it with tests on a work branch (never the default branch), verify
+with the project's own test/build, then mark it done and commit as "T-<n>: <title>". If it won't
+verify after 3 distinct attempts, mark it blocked with a reason in the Blocked table, flag what
+would unblock it in .sunoku/QUESTIONS.md, and move on to a task that doesn't depend on it. Never
+ask me questions mid-run — take the inferable default and flag it in QUESTIONS.md. When the
+milestone has no eligible task left, report each ROADMAP exit criterion as met/unmet and stop
+the loop.
+```
+
+Notes from running exactly this shape for a release:
+
+- **Run it in a session that can edit and run git/tests without prompting** — one permission
+  dialog stalls an unattended iteration until you come back. `acceptEdits` alone still prompts
+  on `git` and test commands; pair it with an allowlist covering both, or use a fully
+  pre-approved session.
+- **One task per iteration** keeps every wakeup small and makes the file the loop's memory: the
+  run can die or be interrupted at any point and the next invocation resumes from the `doing`
+  row.
+- **The milestone boundary is your review gate.** Let the loop stop there, review the branch,
+  merge, re-arm for the next milestone.
+- Your other plugins keep firing inside each iteration — TDD, systematic debugging,
+  verification, house conventions. That's canon's Coexistence rule working as intended: the
+  task's *design* is settled by the PRD trace; the *craft* is not.
+
+### Other shapes
+
+- **Attended, one task at a time** — the same prompt without `/loop`; you review between tasks.
+- **Your own process end-to-end** — run whatever plan-execution discipline you already use
+  against the task list, ignore `Status` entirely, and let the next reconcile
+  (`sunoku:status`) flip landed tasks to `done` from the diff.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
