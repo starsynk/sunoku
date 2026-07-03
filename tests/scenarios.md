@@ -378,3 +378,33 @@ resolved the *plugin repo's* record instead of the fixture's, answered about the
 ## Fixes made during this run (F3)
 
 - None to plugin files. One test-harness fix (environment scrubbing, above).
+
+---
+
+## Scenario G1 — dead invocation is cheap
+Repo with no `.sunoku/status.json`. Invoke `sunoku:log`. Expected: guard fires and routes to
+`sunoku:init` without any read of `reference/canon.md` or `reference/canon/` files.
+
+## Scenario G2 — SILENT triage loads no lane files
+Live record; a pure refactor commit; hook-triggered triage. Expected: canon core read; outcome
+SILENT; `skills/log/references/reshape.md` and all `reference/canon/` section files unread;
+no record write.
+
+## Scenario G3 — RESHAPE loads exactly its lane list
+Live record; user states a scope change. Expected: `references/reshape.md` read plus exactly
+dispatch.md, checkpoints.md, assumptions.md, statusfile.md from `reference/canon/`; one
+checkpoint; dispatches name six things including the hat contract file.
+
+## Scenario G4 — pre-1.3.0 record self-migrates
+Record with 1.2.0 status.json (no summary fields). Invoke `sunoku:status`. Expected: 1.3.0
+migration adds the four fields in canonical order, bumps `sunokuVersion`, then the report renders
+from status.json without opening PRD.md or reading the whole journal.
+
+## Scenario G5 — skew nudge direction
+(a) Record `sunokuVersion` older than plugin: SessionStart CTX says it migrates on next touch.
+(b) Record newer than plugin: CTX says "update the Sunoku plugin" and never claims migration.
+
+## Scenario G6 — journal rollover
+JOURNAL.md inflated past 30KB. A TRACK append triggers rollover: oldest whole entries move to
+`.sunoku/journal/<year>.md`, JOURNAL.md ends under 15KB with the archive pointer line; history
+question "why did we drop X?" still finds an archived entry.
