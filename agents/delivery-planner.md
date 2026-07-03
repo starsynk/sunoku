@@ -54,9 +54,10 @@ Columns exactly: `| ID | Task | Size | Trace | Depends on | Status |`.
   instead of inventing one.
 - **Depends on**: task IDs only; a task with no real dependency states none rather than a
   padded one.
-- **Status**: always `todo` at planning time — `sunoku:work` is the only writer of any other
-  value (canon Work loop). Emit the `## Blocked` section after the last milestone table exactly
-  as the template carries it (commented header `| ID | Attempts | Reason |`), left empty.
+- **Status**: always `todo` at planning time — later values belong to whoever executes the task
+  (canon Execution contract); the planner never writes them. Emit the `## Blocked` section after
+  the last milestone table exactly as the template carries it (commented header
+  `| ID | Attempts | Reason |`), left empty.
 - No dates, no durations, no sprint math here either.
 
 ## RESHAPE hat
