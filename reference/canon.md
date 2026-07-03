@@ -6,12 +6,15 @@ this file wins.
 
 ## Prime directive
 
-Sunoku plans and documents products. It never writes application code and never touches a consumer
-repo's source tree — only `.sunoku/` at the consumer repo root. No external exports exist: nothing
-in this canon authorizes writing outside `.sunoku/` or syncing to any third-party system. The living
-record is the product: JOURNAL.md, EVIDENCE.md, QUESTIONS.md, and status.json accumulate across the
-product's life. The PRD is not a one-time deliverable — it is the current-state snapshot of that
-ongoing chronicle, reconciled forward as the journal grows.
+Sunoku plans and documents products. Its planning and documentation agents never write application
+code and never touch a consumer repo's source tree — Sunoku itself writes only `.sunoku/` at the
+consumer repo root. Exactly one execution surface exists: `sunoku:work` (see Work loop), which on
+explicit user invocation drives the main assistant — never a Sunoku agent — to implement tasks
+from an approved plan. No external exports exist: nothing in this canon authorizes syncing the
+record to any third-party system. The living record is the product: JOURNAL.md, EVIDENCE.md,
+QUESTIONS.md, and status.json accumulate across the product's life. The PRD is not a one-time
+deliverable — it is the current-state snapshot of that ongoing chronicle, reconciled forward as
+the journal grows.
 
 ## Triage
 
@@ -170,3 +173,35 @@ defining -> live                        (existing/as-built products skip plannin
 
 Every write to status.json updates `updated` to the current timestamp; `created` never changes
 after the file's first write.
+
+## Work loop
+
+`sunoku:work` executes an approved plan, one task per loop iteration, on explicit user invocation
+only — no hook nudges it, no skill triggers it proactively. It is the sole writer of TASKS.md
+`Status` values, and the main assistant under its direction is the only sanctioned writer of
+consumer application code in a Sunoku flow.
+
+- **States**: `todo → doing → done`, or `todo → doing → blocked`. At most one `doing` at a time
+  across the whole file.
+- **Eligibility**: the current milestone is the first milestone section containing any non-`done`
+  task; the loop never picks from a later milestone. Within it, resume a `doing` task first
+  (an interrupted run left it), else take the first `todo` whose every `Depends on` ID is `done`.
+- **Done bar**: a task is `done` only when its changes pass the project's own verification — the
+  test/build suite where one exists, plus any check the task text itself names. Three attempts per
+  iteration, then `blocked`: reason and attempt count to the TASKS.md `Blocked` table, plus one
+  flag row in QUESTIONS.md.
+- **Never ask mid-iteration**: the loop runs unattended. Inferable decisions take the Assumptions
+  default-and-flag path; non-inferable or high-stakes ones block the task instead. Everything
+  accrued surfaces in the milestone-boundary report, never as a mid-run question.
+- **Git**: task commits land on a `sunoku/m<n>` milestone branch — auto-created from the current
+  HEAD at the milestone's first task, never the repo's default branch. One commit per completed
+  task, message `T-<n>: <task title>`. Never push unattended: offering a push + PR happens only
+  inside the milestone-boundary report with the user present. A branch of the user's own code is
+  not an "external export" under the prime directive.
+- **Journal**: one `track` entry per completed milestone, listing the tasks that landed and any
+  still blocked. Task-level history lives in TASKS.md — per-task journal entries are noise, a
+  silence-discipline violation.
+- **Boundary**: milestone completion, or a backlog where every remaining task is blocked or
+  depends on a blocked one, always ends the loop. The completion report checks the milestone's
+  ROADMAP exit criteria one by one and surfaces accrued QUESTIONS flags; a fresh `sunoku:work`
+  invocation after review is the approval that opens the next milestone.
