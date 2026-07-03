@@ -177,9 +177,9 @@ after the file's first write.
 ## Work loop
 
 `sunoku:work` executes an approved plan, one task per loop iteration, on explicit user invocation
-only — no hook nudges it, no skill triggers it proactively. It is the sole writer of TASKS.md
-`Status` values, and the main assistant under its direction is the only sanctioned writer of
-consumer application code in a Sunoku flow.
+only — no hook nudges it, no skill triggers it proactively. It is the sole mutator of TASKS.md
+`Status` values (the planner writes only the planning-time `todo`), and the main assistant under
+its direction is the only sanctioned writer of consumer application code in a Sunoku flow.
 
 - **States**: `todo → doing → done`, or `todo → doing → blocked`. At most one `doing` at a time
   across the whole file.

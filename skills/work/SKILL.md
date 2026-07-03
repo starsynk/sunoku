@@ -43,6 +43,8 @@ authority — so you execute it; you never redesign it mid-run.
    isolation when arming ("run this in a worktree"), do the run in an isolated worktree on this
    branch — the harness's native worktree mechanism if it has one, else `git worktree add` — and
    say once that `.sunoku/` updates ride the branch until merge; default is the current checkout.
+   If the branch already exists and you are not on it, check it out and re-read TASKS.md before
+   acting on the pick — the branch's copy is the truth.
 
 6. **Execute.** Implement the task in the consumer repo — you, the main assistant, write this
    code; never dispatch a Sunoku agent to write it. Ground rules:
@@ -68,7 +70,8 @@ authority — so you execute it; you never redesign it mid-run.
    - **Milestone complete** (every task `done`): read the milestone's exit criteria from
      `.sunoku/ROADMAP.md` and report each as met/unmet with one line of evidence. Append one
      `track` journal entry to `.sunoku/JOURNAL.md` (canon journal format): what landed, what's
-     blocked. Update status.json `updated` (canonical serialization). Then offer, interactively
+     blocked, and any QUESTIONS.md flags accrued during the milestone. Update status.json
+     `updated` (canonical serialization). Then offer, interactively
      and only now: push `sunoku/m<n>` and open a PR whose body is this report (skip the offer if
      no remote or no `gh`). END.
    - **Blocked out** (remaining tasks all blocked or downstream of blocked): report the chain —

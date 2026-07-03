@@ -38,26 +38,26 @@ recollection.
 | 5 | DEFINE phase assembling `PRD.md` from parallel product/design/architecture fragments, red-teamed | P0 | skills/init/SKILL.md:106-121 (AB-28) |
 | 6 | Optional PLAN phase → `ROADMAP.md` (M1 = walking skeleton) + `TASKS.md`, critic-reviewed, no calendar estimates | P1 | skills/init/SKILL.md:123-129; reference/templates/ROADMAP.md:4-6 (AB-35) |
 | 7 | `sunoku:log` triage engine — SILENT / TRACK / RESHAPE, ceremony scaled to the lane | P0 | skills/log/SKILL.md:35-53 (AB-21); reference/canon.md:16-34 |
-| 8 | `sunoku:status` surface — state summary, journal tail, open questions, drift check, reconcile, mute/unmute | P0 | skills/status/SKILL.md:26-83 (AB-22) |
+| 8 | `sunoku:status` surface — state summary, journal tail, open questions, drift check, reconcile, mute/unmute | P0 | skills/status/SKILL.md:26-91 (AB-22) |
 | 9 | Append-only living record: JOURNAL.md, EVIDENCE.md, QUESTIONS.md, PRD Change Log | P0 | reference/templates/JOURNAL.md; EVIDENCE.md; QUESTIONS.md; PRD.md:26-28 (AB-29, AB-33) |
 | 10 | `status.json` lifecycle state machine, single-writer, canonical serialization | P0 | reference/canon.md:136-169 (AB-16, AB-17, AB-25) |
 | 11 | Ambient SessionStart hook: injects standing triage rule + drift count when tracking is live | P1 | hooks/scripts/session-start.sh:33-40 (AB-45) |
 | 12 | Ambient Stop hook: one-shot per-session nudge to `sunoku:log` when code changed but journal didn't | P1 | hooks/scripts/stop-nudge.sh:24-33 (AB-47, AB-48) |
-| 13 | Mute switch — `tracking:false` silences hooks while preserving the record | P1 | skills/status/SKILL.md:79-83; hooks/scripts/session-start.sh:17 (AB-18) |
-| 14 | Drift + reconcile — count commits since `last_reconciled_sha`, offer to diff/group/re-triage | P1 | skills/status/SKILL.md:59-77; hooks/scripts/session-start.sh:27-37 |
+| 13 | Mute switch — `tracking:false` silences hooks while preserving the record | P1 | skills/status/SKILL.md:88-91; hooks/scripts/session-start.sh:17 (AB-18) |
+| 14 | Drift + reconcile — count commits since `last_reconciled_sha`, offer to diff/group/re-triage | P1 | skills/status/SKILL.md:39-86; hooks/scripts/session-start.sh:27-37 |
 | 15 | Eight single-purpose subagents dispatched hub-and-spoke, each a tool-scoped Markdown contract | P0 | agents/*.md (AB-5, AB-6, AB-14); reference/canon.md:67-96 |
 | 16 | Hook regression suite (12 assertions) exercising both scripts in isolated repos | P2 | tests/test-hooks.sh:46-96 (AB-52) |
-| 17 | Scenario regression log — 8 headless full-plugin runs (A, B, C, D1–D5) | P2 | tests/scenarios.md:28-197 (AB-54–AB-58) |
+| 17 | Scenario regression log — 10 headless full-plugin runs (A, B, C, D1–D5, E, F) | P2 | tests/scenarios.md:28-328 (AB-54–AB-58) |
 | 18 | `sunoku:work` execution loop — arms /loop, one task per iteration, 3-attempt blocking, milestone-gated with PR offer | P1 | skills/work/SKILL.md; reference/canon.md (Work loop) |
 
 ## Architecture
 
 Sunoku is **not application code** — it is a hub-and-spoke orchestration built entirely from
 prompt-engineered Markdown contracts plus two Bash hooks, running on the Claude Code plugin
-substrate. There is no compiled runtime and no package manifest (`git ls-files` = 31 files, all
+substrate. There is no compiled runtime and no package manifest (`git ls-files` = 40 files, all
 `.md`/`.json`/`.sh`/LICENSE — AB-1).
 
-- **Substrate**: Claude Code plugin. Three skills (`skills/*/SKILL.md`) are the orchestrators;
+- **Substrate**: Claude Code plugin. Four skills (`skills/*/SKILL.md`) are the orchestrators;
   eight subagents (`agents/*.md`) are dispatched workers, each with a `tools:` allowlist and a
   `model` tier (`agents/codebase-analyst.md:1-6`, AB-5). `codebase-analyst` is the only agent
   granted Bash (`agents/codebase-analyst.md:4`, AB-6).
@@ -71,8 +71,9 @@ substrate. There is no compiled runtime and no package manifest (`git ls-files` 
   AB-25). Its `lifecycle` drives the state machine `validating → defining → planning → live`, with
   `defining → live` for existing/as-built products and `(any) → shelved` on kill
   (`reference/canon.md:163-169`, AB-17).
-- **Shared rulebook**: `reference/canon.md` (173 lines) is read first by all three skills
-  (`skills/init/SKILL.md:15`, `skills/log/SKILL.md:14`, `skills/status/SKILL.md:13`, AB-13); it owns
+- **Shared rulebook**: `reference/canon.md` (207 lines) is read first by all four skills
+  (`skills/init/SKILL.md:15`, `skills/log/SKILL.md:14`, `skills/status/SKILL.md:13`,
+  `skills/work/SKILL.md:15`, AB-13); it owns
   Triage, Checkpoints, Assumptions, Dispatch, Fragments, Conflict, Sentinels, and StatusFile rules
   so no skill restates them.
 - **Ambient layer**: two hooks (`hooks/hooks.json`, AB-8) gated on `tracking:true` + `lifecycle:live`
@@ -113,8 +114,8 @@ ambient hooks.
   undocumented; `sunoku:log` runs the triage and does exactly as much as the lane demands (silence
   for a bugfix, one journal line for a tracked change, a scoped re-dispatch + one checkpoint for a
   reshape). `sunoku:status` answers "what changed since May?" from the journal and Change Log.
-- **Navigation / IA**: one command to learn (`sunoku:init`); the other two are surfaced once
-  tracking is armed (`README.md:96-100`). State lives in human-readable Markdown under `.sunoku/`,
+- **Navigation / IA**: one command to learn (`sunoku:init`); the other three are surfaced once
+  tracking is armed (`README.md:97-101`). State lives in human-readable Markdown under `.sunoku/`,
   browsable directly.
 - **Accessibility**: text-only, terminal-native, no color- or pointer-dependent affordances; the
   record is plain Markdown/JSON readable outside Claude Code. Windows caveat: hooks need Git Bash on
@@ -159,8 +160,8 @@ repo. The non-commercial stance is carried as flagged assumption `Q-1`.
 ## Gap List
 <!-- Must-have features not yet built (existing-code flow). Seeded from as-built Gaps & TODOs. -->
 
-The core product — VALIDATE / DEFINE / PLAN / TRACK, the three skills, eight agents, two hooks, the
-living-record schema — is **fully built and internally wired** (all 17 features above trace to
+The core product — VALIDATE / DEFINE / PLAN / TRACK, the four skills, eight agents, two hooks, the
+living-record schema — is **fully built and internally wired** (all 18 features above trace to
 shipped source). No core product capability is missing. The open items are **hardening / ops gaps,
 not absent must-have features**, and are classified as such:
 

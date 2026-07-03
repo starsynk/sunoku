@@ -46,9 +46,10 @@ optionally act (reconcile, mute/unmute) only when the user asks or accepts an of
      if drift > 0 or the tree is dirty; (2) else prompt to answer the highest-stakes open
      question if one exists; (3) else, if `lifecycle` is `live` with no roadmap
      (`ROADMAP.md`/`TASKS.md` absent or still stub-sentineled), offer an optional PLAN pass;
-     (4) else, if `.sunoku/TASKS.md` has any `todo` or `blocked` task, report the counts (e.g.
-     "6 todo, 1 blocked in M2") and name `sunoku:work` as the way to execute the backlog —
-     mention, never auto-invoke; (5) else state plainly that nothing needs attention right now.
+     (4) else, if `.sunoku/TASKS.md` has any `todo`, `doing`, or `blocked` task, report the counts
+     (e.g. "6 todo, 1 blocked in M2", or "1 doing — resume the interrupted task" when a `doing`
+     row is present) and name `sunoku:work` as the way to execute the backlog — mention, never
+     auto-invoke; (5) else state plainly that nothing needs attention right now.
 
 3. **History questions** — when the user asks something like "what changed since May?" or "why
    did we drop X?", answer strictly from the record:

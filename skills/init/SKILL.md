@@ -151,8 +151,9 @@ fans out to a subagent and reports back to you; agents never message each other.
       and `last_reconciled_sha` to the current `git HEAD` (empty string `""` if the repo has no
       commits yet), writing the canonical `status.json`. Append a journal entry (`## YYYY-MM-DD —
       track`, **What:** "Sunoku record armed", **Why:** short arming note, **Refs:** the HEAD sha or
-      "conversation"). Then tell the user the three-command surface: `sunoku:log` to record changes,
-      `sunoku:status` for state and drift, and that `sunoku:init` will now hand off to status.
+      "conversation"). Then tell the user the four-command surface: `sunoku:log` to record changes,
+      `sunoku:status` for state and drift, `sunoku:work` to execute the task backlog one task at a
+      time, and that `sunoku:init` will now hand off to status.
 
 5. **Existing-code flow.** (`origin: existing`; VALIDATE is never offered.)
 
@@ -192,7 +193,8 @@ fans out to a subagent and reports back to you; agents never message each other.
       `research/.fragments/plan-critique.md`) → fix loop ≤3, then delete the critique fragment →
       **checkpoint: approve the roadmap**,
       all while `lifecycle` stays `live`. No → done; zero further ceremony. Either way, tell the user
-      the three-command surface.
+      the four-command surface (`sunoku:log`, `sunoku:status`, `sunoku:work`, and `sunoku:init`
+      itself).
 
 ## Discipline reminders
 
