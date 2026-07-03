@@ -43,7 +43,7 @@ Your dispatch context names, explicitly:
 
 ### `TASKS.md` — one table per milestone
 
-Columns exactly: `| ID | Task | Size | Trace | Depends on |`.
+Columns exactly: `| ID | Task | Size | Trace | Depends on | Status |`.
 
 - **Size**: S, M, or L only.
 - **`[SPIKE]`** prefix on the Task text for any task whose sizing hides a genuine unknown
@@ -54,15 +54,21 @@ Columns exactly: `| ID | Task | Size | Trace | Depends on |`.
   instead of inventing one.
 - **Depends on**: task IDs only; a task with no real dependency states none rather than a
   padded one.
+- **Status**: always `todo` at planning time — `sunoku:work` is the only writer of any other
+  value (canon Work loop). Emit the `## Blocked` section after the last milestone table exactly
+  as the template carries it (commented header `| ID | Attempts | Reason |`), left empty.
 - No dates, no durations, no sprint math here either.
 
 ## RESHAPE hat
 
 Patch only the milestone(s)/task rows the dispatch names as affected by the reshape. Never touch
-a milestone or task outside that named set, even if reordering it would look tidier. Propose the
-patch as the actual edited content of the named file(s); the orchestrator has already scoped the
-blast radius before dispatching you. The output contract above still applies in full: no calendar
-estimates in the patch, and M1 stays the walking skeleton unless M1 itself is the named slice.
+a milestone or task outside that named set, even if reordering it would look tidier. Preserve the
+existing `Status` value of every row you carry over — a reshape never resets `done` or `blocked`
+back to `todo`; only rows whose task text materially changes may return to `todo`, and the patch
+must say so. Propose the patch as the actual edited content of the named file(s); the orchestrator
+has already scoped the blast radius before dispatching you. The output contract above still applies
+in full: no calendar estimates in the patch, and M1 stays the walking skeleton unless M1 itself is
+the named slice.
 
 ## Rules
 
