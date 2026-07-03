@@ -95,22 +95,27 @@ printf '%s' "$OUT" | python3 -m json.tool >/dev/null 2>&1 && { echo "PASS: valid
 
 # 11. Missing sunokuVersion key -> version-skew nudge injected
 D="$(mktemp -d)"; mkrepo "$D"
-OUT="$(printf '%s' "$STDIN_MAIN" | CLAUDE_PROJECT_DIR="$D" bash "$SS")"; check "skew nudge (missing key)" 0 "MIGRATIONS.md" $? "$OUT"
+OUT="$(printf '%s' "$STDIN_MAIN" | CLAUDE_PROJECT_DIR="$D" bash "$SS")"; check "skew nudge (missing key)" 0 "migrates on next record touch; sunoku:status migrates now" $? "$OUT"
 
 # 12. Explicit version mismatch -> nudge injected
 D="$(mktemp -d)"; mkrepo "$D"
 sed -i.bak 's/"version": 1,/"version": 1,\n  "sunokuVersion": "0.9.0",/' .sunoku/status.json
-OUT="$(printf '%s' "$STDIN_MAIN" | CLAUDE_PROJECT_DIR="$D" bash "$SS")"; check "skew nudge (mismatch)" 0 "MIGRATIONS.md" $? "$OUT"
+OUT="$(printf '%s' "$STDIN_MAIN" | CLAUDE_PROJECT_DIR="$D" bash "$SS")"; check "skew nudge (mismatch)" 0 "migrates on next record touch; sunoku:status migrates now" $? "$OUT"
 
 # 13. Version match -> context injected but no migration nudge
 PV="$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$HERE/.claude-plugin/plugin.json" | head -n1)"
 D="$(mktemp -d)"; mkrepo "$D"
 sed -i.bak "s/\"version\": 1,/\"version\": 1,\n  \"sunokuVersion\": \"$PV\",/" .sunoku/status.json
 OUT="$(printf '%s' "$STDIN_MAIN" | CLAUDE_PROJECT_DIR="$D" bash "$SS")"
-if printf '%s' "$OUT" | grep -q "additionalContext" && ! printf '%s' "$OUT" | grep -q "MIGRATIONS.md"; then
+if printf '%s' "$OUT" | grep -q "additionalContext" && ! printf '%s' "$OUT" | grep -q "update the Sunoku plugin" && ! printf '%s' "$OUT" | grep -q "migrates on next record touch"; then
   echo "PASS: version match quiet"; PASS=$((PASS+1))
 else
   echo "FAIL: version match quiet (out=$OUT)"; FAIL=$((FAIL+1))
 fi
+
+# 14. Record version newer than plugin -> nudge to update the plugin, not migrate
+D="$(mktemp -d)"; mkrepo "$D"
+sed -i.bak 's/"version": 1,/"version": 1,\n  "sunokuVersion": "9.9.9",/' .sunoku/status.json
+OUT="$(printf '%s' "$STDIN_MAIN" | CLAUDE_PROJECT_DIR="$D" bash "$SS")"; check "skew nudge (record newer)" 0 "update the Sunoku plugin" $? "$OUT"
 
 echo "---"; echo "$PASS passed, $FAIL failed"; [ "$FAIL" -eq 0 ]
