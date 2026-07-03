@@ -38,4 +38,10 @@ assert_absent reference/canon.md "## Dispatch (hub-and-spoke)"
 assert_absent reference/canon.md "## StatusFile"
 assert_max_bytes reference/canon.md 4096
 
+# Task 4: skills point at core + disclosure map, not full-file section reads
+assert_contains skills/log/SKILL.md "Disclosure map"
+assert_contains skills/status/SKILL.md "Disclosure map"
+assert_contains skills/init/SKILL.md "Disclosure map"
+assert_absent skills/log/SKILL.md "Obey its Triage, Checkpoints, Dispatch, and StatusFile sections"
+
 exit $FAIL
