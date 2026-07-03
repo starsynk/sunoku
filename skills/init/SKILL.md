@@ -99,7 +99,9 @@ fans out to a subagent and reports back to you; agents never message each other.
 
    f. **Arm TRACK** (one step, in this exact order): set `lifecycle` to `live`, `tracking` to `true`,
       and `last_reconciled_sha` to the current `git HEAD` (empty string `""` if the repo has no
-      commits yet), writing the canonical `status.json`. Append a journal entry (`## YYYY-MM-DD —
+      commits yet), stamping the four summary fields (`one_liner`, `open_questions`,
+      `high_stakes`, `last_entry` — canon statusfile.md) for the first time, writing the canonical
+      `status.json`. Append a journal entry (`## YYYY-MM-DD —
       track`, **What:** "Sunoku record armed", **Why:** short arming note, **Refs:** the HEAD sha or
       "conversation"). Then tell the user the three-command surface: `sunoku:log` to record changes,
       `sunoku:status` for state and drift, and that `sunoku:init` will now hand off to status. If

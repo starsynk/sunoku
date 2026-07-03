@@ -25,17 +25,17 @@ optionally act (reconcile, mute/unmute) only when the user asks or accepts an of
    sections verbatim; this skill does not restate their rules.
 
 2. **Report, concise, in this exact order** (for any `lifecycle` other than `shelved`):
-   - **Product one-liner** — pulled from the PRD's `Problem` section (or the product name from
-     status.json if the PRD is still a stub). Read only the `## Problem` section (heading-anchored
-     range), not the whole PRD.
+   - **Product one-liner** — status.json's `one_liner` field, directly (falls back to the PRD
+     `## Problem` section only via the migration below).
    - **Lifecycle + tracking state** — the raw `lifecycle` value and whether `tracking` is
      `true`/`false`, in plain words (e.g. "live, tracking on").
-   - **Last 5 journal entries** — one line each (date + type + the `What:` line), most recent
-     first. Locate them with `grep -n '^## ' .sunoku/JOURNAL.md | tail -n 5`, then read only
-     those entry blocks (offset reads). Never read the whole journal for this line.
-   - **Open QUESTIONS count** — `grep -c '^## .*status: open)' .sunoku/QUESTIONS.md` for the
-     open total; `grep -n 'stakes: high' .sunoku/QUESTIONS.md` to find high-stakes entries, then
-     read only those blocks and name the open ones (title + one-line gist).
+   - **Journal freshness** — status.json's `last_entry` field, as-is (date + type + What line,
+     or "no entries yet" if empty). Drill in with `grep -n '^## ' .sunoku/JOURNAL.md | tail -n 5`
+     only if asked for more; never read the whole journal for this line.
+   - **Open QUESTIONS count** — status.json's `open_questions`/`high_stakes` fields, directly
+     (`grep -c '^## .*status: open)' .sunoku/QUESTIONS.md` recomputes this only in the migration
+     below). When `high_stakes` > 0, name the entries: `grep -n 'stakes: high'
+     .sunoku/QUESTIONS.md`, then read only those blocks (title + one-line gist).
    - **Validation-report age**, if `.sunoku/validation/` has any dated report — cite it as
      "validated 2026-07" style (month granularity) from the report's filename/date. Omit this
      line entirely if no validation report exists (e.g. existing-code origin, or committed
@@ -55,6 +55,9 @@ optionally act (reconcile, mute/unmute) only when the user asks or accepts an of
      row is present) and note the backlog is ready to work with whatever executor the user prefers
      (canon Execution contract) — report, never execute; (5) else state plainly that nothing needs
      attention right now.
+
+   If the four summary fields are absent (pre-1.3.0 record), run the 1.3.0 migration per
+   reference/canon/record-migrations.md and reference/MIGRATIONS.md now, then report.
 
 3. **History questions** — when the user asks something like "what changed since May?" or "why
    did we drop X?", answer strictly from the record:

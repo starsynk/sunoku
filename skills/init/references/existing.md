@@ -20,7 +20,9 @@ c. **ACCURACY GATE.** YOU draft `PRD.md` from `research/as-built.md` — every s
 
 d. **MEMORY FIRST.** Immediately on approval, arm — BEFORE the gap question. In one step: set
    `lifecycle` to `live`, `tracking` to `true`, `last_reconciled_sha` to current `git HEAD` (`""`
-   if no commits), canonical `status.json`; and open the journal with the armed entry
+   if no commits), stamping the four summary fields (`one_liner`, `open_questions`,
+   `high_stakes`, `last_entry` — canon statusfile.md) for the first time, canonical `status.json`;
+   and open the journal with the armed entry
    (`## YYYY-MM-DD — track`, **What:** "Sunoku record armed", **Why/Refs** as above). The record is
    now tracking even if the next question is declined.
 

@@ -60,7 +60,7 @@ Every dispatch or skill step that loads one does so by exact path, never "if nee
 
 | Lane | Required section files (`reference/canon/`) |
 |---|---|
-| log — SILENT / TRACK | none (Triage above + the skill's inline journal/status rules suffice) |
+| log — SILENT / TRACK | statusfile.md on any write (SILENT writes nothing and loads nothing) |
 | log — RESHAPE | dispatch.md, checkpoints.md, assumptions.md, statusfile.md |
 | status — report / history | none |
 | status — reconcile | dispatch.md, statusfile.md, sentinels-resume.md |
