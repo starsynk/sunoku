@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "sunokuVersion": "1.1.0",
+  "sunokuVersion": "1.2.0",
   "product": "Sunoku",
   "origin": "existing",
   "lifecycle": "live",
   "tracking": true,
   "last_reconciled_sha": "76789887ed1553c40d068f573af7d0634ab138cd",
   "created": "2026-07-02T13:26:16Z",
-  "updated": "2026-07-03T12:08:12Z"
+  "updated": "2026-07-03T13:13:24Z"
 }
