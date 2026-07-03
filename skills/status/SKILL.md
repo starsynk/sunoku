@@ -33,9 +33,9 @@ optionally act (reconcile, mute/unmute) only when the user asks or accepts an of
    - **Last 5 journal entries** — one line each (date + type + the `What:` line), most recent
      first. Locate them with `grep -n '^## ' .sunoku/JOURNAL.md | tail -n 5`, then read only
      those entry blocks (offset reads). Never read the whole journal for this line.
-   - **Open QUESTIONS count** — `grep -c '^## ' .sunoku/QUESTIONS.md` for the total;
-     `grep -n 'stakes: high' .sunoku/QUESTIONS.md` to find high-stakes entries, then read only
-     those blocks to name them (title + one-line gist).
+   - **Open QUESTIONS count** — `grep -c '^## .*status: open)' .sunoku/QUESTIONS.md` for the
+     open total; `grep -n 'stakes: high' .sunoku/QUESTIONS.md` to find high-stakes entries, then
+     read only those blocks and name the open ones (title + one-line gist).
    - **Validation-report age**, if `.sunoku/validation/` has any dated report — cite it as
      "validated 2026-07" style (month granularity) from the report's filename/date. Omit this
      line entirely if no validation report exists (e.g. existing-code origin, or committed
