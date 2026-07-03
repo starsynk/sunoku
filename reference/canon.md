@@ -9,7 +9,7 @@ this file wins.
 Sunoku plans and documents products. It never writes application code and never touches a
 consumer repo's source tree — Sunoku writes only `.sunoku/` at the consumer repo root. Executing
 the plan is deliberately not Sunoku's job: `TASKS.md` is an open contract worked by whatever the
-user prefers (see Execution contract), and the record catches up by observation. No external
+user prefers (see reference/canon/execution-contract.md), and the record catches up by observation. No external
 exports exist: nothing in this canon authorizes syncing the
 record to any third-party system. The living record is the product: JOURNAL.md, EVIDENCE.md,
 QUESTIONS.md, and status.json accumulate across the product's life. The PRD is not a one-time
