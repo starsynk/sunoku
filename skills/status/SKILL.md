@@ -1,6 +1,6 @@
 ---
 name: status
-description: The ongoing surface for a live Sunoku record. Current product state, recent journal entries, open questions, drift check with reconcile offer, and history answers — use for "what changed since May?", "why did we drop X?", "project status", "what is this product now?", or "reconcile". Suggests the next action.
+description: Surface for a live Sunoku record: product state, recent journal, open questions, drift with reconcile offer, history answers. Use for "what changed since May?", "why did we drop X?", "project status", "what is this product now?", or "reconcile". Suggests the next action.
 ---
 
 ## Mission

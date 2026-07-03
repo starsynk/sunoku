@@ -56,4 +56,13 @@ assert_contains skills/status/SKILL.md "references/reconcile.md"
 assert_contains skills/status/SKILL.md "grep -c"
 assert_contains skills/status/SKILL.md "tail"
 
+# Task 8: descriptions trimmed but trigger phrases intact
+assert_contains skills/init/SKILL.md 'is this idea worth building?'
+assert_contains skills/log/SKILL.md 'record that'
+assert_contains skills/status/SKILL.md 'what changed since May?'
+for f in skills/init/SKILL.md skills/log/SKILL.md skills/status/SKILL.md agents/*.md; do
+  [ "$(awk -F'description: ' '/^description:/{print length($2); exit}' "$f")" -le 320 ] \
+    && ok "desc <=320 chars: $f" || fail "desc too long: $f"
+done
+
 exit $FAIL

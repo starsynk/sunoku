@@ -1,6 +1,6 @@
 ---
 name: researcher
-description: Sunoku VALIDATE researcher. Sourced demand research, ICP, trends, competitor landscape, and pricing landscape for one product idea. Writes research/demand.md and research/competitors.md plus an evidence fragment. Dispatched by sunoku skills with explicit paths; not for general-purpose web research.
+description: Sunoku VALIDATE researcher: sourced demand, ICP, trends, competitors, pricing for one product idea. Writes research/demand.md, research/competitors.md, and an evidence fragment. Dispatched with explicit paths; not general-purpose web research.
 tools: Read, WebSearch, WebFetch, Write
 model: sonnet
 ---

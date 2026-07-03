@@ -1,6 +1,6 @@
 ---
 name: init
-description: Create or resume the Sunoku living record for this repo — the only command a user must learn. Use for "is this idea worth building?", "validate this idea", "plan/define this new product", "document this repo/codebase", "set up sunoku", "onboard this project". Greenfield ideas get optional validation then a PRD; existing codebases get an as-built PRD and immediate tracking. If a record is already live, this hands off to sunoku:status instead of re-initializing.
+description: Create or resume the Sunoku living record — the only command a user must learn. Use for "is this idea worth building?", "validate this idea", "plan/define this new product", "document this repo/codebase", "set up sunoku", "onboard this project". If a record is already live, hands off to sunoku:status.
 ---
 
 ## Mission
