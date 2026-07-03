@@ -78,4 +78,10 @@ done
 assert_contains reference/canon/dispatch.md "reference/contracts/"
 if grep -rqF "five required things" skills/; then fail "stale five-things phrasing"; else ok "dispatch phrasing updated"; fi
 
+# Task 11: statusfile defines summary fields; skills use them
+assert_contains reference/canon/statusfile.md '"one_liner"'
+assert_contains reference/canon/statusfile.md '"last_entry"'
+assert_contains reference/MIGRATIONS.md "1.3.0"
+assert_contains skills/status/SKILL.md "one_liner"
+
 exit $FAIL

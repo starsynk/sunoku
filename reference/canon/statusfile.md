@@ -8,14 +8,18 @@ indent, exact key order below) is mandatory; hooks match on exact byte patterns 
 ```json
 {
   "version": 1,
-  "sunokuVersion": "<plugin version>",
-  "product": "<display name>",
-  "origin": "greenfield",
-  "lifecycle": "defining",
-  "tracking": false,
-  "last_reconciled_sha": "",
-  "created": "2026-07-02T09:00:00Z",
-  "updated": "2026-07-02T09:00:00Z"
+  "sunokuVersion": "1.3.0",
+  "product": "<name>",
+  "origin": "greenfield|existing",
+  "lifecycle": "<lifecycle>",
+  "tracking": true,
+  "one_liner": "<first sentence of the PRD Problem section, or the product name while the PRD is a stub>",
+  "open_questions": 0,
+  "high_stakes": 0,
+  "last_entry": "<YYYY-MM-DD — type — What line, or empty string>",
+  "last_reconciled_sha": "<sha or empty>",
+  "created": "<ISO8601>",
+  "updated": "<ISO8601>"
 }
 ```
 
@@ -29,7 +33,14 @@ Field semantics:
 - `origin` — `greenfield` | `existing`.
 - `lifecycle` — `validating` | `defining` | `planning` | `live` | `shelved`.
 - `tracking` — whether TRACK/RESHAPE triage is active for this product.
+- `one_liner` / `open_questions` / `high_stakes` / `last_entry` — the denormalized summary index;
+  see the rule below for what refreshes them and what they're for.
 - `last_reconciled_sha` — the consumer repo commit the journal was last reconciled against.
+
+The four summary fields (`one_liner`, `open_questions`, `high_stakes`, `last_entry`) are a
+denormalized index of the record. Every write that changes their source (journal append, PRD
+Problem edit, QUESTIONS.md change) refreshes them in the same status.json write. They are
+advisory for fast reporting; drill-in answers verify against the record files.
 
 Lifecycle transitions:
 

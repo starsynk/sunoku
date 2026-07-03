@@ -76,4 +76,6 @@ accurate as it was before the change, no more ceremony than that requires.
    reconcile), update `.sunoku/status.json`'s `updated` field to the current timestamp,
    preserving the exact canonical serialization (one key per line, two-space indent, exact key
    order) — hooks grep this file byte-for-byte, so reformatting it breaks them even if the JSON
-   is still valid. A SILENT outcome makes no status.json write at all.
+   is still valid, and refresh the summary fields (one_liner, open_questions, high_stakes,
+   last_entry) per canon statusfile.md — same write, canonical serialization. A SILENT outcome
+   makes no status.json write at all.

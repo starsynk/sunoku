@@ -18,3 +18,13 @@ the only trace.
 | Detect (legacy shape) | Fix (in place) |
 |---|---|
 | `TASKS.md` Status legend line references `sunoku:work` | Replace that legend line with the current template's legend (`reference/templates/TASKS.md`): Status is maintained by whoever executes; reconcile flips rows the diff proves landed |
+
+## 1.2.x -> 1.3.0
+
+Records written before 1.3.0 lack `one_liner`, `open_questions`, `high_stakes`, `last_entry`.
+On the first record touch: compute `one_liner` from the PRD `## Problem` first sentence (product
+name if the PRD is a stub); `open_questions` = count of entries marked open (the file's
+`status: open` literal) in QUESTIONS.md (0 if absent); `high_stakes` = count of OPEN entries
+carrying `stakes: high`; `last_entry` from the final JOURNAL.md
+`## YYYY-MM-DD — <type>` header plus its `What:` line (empty string for a stub journal). Insert
+in canonical key order per canon statusfile.md and bump `sunokuVersion` in the same write.

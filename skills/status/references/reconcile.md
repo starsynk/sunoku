@@ -27,4 +27,6 @@ per the Disclosure map.
   summary. Never infer completion the diff doesn't show — partial work stays as-is, noted.
 - When all groups are resolved, set `last_reconciled_sha` to the current HEAD and update
   `updated`, in the canonical status.json serialization (one key per line, two-space indent,
-  exact key order — hooks grep this byte-for-byte).
+  exact key order — hooks grep this byte-for-byte), and refresh the summary fields (one_liner,
+  open_questions, high_stakes, last_entry) per canon statusfile.md — same write, canonical
+  serialization.
