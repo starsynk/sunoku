@@ -39,7 +39,15 @@ fans out to a subagent and reports back to you; agents never message each other.
      walk the phase's ordered steps, find the furthest step whose artifacts are all done, and
      continue from the first not-done step. Announce in one line exactly what you are resuming (e.g.
      "Resuming DEFINE: PRD Problem/Personas/Features done, picking up at the UX section"). Then
-     proceed into the matching flow (step 4 greenfield / step 5 existing) at that step.
+     proceed into the matching flow (step 4 greenfield / step 5 existing) at that step, loading the
+     phase file this table names:
+
+     | lifecycle at resume | origin | phase file to load |
+     |---|---|---|
+     | validating | greenfield | references/validate.md |
+     | defining | greenfield | references/define.md |
+     | defining | existing | references/existing.md |
+     | planning | any | references/plan.md |
    - **absent** → fresh init. Detect the product type: run `git ls-files` (fall back to a directory
      listing if the repo is not initialized). Empty or docs-only → greenfield flow (step 4). Source
      present → do NOT assume existing-code yet; source can be a freshly generated scaffold
@@ -97,55 +105,23 @@ fans out to a subagent and reports back to you; agents never message each other.
       already committed" in the BRIEF Commitment section. Set `lifecycle` to `defining` and go
       straight to step 4d (DEFINE). No validation report is ever produced for this record.
 
-   c. **VALIDATE** (lifecycle `validating`). Dispatch `sunoku:researcher` and
-      `sunoku:feasibility-assessor` (VALIDATE hat) **in parallel** — one message, both dispatches.
-      Per canon Dispatch each names: the absolute `.sunoku/` path; read list (`BRIEF.md`); write
-      targets (`research/demand.md` + `research/competitors.md` for the researcher;
-      `research/feasibility.md` for the assessor) plus each agent's own evidence fragment
-      (`research/.fragments/validate-researcher.md`, `research/.fragments/validate-feasibility.md`);
-      the section list from their contracts; and the sentinel+summary closer. At the phase barrier
-      (both returned), merge per canon Fragments: concatenate both fragments onto `research/EVIDENCE.md`,
-      delete the fragment files, and assert fragment count == 2 dispatched writers (a missing fragment
-      is a lost agent — re-dispatch that one; never invent rows). Then dispatch `sunoku:red-team`
-      (VALIDATE hat): read list = `BRIEF.md` + `research/demand.md` + `research/competitors.md` +
-      `research/feasibility.md` + `research/EVIDENCE.md`; write = `research/.fragments/validate-critique.md`.
-      Run the conflict loop per canon Conflict (evidence-resolvable disagreements re-run only the
-      affected piece, capped at 3 attempts total; judgment calls become flagged assumptions, not
-      retries). Then YOU compose `validation/<YYYY-MM-DD>-validation.md` from the validation-report
-      template: verdict (GO / NO-GO / GO-IF with named conditions), the per-claim evidence table with
-      strength self-ratings, the red-team's fetched-source verification notes, and assumptions
-      carried, then delete the critique fragment. This file is immutable once finalized.
-      **Checkpoint = the go/no-go.** If the retry cap
-      was hit with a blocking objection still open, present this checkpoint labeled **NON-CONVERGED**
-      and let the user break the tie. If ≥3 high-stakes assumptions have accrued, surface them inside
-      this checkpoint using canon's verbatim line.
+   c. **VALIDATE** (lifecycle `validating`).
+
+      Run this phase from `${CLAUDE_PLUGIN_ROOT}/skills/init/references/validate.md` — read it now and
+      follow it exactly.
 
    d. **On the verdict.** NO-GO accepted → append a `decision` journal entry (why), set `lifecycle`
       to `shelved`, and stop. The shelved record and its immutable report are the deliverable — this
       is a successful outcome, not a failure. GO or GO-IF accepted → each GO-IF condition becomes a
       high-stakes `Q-n` entry in `QUESTIONS.md`. Proceed to DEFINE: set `lifecycle` to `defining`.
-      Dispatch `sunoku:product-owner`, `sunoku:design-lead`, and `sunoku:feasibility-assessor`
-      (DEFINE hat) — product-owner first or in parallel where their reads allow, each writing its PRD
-      section file under `research/.fragments/` (e.g. `.fragments/define-product.md`,
-      `.fragments/define-design.md`, `.fragments/define-architecture.md`) so parallel writers never
-      share a file. design-lead's read list includes the product-owner's drafted Problem/Personas/
-      Features sections. Then dispatch `sunoku:red-team` (DEFINE hat): read = the drafted PRD section
-      fragments + `research/EVIDENCE.md`; write = `research/.fragments/define-critique.md`. Run the
-      conflict loop (≤3). Then YOU assemble `PRD.md` from the section fragments into the template's
-      section order (Problem, Personas, Features, Architecture, UX, Out of scope, Success metrics,
-      Commercial, Change Log), leave the Change Log table empty, delete the PRD sentinel, and delete
-      the section fragments after assembly — including `research/.fragments/define-critique.md`, not
-      just the drafted PRD section fragments. **Checkpoint: approve the PRD** — surface ≥3 high-stakes
-      assumptions inside it per canon if that many have accrued.
 
-   e. **PLAN (optional).** Offer it once: "want a build plan here? Planning elsewhere is fine —
-      skipping keeps full tracking." Accepted → scaffold `ROADMAP.md` + `TASKS.md` stubs, set
-      `lifecycle` to `planning`, dispatch `sunoku:delivery-planner` (full-plan hat, reads `PRD.md`,
-      writes `ROADMAP.md` + `TASKS.md`) → then `sunoku:delivery-critic` (reads `ROADMAP.md` +
-      `TASKS.md` + `PRD.md`, writes `research/.fragments/plan-critique.md`) → fix loop ≤3
-      (re-dispatch delivery-planner for any blocking finding, never edit the plan yourself), then
-      delete the critique fragment → **checkpoint: approve the roadmap.** Declined → skip planning
-      entirely; go to arming.
+      Run this phase from `${CLAUDE_PLUGIN_ROOT}/skills/init/references/define.md` — read it now and
+      follow it exactly.
+
+   e. **PLAN (optional).**
+
+      Run this phase from `${CLAUDE_PLUGIN_ROOT}/skills/init/references/plan.md` — read it now and
+      follow it exactly.
 
    f. **Arm TRACK** (one step, in this exact order): set `lifecycle` to `live`, `tracking` to `true`,
       and `last_reconciled_sha` to the current `git HEAD` (empty string `""` if the repo has no
@@ -164,37 +140,10 @@ fans out to a subagent and reports back to you; agents never message each other.
       `BRIEF.md` (delete sentinel); log inferences as flagged assumptions in `QUESTIONS.md`. Ensure
       `status.json` has `origin: existing` and `lifecycle: defining`.
 
-   b. **RECONSTRUCT** (lifecycle `defining`). Dispatch `sunoku:codebase-analyst` (RECONSTRUCT hat):
-      read list = the consumer repo source tree + existing docs/README; write = `research/as-built.md`
-      + its evidence fragment `research/.fragments/reconstruct-analyst.md`; section list = Stack,
-      Architecture, Modules, Data model, Entry points, What demonstrably works, Gaps & TODOs; every
-      claim cited `file:line`; sentinel+summary closer. The **journal stays EMPTY** here — no git
-      archaeology; pre-Sunoku history is out of scope. At the barrier, merge the one fragment onto
-      `research/EVIDENCE.md` per canon Fragments (count == 1), delete the fragment.
+   b. **RECONSTRUCT** (lifecycle `defining`) through the gap-roadmap step.
 
-   c. **ACCURACY GATE.** YOU draft `PRD.md` from `research/as-built.md` — every section grounded in
-      the `file:line` evidence, no aspirational claims — plus an explicit **GAP LIST** of must-have
-      features not yet built (seeded from the analyst's Gaps & TODOs), written as a `## Gap List`
-      section appended to the draft `PRD.md` — there is no separate gap-list file. Delete the PRD
-      sentinel. Present it: "here is what I understood your product to be — correct me." Apply the
-      user's corrections and re-present until they approve. Misreads die here; what the user
-      approves becomes canon. This is the PRD-approve checkpoint for this flow.
-
-   d. **MEMORY FIRST.** Immediately on approval, arm — BEFORE the gap question. In one step: set
-      `lifecycle` to `live`, `tracking` to `true`, `last_reconciled_sha` to current `git HEAD` (`""`
-      if no commits), canonical `status.json`; and open the journal with the armed entry
-      (`## YYYY-MM-DD — track`, **What:** "Sunoku record armed", **Why/Refs** as above). The record is
-      now tracking even if the next question is declined.
-
-   e. **Gap roadmap (exactly ONE optional question).** Ask once: "want a gap roadmap over the
-      must-haves that aren't built yet?" Yes → scaffold `ROADMAP.md` + `TASKS.md`, dispatch
-      `sunoku:delivery-planner` (gap-plan hat, reads the approved gap list — `PRD.md`'s `## Gap
-      List` section — + `research/as-built.md`, writes `ROADMAP.md` + `TASKS.md`) →
-      `sunoku:delivery-critic` (writes
-      `research/.fragments/plan-critique.md`) → fix loop ≤3, then delete the critique fragment →
-      **checkpoint: approve the roadmap**,
-      all while `lifecycle` stays `live`. No → done; zero further ceremony. Either way, tell the user
-      the three-command surface (`sunoku:log`, `sunoku:status`, and `sunoku:init` itself).
+      Run this phase from `${CLAUDE_PLUGIN_ROOT}/skills/init/references/existing.md` — read it now and
+      follow it exactly.
 
 ## Discipline reminders
 
