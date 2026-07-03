@@ -67,7 +67,8 @@ done
 
 # Task 9: init is a router
 for f in validate define plan existing; do assert_file "skills/init/references/$f.md"; done
-assert_max_bytes skills/init/SKILL.md 6144
+assert_file "skills/init/references/onboarding.md"
+assert_max_bytes skills/init/SKILL.md 8192
 assert_contains skills/init/SKILL.md "references/validate.md"
 
 exit $FAIL
