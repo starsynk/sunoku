@@ -65,4 +65,9 @@ for f in skills/init/SKILL.md skills/log/SKILL.md skills/status/SKILL.md agents/
     && ok "desc <=320 chars: $f" || fail "desc too long: $f"
 done
 
+# Task 9: init is a router
+for f in validate define plan existing; do assert_file "skills/init/references/$f.md"; done
+assert_max_bytes skills/init/SKILL.md 6144
+assert_contains skills/init/SKILL.md "references/validate.md"
+
 exit $FAIL
