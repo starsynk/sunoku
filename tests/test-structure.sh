@@ -52,4 +52,8 @@ assert_max_bytes skills/status/SKILL.md 6144
 assert_contains skills/log/SKILL.md "references/reshape.md"
 assert_contains skills/status/SKILL.md "references/reconcile.md"
 
+# Task 6: no whole-file reads on the report path
+assert_contains skills/status/SKILL.md "grep -c"
+assert_contains skills/status/SKILL.md "tail"
+
 exit $FAIL
