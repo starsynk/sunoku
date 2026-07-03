@@ -22,9 +22,9 @@ accurate as it was before the change, no more ceremony than that requires.
 
 2. **Read canon core.** With the guard passed, read `${CLAUDE_PLUGIN_ROOT}/reference/canon.md`
    (core: Prime directive, Coexistence, Triage, Disclosure map) in full. Then load exactly the
-   `reference/canon/` section files the Disclosure map names for your lane — for SILENT/TRACK
-   that is none; a RESHAPE loads its four before step 6. Obey loaded sections verbatim; this
-   skill does not restate their rules.
+   `reference/canon/` section files the Disclosure map names for your lane — for SILENT that is
+   none; a TRACK loads statusfile.md at its write step; a RESHAPE loads its four before step 6.
+   Obey loaded sections verbatim; this skill does not restate their rules.
 
 3. **Establish the subject.** Two triggers:
    - **User-stated** — the user's own sentence ("we decided...", "we're dropping X...") is the
