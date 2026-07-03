@@ -92,6 +92,12 @@ log undocumented changes) are Bash scripts invoked via `bash "${CLAUDE_PLUGIN_RO
 Windows you need Git Bash available on PATH for these to run — without it, the hooks silently
 no-op and you lose the ambient nudges, though the four commands below still work normally.
 
+**Upgrading:** nothing to migrate by hand. Records written by an older plugin self-migrate in
+place the next time any Sunoku command touches them (the session-start hook flags the version
+skew and points the way; running `sunoku:status` once migrates immediately). What changed per
+release is in [CHANGELOG.md](CHANGELOG.md); the exact record fixes live in
+[reference/MIGRATIONS.md](reference/MIGRATIONS.md).
+
 ## The four commands
 
 There's exactly one command to learn: **`sunoku:init`**. It creates the record if none exists,
