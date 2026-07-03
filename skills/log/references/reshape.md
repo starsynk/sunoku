@@ -36,5 +36,6 @@ d. **On approval, reconcile in this exact order**, writing each in turn:
    ii. Apply the approved PRD section edits to `.sunoku/PRD.md` and append a Change Log row
        (`| Date | Change | Why | Journal ref |`) pointing at the entry just written.
    iii. Apply the approved patch to `.sunoku/ROADMAP.md` / `TASKS.md`.
-   iv. Update `.sunoku/status.json` `updated` timestamp (canonical serialization — see
-       canon StatusFile; you are the only writer).
+   iv. Update `.sunoku/status.json` `updated` timestamp and refresh the summary fields
+       (one_liner, open_questions, high_stakes, last_entry) per canon statusfile.md — same
+       write, canonical serialization.
