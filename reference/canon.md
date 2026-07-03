@@ -64,6 +64,7 @@ Every dispatch or skill step that loads one does so by exact path, never "if nee
 | log — RESHAPE | dispatch.md, checkpoints.md, assumptions.md, statusfile.md |
 | status — report / history | none |
 | status — reconcile | dispatch.md, statusfile.md, sentinels-resume.md |
-| init — any phase | dispatch.md, fragments.md, garbage-output.md, conflict.md, sentinels-resume.md, checkpoints.md, statusfile.md |
+| init — any phase | dispatch.md, fragments.md, garbage-output.md, conflict.md, sentinels-resume.md, checkpoints.md, statusfile.md, assumptions.md |
 | any run that detects version skew | record-migrations.md |
+| any triage that flags an ambiguous classification | assumptions.md |
 | reporting a workable backlog | execution-contract.md |
