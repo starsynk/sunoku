@@ -230,3 +230,92 @@ any scaffold reading.
 **Result: PASS.** First run stalled awaiting a product display name (prompt gap, not plugin
 defect — headless prompts must supply a name; scaffold's `my-app` is correctly not trusted).
 Re-run with name supplied passed everything.
+
+---
+
+## Scenario F — work loop executes, blocks, and gates at milestone (2026-07-03)
+
+**Fixture:** a throwaway "Greeter" repo with a **live record and a pre-built M1 backlog** — no
+validate/define/plan phases, straight into execution. `greet.sh` (prints `hello`) + a `test.sh`
+harness that conditionally asserts `farewell.sh`→`goodbye` and `shout.sh hello`→`HELLO!`.
+`.sunoku/` holds `status.json` (live, tracking, greenfield), a two-milestone `ROADMAP.md`, and a
+`TASKS.md` seeded T-1..T-4: **T-1** add farewell.sh, **T-2** add shout.sh (`Depends on: T-1`),
+**T-3** an *intentionally impossible* task (greet.sh exit 0 while printing both "hello" and
+nothing), **T-4** in M2. Fixture lives in scratch, never in the repo. Prompt: `/sunoku:work`,
+invoked headless once per iteration (degraded one-task path — dynamic-loop wakeups don't fire
+under `-p`), repeated until an `END —` signal. Model under test: **opus**; loop skill armed each
+fresh invocation (arm attempt confirmed in run-1's transcript), then fell through to the
+one-task-per-invocation degraded path as designed.
+
+**Main run — 4 invocations (T-1 → T-2 → T-3 blocked → boundary idempotence)**
+
+- [x] **T-1 done** — run 1 created `farewell.sh` (`goodbye`), flipped Status `todo→doing→done`,
+      committed `T-1: …` on the milestone branch
+- [x] **T-2 done, dependency honored** — T-2 only became eligible after T-1 was `done` (run 2);
+      `shout.sh` landed, committed
+- [x] **T-3 blocked after 3 attempts** — run 3 ran three distinct approaches on a scratch copy so
+      `greet.sh` stayed pristine, all failed the done-bar; Status → `blocked`, **no code committed**
+      (greet.sh unchanged), commit is record-files-only `T-3: blocked — …`
+- [x] **Blocked table row** `| T-3 | 3 | … |` written (3 attempts, one-line reason)
+- [x] **QUESTIONS.md flag** for T-3 in full canon Assumptions format (Assumption / Chosen default /
+      Reasoning / Flip-if-wrong / Stakes: high), naming the human decision that unblocks it
+- [x] **milestone branch** `sunoku/m1` exists, auto-created from HEAD at the first task
+- [x] **≥2 task commits** on `sunoku/m1` — 3 present (T-1, T-2, T-3-blocked record)
+- [x] **`bash test.sh` → PASS** on the branch (green M1 skeleton, minus the impossible task)
+- [x] **main untouched** — 1 commit, no branch work leaked to the default branch
+- [x] **no journal entry** while M1 incomplete — JOURNAL.md still holds only its stub sentinel
+      (canon: a `track` entry is written *only* at milestone completion; M1 blocked out ≠ complete)
+- [x] **blocked-out boundary + END** — run 3 reported the blocked chain (T-3 reason, its flag, that
+      M2's T-4 does not depend on it) and what a human must decide; run 4 re-confirmed the boundary
+      byte-for-byte (record + branch hash identical before/after — the loop parks idempotently at a
+      blocked boundary, no churn) and emitted `END — M1 blocked out …`
+
+**Variant F2 — milestone completion gates at the boundary (1 invocation)**
+
+Human-unblock stand-in done the honest, internally-consistent way: the human **corrects** T-3's
+impossible spec to a satisfiable one (`whisper.sh` lowercases `$1`), re-opens it `todo`, clears the
+Blocked row, resolves the QUESTIONS flag, and extends `test.sh` — committed as a `human:` commit.
+The loop then completes M1's last task *within the iteration* and must decide at the boundary.
+
+- [x] **exit criteria checked one by one** — run reads ROADMAP M1 criteria and reports each met with
+      evidence (`bash test.sh` → PASS ✓; farewell.sh + shout.sh exist ✓)
+- [x] **exactly one `track` journal entry appended** — a single `## 2026-07-03 — track` for **M1**,
+      listing the tasks that landed; status.json `updated` bumped (canonical serialization intact)
+- [x] **END at the boundary, did NOT start T-4** — transcript states verbatim "That's a milestone
+      boundary — the loop ends at milestone completion; M2 needs a fresh invocation"; `END — M1
+      complete; re-run /sunoku:work to start M2.`; **no `sunoku/m2` branch created**
+- [x] **M2 still untouched** — T-4 remains `todo`
+
+**Result: PASS (main run 11/11; F2 8/8).** The work loop executed the approved plan one task per
+invocation, honored a dependency, blocked an unsatisfiable task without vandalizing a green suite,
+kept the default branch clean, journaled only at a completed milestone, and — the reviewer's flagged
+concern — **routed cleanly through step 8's milestone-complete boundary to `END`, gating at the
+milestone rather than auto-continuing into M2.** No plugin defect surfaced; the step-7-Pass →
+step-9 path is empirically sound. Runtimes: run 1 ~1m24s, run 2 ~1m22s, run 3 ~2m22s, run 4 ~0m40s;
+F2 ~1m40s (~7m30s total across the 5 counted invocations, plus discarded diagnostic re-runs).
+
+**Fixes made during this run:** none to plugin files. All behavior was correct on the exercised
+runs. Three test-harness (not plugin) adjustments, honestly noted:
+
+- **Invocation flags.** The brief's `--permission-mode acceptEdits` is too tight for a skill whose
+  core job is running `git` — under it the loop correctly armed, picked T-1, set it `doing`, then
+  found `git checkout -b sunoku/m1` needs an approval a non-interactive `-p` session can't grant, so
+  it truthfully reverted T-1 to `todo` and ENDed asking for git permission. Also, `canon.md` (a
+  plugin file outside the fixture) was blocked by the working-dir sandbox. Switched to the
+  documented house harness `--permission-mode bypassPermissions` and added
+  `--add-dir <plugin-root>` so canon is readable. Both are RUN-PROMPT/harness fixes, not plugin
+  edits; the skill's degraded-path reasoning under the tight harness was itself correct.
+- **Assertion regex.** The brief's task-commit count `grep -c "^.\{8\} T-"` assumes an 8-char
+  abbreviated SHA; `git log --oneline` abbreviates to 7 here, so it under-counted to 0. The real
+  count is 3 (width-agnostic `^[0-9a-f]+ T-`), well over the `>=2` bar. Same class of harness-only
+  regex fix noted for the A–C run; no assertion was weakened.
+- **F2 fixture setup.** The brief's F2 python flips only the T-3 Status cell. Run verbatim, that
+  leaves the Blocked table row and QUESTIONS flag still asserting T-3 is unsatisfiable — an
+  internally-contradictory record. The loop (correctly, and more rigorously than the brief assumed)
+  **refused to honor the half-edit as a fake pass** and re-emitted the blocked-out boundary,
+  writing nothing. Recorded as a finding; F2 was then run the faithful way (human corrects the spec,
+  re-opens todo, clears the block — all committed), which is what exercises the completion-gate path
+  above. A pre-completing manual flip (M1 already fully `done` before invocation) was also tried and
+  showed the loop then legitimately treats M2 as the current milestone and works T-4 — expected per
+  the eligibility rule, not a boundary breach; the gate is only exercised when the loop completes a
+  milestone's last task *within* an iteration, which F2-faithful does.
