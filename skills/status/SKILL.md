@@ -10,11 +10,7 @@ optionally act (reconcile, mute/unmute) only when the user asks or accepts an of
 
 ## Flow
 
-1. **Read canon first.** Read `${CLAUDE_PLUGIN_ROOT}/reference/canon.md` in full before doing
-   anything else. Obey its Triage, Checkpoints, Dispatch, and StatusFile sections verbatim for
-   any write this run makes — this skill does not restate their rules.
-
-   **Guard: record required.** Check `.sunoku/status.json`. If it does not exist, tell the user
+1. **Guard: record required.** Check `.sunoku/status.json`. If it does not exist, tell the user
    plainly there is no Sunoku record for this repo yet and route them to `sunoku:init`. Do
    nothing else.
 
@@ -22,6 +18,10 @@ optionally act (reconcile, mute/unmute) only when the user asks or accepts an of
    Instead read `.sunoku/JOURNAL.md` for the `decision` entry (or entries) that explain the kill,
    summarize the shelving rationale from those entries in the user's terms, and mention that
    `sunoku:init` can revive the record if they want to pick it back up. Stop there.
+
+   **Read canon.** With the guards passed, read `${CLAUDE_PLUGIN_ROOT}/reference/canon.md` in
+   full before doing anything else. Obey its Triage, Checkpoints, Dispatch, and StatusFile
+   sections verbatim for any write this run makes — this skill does not restate their rules.
 
 2. **Report, concise, in this exact order** (for any `lifecycle` other than `shelved`):
    - **Product one-liner** — pulled from the PRD's `Problem` section (or the product name from

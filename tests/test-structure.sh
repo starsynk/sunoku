@@ -21,4 +21,12 @@ assert_file skills/init/SKILL.md
 
 # --- task assertions appended below this line ---
 
+# Task 2: guard precedes canon read
+awk '/^## Flow/{f=1} f && /canon.md/{print NR; exit}' skills/log/SKILL.md > /tmp/sun_canon_line
+awk '/^## Flow/{f=1} f && /status.json/{print NR; exit}' skills/log/SKILL.md > /tmp/sun_guard_line
+[ "$(cat /tmp/sun_guard_line)" -lt "$(cat /tmp/sun_canon_line)" ] && ok "log: guard before canon" || fail "log: canon read precedes guard"
+awk '/^## Flow/{f=1} f && /canon.md/{print NR; exit}' skills/status/SKILL.md > /tmp/sun_canon_line
+awk '/^## Flow/{f=1} f && /status.json/{print NR; exit}' skills/status/SKILL.md > /tmp/sun_guard_line
+[ "$(cat /tmp/sun_guard_line)" -lt "$(cat /tmp/sun_canon_line)" ] && ok "status: guard before canon" || fail "status: canon read precedes guard"
+
 exit $FAIL
