@@ -87,4 +87,8 @@ assert_contains skills/status/SKILL.md "one_liner"
 # Task 12: rollover rule present
 assert_contains skills/log/SKILL.md ".sunoku/journal/"
 
+# Task 13: version aligned
+assert_contains .claude-plugin/plugin.json '"version": "1.3.0"'
+assert_contains CHANGELOG.md "## 1.3.0"
+
 exit $FAIL
