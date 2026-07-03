@@ -64,33 +64,12 @@ optionally act (reconcile, mute/unmute) only when the user asks or accepts an of
      question asked, say so directly — pre-Sunoku history is out of scope by design, not a gap
      to paper over with speculation or git-log archaeology.
 
-4. **Reconcile** — run this when the user accepts the step-2 offer, or asks for it directly
-   ("reconcile"):
-   - Read the actual code diff: `git diff <last_reconciled_sha>..HEAD` (code-reading is the
-     evidence; never substitute commit-message summaries for reading the diff, per canon).
-     **Empty `last_reconciled_sha`**: `""..HEAD` is not a valid range and would silently read as
-     an empty diff — if `last_reconciled_sha` is empty, read the full current tree instead of a
-     diff (e.g. `git diff $(git hash-object -t tree /dev/null)..HEAD`, or read the tracked files
-     directly) before triaging, so nothing since arming is skipped.
-   - **Size gate**: if the diff touches ≲20 files AND ≲2k changed lines, read it inline
-     yourself. If it exceeds either threshold, dispatch `sunoku:codebase-analyst` with the
-     RECONCILE hat, scoped per canon Dispatch (absolute `.sunoku/` path, the exact sha range to
-     diff, the exact report/fragment path to write, sentinel+summary obligation) rather than
-     reading the whole diff yourself.
-   - **Group** the resulting changes into coherent units (inline or from the dispatched report).
-   - Run **each group** through the same triage `sunoku:log` uses: SILENT (skip, note nothing) /
-     TRACK (append one journal entry per group, task row if applicable) / RESHAPE (invoke the
-     `sunoku:log` skill's RESHAPE procedure in full for that group — blast radius, owning-agent
-     re-dispatch only, one checkpoint per RESHAPE group covering that group's full delta).
-     Multiple RESHAPE groups in one reconcile get one checkpoint each, never combined into a
-     single omnibus checkpoint.
-   - **Task statuses** (canon Execution contract): while triaging, when a group's diff shows the
-     work of a planned TASKS.md task has landed, flip that row's Status to `done` (a `doing` row
-     whose work the diff completes flips the same way) and cite the evidence in the reconcile
-     summary. Never infer completion the diff doesn't show — partial work stays as-is, noted.
-   - When all groups are resolved, set `last_reconciled_sha` to the current HEAD and update
-     `updated`, in the canonical status.json serialization (one key per line, two-space indent,
-     exact key order — hooks grep this byte-for-byte).
+4. **Reconcile** — when the user accepts the step-2 offer or asks directly ("reconcile"): load
+   the canon section files the Disclosure map names for "status — reconcile", then read
+   `${CLAUDE_PLUGIN_ROOT}/skills/status/references/reconcile.md` and execute it exactly. It
+   defines the diff read (including the empty `last_reconciled_sha` fallback), the ≲20-file/≲2k-line
+   size gate for dispatching `sunoku:codebase-analyst` (RECONCILE hat), per-group triage, task
+   status flips, and the closing `last_reconciled_sha`/`updated` write.
 
 5. **Mute/unmute** — on explicit user request ("mute tracking", "turn tracking back on"), flip
    `tracking` in `.sunoku/status.json` to the requested boolean, preserving the canonical
