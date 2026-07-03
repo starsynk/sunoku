@@ -71,4 +71,11 @@ assert_file "skills/init/references/onboarding.md"
 assert_max_bytes skills/init/SKILL.md 9216
 assert_contains skills/init/SKILL.md "references/validate.md"
 
+# Task 10: hat contracts exist; dispatch names six things
+for f in product-owner-define product-owner-reshape feasibility-assessor-validate feasibility-assessor-define codebase-analyst-reconstruct codebase-analyst-reconcile delivery-planner-full-plan delivery-planner-reshape red-team-validate red-team-define; do
+  assert_file "reference/contracts/$f.md"
+done
+assert_contains reference/canon/dispatch.md "reference/contracts/"
+if grep -rqF "five required things" skills/; then fail "stale five-things phrasing"; else ok "dispatch phrasing updated"; fi
+
 exit $FAIL

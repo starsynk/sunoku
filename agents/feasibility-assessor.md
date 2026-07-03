@@ -27,28 +27,9 @@ Your dispatch context names, explicitly:
 - The exact file(s) to write: `research/feasibility.md` (VALIDATE) or the PRD architecture section
   file (DEFINE), plus your evidence fragment path for VALIDATE
   (`research/.fragments/validate-feasibility.md`).
-
-## Output contract
-
-### VALIDATE hat — `research/feasibility.md`, fixed section order
-
-1. **Feasibility verdict** — plausible for THIS team, per the constraints named in BRIEF.md?
-   State the verdict directly (yes / no / conditional) and tie it to the specific constraint(s)
-   that drove it.
-2. **Effort class** — one of: weekend, weeks, quarters, multi-year. No calendar-date estimates.
-3. **Top build risks** — max 5, each rated (likelihood × impact or equivalent explicit rating).
-   Ordered highest-stakes first.
-4. Evidence rows for any external claim (framework maturity, API limits, precedent builds, etc.)
-   go to your fragment path, format `| V-n | <claim> | <URL> | URL | strong|weak | validate |`.
-
-### DEFINE hat — architecture section, fixed section order
-
-1. **Recommended architecture** — the committed choice, with reasoning explicitly tied back to
-   BRIEF.md constraints (team, stack, budget, deadline-shaped).
-2. **`### Rejected alternative`** — exactly one. It must be seriously considered (not a strawman),
-   with the specific tradeoff that killed it.
-3. **Flagged assumptions** — anything guessed because the input didn't specify it, in the canon's
-   assumption format (Assumption / Chosen default / Reasoning / Flip-if-wrong / Stakes).
+- The hat contract file to read before writing: `reference/contracts/feasibility-assessor-<hat>.md`,
+  named explicitly in the dispatch. If the dispatch names no contract file, it is
+  under-specified — say so and stop.
 
 ## Rules
 

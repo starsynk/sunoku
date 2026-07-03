@@ -15,8 +15,8 @@ fans out to a subagent and reports back to you; agents never message each other.
 1. **Read canon first.** Read `${CLAUDE_PLUGIN_ROOT}/reference/canon.md` (core) in full, then load
    exactly the `reference/canon/` files the Disclosure map names for "init — any phase". Obey them
    verbatim. This skill invokes those rules in order below and does not restate them. Every
-   dispatch you issue names the five required things from canon Dispatch (absolute `.sunoku/` path,
-   exact files to read, exact files to write, the section list
+   dispatch you issue names the six required things (item 6 only for multi-hat agents) from canon
+   Dispatch (absolute `.sunoku/` path, exact files to read, exact files to write, the section list
    the output must contain, and the closing "delete the stub sentinel and return a one-paragraph
    summary" instruction). Templates you scaffold live under `${CLAUDE_PLUGIN_ROOT}/reference/templates/`.
 
