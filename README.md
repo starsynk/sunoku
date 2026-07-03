@@ -90,7 +90,7 @@ claude --plugin-dir /path/to/sunoku
 **Windows note:** Sunoku's ambient hooks (session-start context injection, the stop-time nudge to
 log undocumented changes) are Bash scripts invoked via `bash "${CLAUDE_PLUGIN_ROOT}/..."`. On
 Windows you need Git Bash available on PATH for these to run — without it, the hooks silently
-no-op and you lose the ambient nudges, though the three commands below still work normally.
+no-op and you lose the ambient nudges, though the four commands below still work normally.
 
 ## The four commands
 
@@ -119,9 +119,10 @@ and route you to status instead.
   you invoke it, asks nothing mid-run (decisions become flagged assumptions or blocked tasks),
   and never pushes on its own — it offers a push + PR only in the milestone report, with you
   present. Run it in a session whose permission mode can edit and run commands without prompting
-  (e.g. acceptEdits), or the first permission dialog will stall the unattended run. On a Claude
-  Code without the built-in loop skill, each invocation completes one task instead — repeat to
-  progress.
+  (acceptEdits alone still prompts on git/test commands — pair it with an allowlist covering git
+  and your test command, or use a fully pre-approved session), or the first permission dialog will
+  stall the unattended run. On a Claude Code without the built-in loop skill, each invocation
+  completes one task instead — repeat to progress.
 
 Sample prompts:
 
