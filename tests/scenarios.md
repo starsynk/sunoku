@@ -265,6 +265,8 @@ one-task-per-invocation degraded path as designed.
 - [x] **main untouched** — 1 commit, no branch work leaked to the default branch
 - [x] **no journal entry** while M1 incomplete — JOURNAL.md still holds only its stub sentinel
       (canon: a `track` entry is written *only* at milestone completion; M1 blocked out ≠ complete)
+- [x] **T-4 still `| todo |` at the blocked-out boundary** — M2 never entered while M1 blocked
+      (TASKS.md line 16; eligibility rule "never a later milestone" held)
 - [x] **blocked-out boundary + END** — run 3 reported the blocked chain (T-3 reason, its flag, that
       M2's T-4 does not depend on it) and what a human must decide; run 4 re-confirmed the boundary
       byte-for-byte (record + branch hash identical before/after — the loop parks idempotently at a
@@ -285,8 +287,13 @@ The loop then completes M1's last task *within the iteration* and must decide at
       boundary — the loop ends at milestone completion; M2 needs a fresh invocation"; `END — M1
       complete; re-run /sunoku:work to start M2.`; **no `sunoku/m2` branch created**
 - [x] **M2 still untouched** — T-4 remains `todo`
+- [x] **no `sunoku/m2` branch created** — gate held; M2 not entered despite completion of M1
+- [x] **exactly 1 journal entry total** — one `## 2026-07-03 — track` for M1; no double-entry
+- [x] **`whisper.sh` works + test PASS** — T-3 spec corrected (lowercases input), test.sh PASS on branch
+- [x] **status.json canonical serialization intact** — key order OK, 2-space indent, one-key-per-line;
+      `updated` > `created`
 
-**Result: PASS (main run 11/11; F2 8/8).** The work loop executed the approved plan one task per
+**Result: PASS (main run 12/12; F2 8/8).** The work loop executed the approved plan one task per
 invocation, honored a dependency, blocked an unsatisfiable task without vandalizing a green suite,
 kept the default branch clean, journaled only at a completed milestone, and — the reviewer's flagged
 concern — **routed cleanly through step 8's milestone-complete boundary to `END`, gating at the
