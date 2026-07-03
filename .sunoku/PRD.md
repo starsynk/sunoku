@@ -48,7 +48,6 @@ recollection.
 | 15 | Eight single-purpose subagents dispatched hub-and-spoke, each a tool-scoped Markdown contract | P0 | agents/*.md (AB-5, AB-6, AB-14); reference/canon.md:67-96 |
 | 16 | Hook regression suite (15 assertions) exercising both scripts in isolated repos | P2 | tests/test-hooks.sh:46-118 (AB-52) |
 | 17 | Scenario regression log — 11 headless full-plugin runs (A, B, C, D1–D5, E, F, F3) | P2 | tests/scenarios.md:28-375 (AB-54–AB-58) |
-| 18 | `sunoku:work` execution loop — arms /loop, one task per iteration, 3-attempt blocking, milestone-gated with PR offer | P1 | skills/work/SKILL.md; reference/canon.md (Work loop) |
 | 19 | Self-migrating record schema — MIGRATIONS.md registry applied on first touch, `sunokuVersion` stamp, version-skew session nudge | P1 | reference/MIGRATIONS.md; reference/canon.md (Record migrations); hooks/scripts/session-start.sh:40-52 |
 
 ## Architecture
@@ -58,7 +57,7 @@ prompt-engineered Markdown contracts plus two Bash hooks, running on the Claude 
 substrate. There is no compiled runtime and no package manifest (`git ls-files` = 40 files, all
 `.md`/`.json`/`.sh`/LICENSE — AB-1).
 
-- **Substrate**: Claude Code plugin. Four skills (`skills/*/SKILL.md`) are the orchestrators;
+- **Substrate**: Claude Code plugin. Three skills (`skills/*/SKILL.md`) are the orchestrators;
   eight subagents (`agents/*.md`) are dispatched workers, each with a `tools:` allowlist and a
   `model` tier (`agents/codebase-analyst.md:1-6`, AB-5). `codebase-analyst` is the only agent
   granted Bash (`agents/codebase-analyst.md:4`, AB-6).
@@ -72,17 +71,18 @@ substrate. There is no compiled runtime and no package manifest (`git ls-files` 
   AB-25). Its `lifecycle` drives the state machine `validating → defining → planning → live`, with
   `defining → live` for existing/as-built products and `(any) → shelved` on kill
   (`reference/canon.md:163-169`, AB-17).
-- **Shared rulebook**: `reference/canon.md` (207 lines) is read first by all four skills
-  (`skills/init/SKILL.md:15`, `skills/log/SKILL.md:14`, `skills/status/SKILL.md:13`,
-  `skills/work/SKILL.md:15`, AB-13); it owns
-  Triage, Checkpoints, Assumptions, Dispatch, Fragments, Conflict, Sentinels, and StatusFile rules
-  so no skill restates them.
+- **Shared rulebook**: `reference/canon.md` (238 lines) is read first by all three skills
+  (`skills/init/SKILL.md:15`, `skills/log/SKILL.md:14`, `skills/status/SKILL.md:13`, AB-13); it
+  owns Prime directive, Coexistence, Triage, Checkpoints, Assumptions, Dispatch, Fragments,
+  Garbage output, Conflict, Sentinels & resume, StatusFile, Record migrations, and Execution
+  contract rules so no skill restates them.
 - **Ambient layer**: two hooks (`hooks/hooks.json`, AB-8) gated on `tracking:true` + `lifecycle:live`
   — SessionStart injects the triage rule and drift count; Stop nudges once per session when code
   changed but the journal didn't. Both are `bash "${CLAUDE_PLUGIN_ROOT}/..."` invocations (AB-50).
-- **Prime directive**: planning agents never write application code and Sunoku itself writes only
-  `.sunoku/`; the single execution surface is `sunoku:work`, which drives the main assistant on
-  explicit invocation (`reference/canon.md` Prime directive + Work loop).
+- **Prime directive**: Sunoku never writes application code and writes only `.sunoku/` at the
+  consumer repo root. Executing the backlog is an open contract worked by any executor the user
+  chooses, with reconcile flipping diff-proven tasks to `done`
+  (`reference/canon.md` Prime directive + Execution contract).
 
 ### Rejected alternative
 
@@ -98,7 +98,7 @@ not need.
 
 ## UX
 
-Words-only; there is no GUI. The entire surface is four Claude Code skill invocations plus two
+Words-only; there is no GUI. The entire surface is three Claude Code skill invocations plus two
 ambient hooks.
 
 - **Onboarding an existing repo (the flow just run)**: user invokes `sunoku:init`. Sunoku detects
@@ -115,8 +115,8 @@ ambient hooks.
   undocumented; `sunoku:log` runs the triage and does exactly as much as the lane demands (silence
   for a bugfix, one journal line for a tracked change, a scoped re-dispatch + one checkpoint for a
   reshape). `sunoku:status` answers "what changed since May?" from the journal and Change Log.
-- **Navigation / IA**: one command to learn (`sunoku:init`); the other three are surfaced once
-  tracking is armed (`README.md:97-101`). State lives in human-readable Markdown under `.sunoku/`,
+- **Navigation / IA**: one command to learn (`sunoku:init`); the other two are surfaced once
+  tracking is armed (`README.md:100-106`). State lives in human-readable Markdown under `.sunoku/`,
   browsable directly.
 - **Accessibility**: text-only, terminal-native, no color- or pointer-dependent affordances; the
   record is plain Markdown/JSON readable outside Claude Code. Windows caveat: hooks need Git Bash on
@@ -124,9 +124,9 @@ ambient hooks.
 
 ## Out of scope
 
-- Sunoku agents writing consumer application code — planning stays code-free; execution happens
-  only through `sunoku:work` driving the main assistant, explicitly invoked
-  (`reference/canon.md` Prime directive, Work loop).
+- Writing or modifying consumer application code — Sunoku plans and documents only. Executing the
+  backlog belongs to whatever tool the user chooses; `TASKS.md` is an open contract and reconcile
+  records what landed (`reference/canon.md` Prime directive, Execution contract).
 - Any write outside `.sunoku/` at the consumer repo root; no external exports or third-party sync
   (`reference/canon.md:9-14`).
 - Calendar/time estimates in roadmaps — sizes are S/M/L only (`reference/templates/ROADMAP.md:4`).
@@ -182,3 +182,4 @@ gap roadmap over these is optional and, given none are must-haves, not warranted
 | Date | Change | Why | Journal ref |
 |---|---|---|---|
 | 2026-07-03 | Added feature 18 (`sunoku:work` execution loop); prime directive scoped to planning agents; out-of-scope and UX surface updated | Complete the loop: plan → execute → track without leaving the record | 2026-07-03 — reshape |
+| 2026-07-03 | Dropped feature 18 (`sunoku:work`) in 1.2.0; command surface back to three; prime directive restored to plans-and-documents-only; TASKS.md Status/Blocked schema kept as the open Execution contract with reconcile status catch-up; canon gained the Coexistence principle | Owning execution displaced other plugins' process discipline (design gates pre-satisfied, questions forbidden mid-run); record-keeping is the product, execution is commodity | 2026-07-03 — reshape (sunoku:work drop) |
