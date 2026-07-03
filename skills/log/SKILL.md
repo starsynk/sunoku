@@ -11,11 +11,7 @@ accurate as it was before the change, no more ceremony than that requires.
 
 ## Flow
 
-1. **Read canon first.** Read `${CLAUDE_PLUGIN_ROOT}/reference/canon.md` in full before doing
-   anything else. Obey its Triage, Checkpoints, Dispatch, and StatusFile sections verbatim —
-   this skill does not restate their rules, only invokes them in order below.
-
-2. **Guard: live record required.** Check `.sunoku/status.json`. If it does not exist, or its
+1. **Guard: live record required.** Check `.sunoku/status.json`. If it does not exist, or its
    `lifecycle` value is not `live`, tell the user plainly there is no live record to log against
    and route them to `sunoku:init` (name it by that skill name). Do nothing else — no journal
    write, no file read beyond status.json. If `lifecycle` is `shelved`, the same guard applies:
@@ -23,6 +19,10 @@ accurate as it was before the change, no more ceremony than that requires.
    guard: `tracking: false` mutes the AMBIENT layer only (hooks stop nudging), while an explicit
    user invocation of `sunoku:log` still runs the full triage — a direct request to record
    something always beats the mute.
+
+2. **Read canon.** With the guard passed, read `${CLAUDE_PLUGIN_ROOT}/reference/canon.md` in full
+   before doing anything else. Obey its Triage, Checkpoints, Dispatch, and StatusFile sections
+   verbatim — this skill does not restate their rules, only invokes them in order below.
 
 3. **Establish the subject.** Two triggers:
    - **User-stated** — the user's own sentence ("we decided...", "we're dropping X...") is the
