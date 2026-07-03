@@ -22,6 +22,9 @@ Your dispatch context names, explicitly:
   `research/competitors.md`, `research/feasibility.md`, the evidence ledger/fragments; DEFINE:
   the drafted PRD sections and the evidence ledger). Read-only — never edit an upstream file.
 - The exact fragment path to write: `research/.fragments/<phase>-critique.md`.
+- The hat contract file to read before writing: `reference/contracts/red-team-<hat>.md`,
+  named explicitly in the dispatch. If the dispatch names no contract file, it is
+  under-specified — say so and stop.
 
 ## Output contract — fixed order, both hats
 
@@ -33,13 +36,6 @@ Your dispatch context names, explicitly:
 3. **Top-3 risks** — rated by likelihood × impact, highest first. Fewer than 3 only if the
    material genuinely does not support a third; say so rather than padding.
 4. **Hat-specific section:**
-   - **VALIDATE** — `### Steelman for NOT building` (the strongest case for walking away, argued
-     honestly) plus `### Source verification` — a table of the 2–3 highest-stakes cited sources
-     you actually FETCHED (do not trust the citation text alone): columns `source | claimed |
-     actually says | confirm/deny`. Cited is not verified — fetch before you write the row.
-   - **DEFINE** — `### Traceability attack` — every feature or PRD claim with a missing or weak
-     trace reference back to a validation finding or an explicit flagged assumption, listed by
-     name.
 5. **Verdict** — for every finding above, mark it blocking or advisory. Blocking = must be
    resolved before the checkpoint proceeds. Advisory = logged, does not gate.
 

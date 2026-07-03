@@ -9,8 +9,8 @@ a. **Scope the blast radius.** Name explicitly which PRD sections (`Problem`, `P
    Architecture" not "parts of the PRD."
 
 b. **Re-dispatch only the owning agents for the named slices**, per canon Dispatch (absolute
-   `.sunoku/` path, exact files to read, exact files to write, hat named, sentinel+summary
-   obligation in every dispatch):
+   `.sunoku/` path, exact files to read, exact files to write, hat named, hat contract file named,
+   sentinel+summary obligation in every dispatch):
    - `sunoku:product-owner` for scope / target segment / pricing sections — RESHAPE hat,
      patching only the named PRD sections.
    - `sunoku:feasibility-assessor` DEFINE hat for architecture changes — patching only the
