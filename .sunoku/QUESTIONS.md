@@ -19,3 +19,19 @@ framing around buyers vs. users.
 who owns a repo. No enterprise/admin surfaces exist.
 **Flip if wrong:** If the target is larger orgs, expect needs around multi-repo, roles, and
 governance that the current single-repo `.sunoku/` model does not address.
+
+## Q-3 — Coexistence canon addition triaged TRACK, not RESHAPE  (stakes: normal, status: open)
+**Assumption taken:** The new `## Coexistence` section in `reference/canon.md` is a TRACK-lane
+change — an in-scope articulation of Sunoku's existing narrow-orchestrator direction — not a RESHAPE
+of the architecture.
+**Reasoning:** It changes none of the reshape set in substance — core bet, product scope, structure,
+target segment, and pricing are all unchanged; it hardens the Prime directive's narrowness rather
+than redirecting the product. Full RESHAPE ceremony (checkpoint + PRD reconcile) for a ~14-line canon
+principle is the over-ceremony canon's Triage explicitly warns against.
+**Flip if wrong:** If this counts as an architecture change — it adds a foundational principle
+sibling to the Prime directive, which the PRD Architecture section documents — it flips to RESHAPE,
+requiring a PRD Change Log row plus refreshed canon citations. Regardless of lane, this change leaves
+the PRD Architecture "Shared rulebook" bullet (PRD.md:75) stale in two ways: the canon line count
+("207 lines"; canon is now 245) and the owned-section enumeration (omits Coexistence). That
+enumeration is already incomplete from the prior reconcile — it also omits Work loop and Record
+migrations — so the next `sunoku:status` reconcile should refresh the whole bullet, not just this item.

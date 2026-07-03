@@ -22,3 +22,8 @@
 **What:** Self-migrating record schema: `reference/MIGRATIONS.md` registry applied via a new canon "Record migrations" rule, `sunokuVersion` stamped on every record write, version-skew nudge in the SessionStart hook (read-only), CHANGELOG.md added.
 **Why:** 1.0.0-written records lack the new TASKS.md Status column — upgrades must not strand existing records. Legacy shapes now upgrade silently on the first skill touch; hooks detect skew but never write.
 **Refs:** e84d637
+
+## 2026-07-03 — track
+**What:** Added a `Coexistence` principle to `reference/canon.md` (new top-level section, after Prime directive): a Sunoku flow narrows exactly one thing in the assistant's behavior — product design authority, already settled upstream in PRD/roadmap/task trace — and suppresses no other applicable skill from any plugin or source. Stated as a hard rule with a named failure mode ("suppressing an applicable skill because a Sunoku flow is driving is a Sunoku failure, as much as pausing on a SILENT change is").
+**Why:** A work-loop run let the assistant over-generalize "you never redesign" into "no skills fire at all," silently dropping execution-lane skills (house coding conventions, TDD, systematic debugging, verification) the flow never governed. Placing the guarantee in the shared rulebook — plugin-agnostic, naming no specific plugin or skill — means every skill, including the work loop when v2 re-adds it, inherits it without per-skill wiring. Chosen over an enumerate-what-Sunoku-owns approach (over-specifies) and a two-lane model (reifies the flawed "process lane" metaphor that caused the misread). Design record: docs/superpowers/specs/2026-07-03-sunoku-coexistence-design.md (git-excluded).
+**Refs:** conversation; reference/canon.md `## Coexistence`
