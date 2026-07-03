@@ -44,4 +44,12 @@ assert_contains skills/status/SKILL.md "Disclosure map"
 assert_contains skills/init/SKILL.md "Disclosure map"
 assert_absent skills/log/SKILL.md "Obey its Triage, Checkpoints, Dispatch, and StatusFile sections"
 
+# Task 5: lane files exist; hot bodies shrank
+assert_file skills/log/references/reshape.md
+assert_file skills/status/references/reconcile.md
+assert_max_bytes skills/log/SKILL.md 6144
+assert_max_bytes skills/status/SKILL.md 6144
+assert_contains skills/log/SKILL.md "references/reshape.md"
+assert_contains skills/status/SKILL.md "references/reconcile.md"
+
 exit $FAIL
