@@ -37,5 +37,16 @@ case "$DRIFT" in
   *) CTX="$CTX Drift: $DRIFT commit(s) landed since the last reconcile - suggest sunoku:status to review and reconcile." ;;
 esac
 
+# Version-skew nudge: record written by an older plugin -> point at the migration path.
+# Read-only like everything else here; the actual migration happens in-session per canon.
+PLUGIN_JSON="$(cd "$(dirname "$0")/../.." 2>/dev/null && pwd)/.claude-plugin/plugin.json"
+if [ -f "$PLUGIN_JSON" ]; then
+  PLUGIN_VER="$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$PLUGIN_JSON" | head -n1)"
+  RECORD_VER="$(sed -n 's/.*"sunokuVersion"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$STATUS" | head -n1)"
+  if [ -n "$PLUGIN_VER" ] && [ "$RECORD_VER" != "$PLUGIN_VER" ]; then
+    CTX="$CTX Record schema: last written by ${RECORD_VER:-a pre-1.1.0 plugin}, plugin is now $PLUGIN_VER - legacy shapes migrate automatically on the next record touch (see plugin reference/MIGRATIONS.md); sunoku:status migrates now."
+  fi
+fi
+
 printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' "$CTX"
 exit 0

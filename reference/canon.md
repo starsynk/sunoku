@@ -146,6 +146,7 @@ indent, exact key order below) is mandatory; hooks match on exact byte patterns 
 ```json
 {
   "version": 1,
+  "sunokuVersion": "<plugin version>",
   "product": "<display name>",
   "origin": "greenfield",
   "lifecycle": "defining",
@@ -158,6 +159,11 @@ indent, exact key order below) is mandatory; hooks match on exact byte patterns 
 
 Field semantics:
 
+- `version` — schema version of the record itself (not the product, not the plugin); bumped only
+  on a breaking record-shape change where shape-sniffing cannot work (see Record migrations).
+- `sunokuVersion` — the plugin version that last wrote the record (not the product's version),
+  read from `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` and re-stamped on every
+  status.json write.
 - `origin` — `greenfield` | `existing`.
 - `lifecycle` — `validating` | `defining` | `planning` | `live` | `shelved`.
 - `tracking` — whether TRACK/RESHAPE triage is active for this product.
@@ -171,8 +177,24 @@ defining -> live                        (existing/as-built products skip plannin
 (any phase) -> shelved                  (on kill)
 ```
 
-Every write to status.json updates `updated` to the current timestamp; `created` never changes
-after the file's first write.
+Every write to status.json updates `updated` to the current timestamp and re-stamps
+`sunokuVersion` with the current plugin version; `created` never changes after the file's first
+write.
+
+## Record migrations
+
+Legacy record shapes upgrade in place, silently, applied by whichever skill touches the record
+first. Before reading or writing any `.sunoku/` artifact, consult
+`${CLAUDE_PLUGIN_ROOT}/reference/MIGRATIONS.md` and apply every row whose Detect shape matches,
+before proceeding with the run's actual work.
+
+- Migrations are mechanical: SILENT lane — no journal entry, no checkpoint; one line in the
+  skill's output ("record migrated: <what>") is the only trace.
+- Detection is shape-based (what the file actually contains), never version arithmetic.
+  `sunokuVersion` exists for ambient skew *detection*, not as a migration trigger;
+  `status.json.version` is reserved for a future breaking change where shape-sniffing cannot
+  work.
+- Hooks only detect version skew and nudge; they never write the record. Only skills migrate.
 
 ## Work loop
 
