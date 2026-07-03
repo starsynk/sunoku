@@ -84,4 +84,7 @@ assert_contains reference/canon/statusfile.md '"last_entry"'
 assert_contains reference/MIGRATIONS.md "1.3.0"
 assert_contains skills/status/SKILL.md "one_liner"
 
+# Task 12: rollover rule present
+assert_contains skills/log/SKILL.md ".sunoku/journal/"
+
 exit $FAIL

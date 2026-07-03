@@ -67,6 +67,12 @@ accurate as it was before the change, no more ceremony than that requires.
    (the file still carries `<!-- sunoku:stub -->` as its first line), delete that sentinel line
    as part of this write — the file is append-only from here on.
 
+   **Rollover:** after appending, if `.sunoku/JOURNAL.md` exceeds 30KB, move the oldest whole
+   entries (never split an entry) into `.sunoku/journal/<year-of-entry>.md` — create the
+   directory if missing, append in original order — until JOURNAL.md is under 15KB. Leave the
+   header block in place and ensure it carries the line `> Older entries: .sunoku/journal/`.
+   Entry bodies are never edited during the move; the archive files are append-only too.
+
 6. **RESHAPE procedure** — load the canon section files the Disclosure map names for
    "log — RESHAPE", then read `${CLAUDE_PLUGIN_ROOT}/skills/log/references/reshape.md` and
    execute it exactly. It defines blast-radius scoping, owning-agent re-dispatch, the single
