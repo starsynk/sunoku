@@ -4,6 +4,40 @@ Notable changes to the Sunoku plugin. Record-schema changes additionally land as
 [reference/MIGRATIONS.md](reference/MIGRATIONS.md), which skills apply to legacy records
 automatically on the first touch after an upgrade.
 
+## 1.2.0 — 2026-07-03
+
+### Removed
+
+- **`sunoku:work`** (breaking — the command is gone). One release in, owning execution proved to
+  put Sunoku in the execution-harness business: to run unattended it had to pre-satisfy other
+  plugins' design gates and forbid mid-run questions, displacing exactly the process discipline
+  (TDD, plan execution, review checkpoints) users install other plugins for. Sunoku returns to
+  its prime directive: it plans and documents, and never writes application code.
+
+### Added
+
+- **Canon `Coexistence` section** — a Sunoku flow settles product-design authority (already
+  decided in the PRD, roadmap, and task trace) and suppresses no other skill from any plugin or
+  source.
+- **Canon `Execution contract`** (replaces `Work loop`) — `TASKS.md` is an open contract any
+  executor may work: the status vocabulary, `Blocked` table + QUESTIONS.md flag conventions, and
+  milestone-grained journaling, with Sunoku never policing the executor.
+- **Reconcile status catch-up** — reconcile flips a planned task to `done` when the diff shows
+  its work landed, so executors that never touch `Status` still leave a true record.
+- Migration row (1.2.0): legacy `TASKS.md` Status legends naming `sunoku:work` self-rewrite on
+  first touch.
+
+### Changed
+
+- README and `sunoku:init` describe the three-command surface; `sunoku:status` suggests the
+  backlog as workable by any executor rather than naming a Sunoku command.
+
+### Upgrade notes (from 1.1.0)
+
+Nothing to migrate by hand; the record schema is unchanged — the `Status` column and `Blocked`
+table stay. Stop invoking `/sunoku:work`: execute the backlog with anything you like (README
+"Executing the backlog"), and the next reconcile keeps `TASKS.md` honest either way.
+
 ## 1.1.0 — 2026-07-03
 
 ### Added

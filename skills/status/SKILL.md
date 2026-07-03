@@ -47,9 +47,10 @@ optionally act (reconcile, mute/unmute) only when the user asks or accepts an of
      question if one exists; (3) else, if `lifecycle` is `live` with no roadmap
      (`ROADMAP.md`/`TASKS.md` absent or still stub-sentineled), offer an optional PLAN pass;
      (4) else, if `.sunoku/TASKS.md` has any `todo`, `doing`, or `blocked` task, report the counts
-     (e.g. "6 todo, 1 blocked in M2", or "1 doing — resume the interrupted task" when a `doing`
-     row is present) and name `sunoku:work` as the way to execute the backlog — mention, never
-     auto-invoke; (5) else state plainly that nothing needs attention right now.
+     (e.g. "6 todo, 1 blocked in M2", or "1 doing — an interrupted task to resume" when a `doing`
+     row is present) and note the backlog is ready to work with whatever executor the user prefers
+     (canon Execution contract) — report, never execute; (5) else state plainly that nothing needs
+     attention right now.
 
 3. **History questions** — when the user asks something like "what changed since May?" or "why
    did we drop X?", answer strictly from the record:
@@ -82,6 +83,10 @@ optionally act (reconcile, mute/unmute) only when the user asks or accepts an of
      re-dispatch only, one checkpoint per RESHAPE group covering that group's full delta).
      Multiple RESHAPE groups in one reconcile get one checkpoint each, never combined into a
      single omnibus checkpoint.
+   - **Task statuses** (canon Execution contract): while triaging, when a group's diff shows the
+     work of a planned TASKS.md task has landed, flip that row's Status to `done` (a `doing` row
+     whose work the diff completes flips the same way) and cite the evidence in the reconcile
+     summary. Never infer completion the diff doesn't show — partial work stays as-is, noted.
    - When all groups are resolved, set `last_reconciled_sha` to the current HEAD and update
      `updated`, in the canonical status.json serialization (one key per line, two-space indent,
      exact key order — hooks grep this byte-for-byte).

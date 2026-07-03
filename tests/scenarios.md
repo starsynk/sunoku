@@ -235,6 +235,11 @@ Re-run with name supplied passed everything.
 
 ## Scenario F — work loop executes, blocks, and gates at milestone (2026-07-03)
 
+> **RETIRED 2026-07-03** — `sunoku:work` was removed in 1.2.0 (see CHANGELOG). F and its variant
+> F2 stay as the dated run log of the feature while it existed; do not re-run them. The
+> `Status`/`Blocked` schema they exercised survives under canon's Execution contract, and
+> Scenario F3 below remains current.
+
 **Fixture:** a throwaway "Greeter" repo with a **live record and a pre-built M1 backlog** — no
 validate/define/plan phases, straight into execution. `greet.sh` (prints `hello`) + a `test.sh`
 harness that conditionally asserts `farewell.sh`→`goodbye` and `shout.sh hello`→`HELLO!`.

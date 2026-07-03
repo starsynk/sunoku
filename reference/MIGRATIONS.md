@@ -12,3 +12,9 @@ the only trace.
 |---|---|
 | `TASKS.md` exists, non-stub, and its task-table header lacks a `Status` column | Append `Status` to the header of every milestone table and `todo` to every task row; append an empty `## Blocked` section (commented header `\| ID \| Attempts \| Reason \|`) after the last milestone table; add the Status legend line under the file's intro blockquote |
 | `status.json` lacks a `sunokuVersion` key | Insert `sunokuVersion` with the current plugin version (from `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json`), in canonical key order (canon StatusFile) |
+
+## 1.2.0
+
+| Detect (legacy shape) | Fix (in place) |
+|---|---|
+| `TASKS.md` Status legend line references `sunoku:work` | Replace that legend line with the current template's legend (`reference/templates/TASKS.md`): Status is maintained by whoever executes; reconcile flips rows the diff proves landed |
