@@ -30,11 +30,11 @@ if [ -n "$LAST_SHA" ] && [ "$LAST_SHA" != "$HEAD_SHA" ]; then
   DRIFT="$(git -C "$ROOT" rev-list --count "$LAST_SHA..$HEAD_SHA" 2>/dev/null || echo 0)"
 fi
 
-CTX="Sunoku living record is ACTIVE in this repo (.sunoku/). Standing rule: after completing any substantive change, apply the triage test - would .sunoku/PRD.md or the roadmap need editing to stay accurate? If yes or ambiguous, invoke the sunoku:log skill to capture it. Bugfixes, styling, refactors, perf, config and copy changes are SILENT: do nothing for those."
+CTX="Sunoku record active (.sunoku/). After any substantive change ask: would PRD.md or roadmap need edits to stay accurate? Yes/unsure -> run the sunoku:log triage. Bugfix/styling/refactor/perf/config/copy -> silent, do nothing."
 case "$DRIFT" in
   ''|*[!0-9]*) : ;;
   0) : ;;
-  *) CTX="$CTX Drift: $DRIFT commit(s) landed since the last reconcile - suggest sunoku:status to review and reconcile." ;;
+  *) CTX="$CTX Drift: $DRIFT commit(s) unreconciled -> sunoku:status." ;;
 esac
 
 # Version-skew nudge: record written by an older plugin -> point at the migration path.
@@ -44,7 +44,12 @@ if [ -f "$PLUGIN_JSON" ]; then
   PLUGIN_VER="$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$PLUGIN_JSON" | head -n1)"
   RECORD_VER="$(sed -n 's/.*"sunokuVersion"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$STATUS" | head -n1)"
   if [ -n "$PLUGIN_VER" ] && [ "$RECORD_VER" != "$PLUGIN_VER" ]; then
-    CTX="$CTX Record schema: last written by ${RECORD_VER:-a pre-1.1.0 plugin}, plugin is now $PLUGIN_VER - legacy shapes migrate automatically on the next record touch (see plugin reference/MIGRATIONS.md); sunoku:status migrates now."
+    OLDEST="$(printf '%s\n%s\n' "$RECORD_VER" "$PLUGIN_VER" | sort -V | head -n1)"
+    if [ "$OLDEST" = "$PLUGIN_VER" ] && [ -n "$RECORD_VER" ]; then
+      CTX="$CTX Record schema $RECORD_VER is newer than plugin $PLUGIN_VER -> update the Sunoku plugin."
+    else
+      CTX="$CTX Record schema ${RECORD_VER:-pre-1.1.0} older than plugin $PLUGIN_VER - migrates on next record touch; sunoku:status migrates now."
+    fi
   fi
 fi
 
