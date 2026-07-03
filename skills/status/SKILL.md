@@ -34,7 +34,7 @@ optionally act (reconcile, mute/unmute) only when the user asks or accepts an of
      only if asked for more; never read the whole journal for this line.
    - **Open QUESTIONS count** — status.json's `open_questions`/`high_stakes` fields, directly
      (`grep -c '^## .*status: open)' .sunoku/QUESTIONS.md` recomputes this only in the migration
-     below). When `high_stakes` > 0, name the entries: `grep -n 'stakes: high'
+     below). When `high_stakes` > 0, name the entries: `grep -n 'stakes: high, status: open'
      .sunoku/QUESTIONS.md`, then read only those blocks (title + one-line gist).
    - **Validation-report age**, if `.sunoku/validation/` has any dated report — cite it as
      "validated 2026-07" style (month granularity) from the report's filename/date. Omit this

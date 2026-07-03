@@ -48,6 +48,9 @@ fans out to a subagent and reports back to you; agents never message each other.
      | defining | greenfield | references/define.md |
      | defining | existing | references/existing.md |
      | planning | any | references/plan.md |
+
+     Still stub-sentineled `BRIEF.md`? Load `references/onboarding.md`'s scoping section first —
+     onboarding is otherwise first-run only.
    - **absent** → No `.sunoku/status.json` yet — first run: read
      `${CLAUDE_PLUGIN_ROOT}/skills/init/references/onboarding.md` now and follow it exactly; it ends
      by routing into a phase below.
@@ -61,13 +64,13 @@ fans out to a subagent and reports back to you; agents never message each other.
      not scaffolded from a stub in place).
    - `ROADMAP.md` / `TASKS.md` are scaffolded only if and when PLAN runs — a record without a roadmap
      is valid, so do not pre-scaffold them.
-   Then write `status.json` in the canonical serialization (canon StatusFile: one key per line,
-   two-space indent, exact key order `version` / `product` / `origin` / `lifecycle` / `tracking` /
-   `last_reconciled_sha` / `created` / `updated`). Set `product` to a display name (inferred or
-   asked in scoping), `origin` to the flow (`greenfield` or `existing`), `lifecycle` to the first
-   phase (`validating` for greenfield that will validate, `defining` for existing or a committed
-   greenfield skip), `tracking` to `false`, `last_reconciled_sha` to `""`, and `created` / `updated`
-   to the current UTC timestamp. You are the only writer of this file for the whole run.
+   Then write `status.json` following the canonical serialization and key order in
+   `reference/canon/statusfile.md` exactly, `sunokuVersion` from plugin.json. Set `product` to a
+   display name, `origin` to the flow, `lifecycle` to the first phase (`validating` greenfield,
+   `defining` existing or a committed greenfield skip), `tracking` to `false` until arm,
+   `last_reconciled_sha` to `""`, `created` / `updated` to now, and the summary fields to their
+   initial values: `one_liner` the product name, `open_questions` / `high_stakes` `0`,
+   `last_entry` `""`. You are the only writer of this file for the whole run.
 
 4. **Greenfield flow.** (canon Checkpoints bind you: only go/no-go, PRD approve, roadmap approve.)
 

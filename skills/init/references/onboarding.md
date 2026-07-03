@@ -1,6 +1,6 @@
 # init — First-run onboarding (origin detection + BRIEF)
 
-Preconditions: canon core read; canon sections for "init — any phase" loaded per the Disclosure map. This file is first-run only — a resume (status.json exists) never loads it.
+Preconditions: canon core read; canon sections for "init — any phase" loaded per the Disclosure map. This file is first-run only — a resume (status.json exists) never loads it (one exception: a resume that finds BRIEF.md still stub-sentineled loads the scoping section).
 
 ## Origin detection (step 2, absent branch)
 
@@ -45,3 +45,5 @@ a. **Scoping.** Infer-first from README, docs, and manifests (package.json, pypr
    display name, intended segment if the code doesn't reveal it, monetization stance). Write
    `BRIEF.md` (delete sentinel); log inferences as flagged assumptions in `QUESTIONS.md`. Ensure
    `status.json` has `origin: existing` and `lifecycle: defining`.
+
+Done here — return to the router: scaffold (step 3), then run the chosen flow.
