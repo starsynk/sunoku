@@ -29,3 +29,9 @@ name if the PRD is a stub); `open_questions` = count of entries marked open (the
 carrying `stakes: high`; `last_entry` from the final JOURNAL.md
 `## YYYY-MM-DD — <type>` header plus its `What:` line (empty string for a stub journal). Insert
 in canonical key order per canon statusfile.md and bump `sunokuVersion` in the same write.
+
+## 1.6.0
+
+| Detect (legacy shape) | Fix (in place) |
+|---|---|
+| `.sunoku/.gitattributes` missing on an existing record | Copy `reference/templates/sunoku.gitattributes` to `.sunoku/.gitattributes` — union-merge for the append-only ledgers (JOURNAL.md, `journal/*.md`, `research/EVIDENCE.md`) so concurrent branch appends never conflict |

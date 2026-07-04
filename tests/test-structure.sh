@@ -88,8 +88,8 @@ assert_contains skills/status/SKILL.md "one_liner"
 assert_contains skills/log/SKILL.md ".sunoku/journal/"
 
 # Task 13: version aligned
-assert_contains .claude-plugin/plugin.json '"version": "1.5.0"'
-assert_contains CHANGELOG.md "## 1.5.0"
+assert_contains .claude-plugin/plugin.json '"version": "1.6.0"'
+assert_contains CHANGELOG.md "## 1.6.0"
 
 # Scripts layer: deterministic record writes live in scripts/, docs point at them
 for f in lib status-write report journal-append questions-flush tasks-set scaffold sentinels migrate; do
@@ -117,5 +117,28 @@ assert_contains skills/log/SKILL.md "Question answer"
 assert_contains skills/status/SKILL.md "answers route through"
 assert_contains reference/templates/QUESTIONS.md "status: open)"
 assert_absent reference/templates/QUESTIONS.md "status: open|answered"
+
+# 1.6.0: agent model values are documented ones (best is not)
+for f in agents/*.md; do
+  grep -qE '^model: (sonnet|opus|haiku|fable|inherit)$' "$f" && ok "valid model: $f" || fail "invalid model value: $f"
+done
+
+# 1.6.0: Node hooks (no bash runtime), guard wired, cross-platform README
+assert_file hooks/scripts/session-start.mjs
+assert_file hooks/scripts/stop-nudge.mjs
+assert_file hooks/scripts/guard-record-writes.mjs
+assert_contains hooks/hooks.json "session-start.mjs"
+assert_contains hooks/hooks.json "PreToolUse"
+assert_absent hooks/hooks.json "session-start.sh"
+assert_absent README.md "Git Bash"
+
+# 1.6.0: merge=union ledger template + migration row
+assert_file reference/templates/sunoku.gitattributes
+assert_contains reference/templates/sunoku.gitattributes "merge=union"
+assert_contains reference/MIGRATIONS.md "1.6.0"
+
+# 1.6.0: CI wired
+assert_file .github/workflows/test.yml
+assert_contains .github/workflows/test.yml "test-scripts.sh"
 
 exit $FAIL

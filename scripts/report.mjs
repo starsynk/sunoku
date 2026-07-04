@@ -34,12 +34,17 @@ if (questions !== null && !isStub(questions)) {
 
 report.drift = null;
 report.dirty = null;
+report.baseline_lost = false;
 if (git(root, ['rev-parse', '--git-dir']) !== null) {
   const sha = status.last_reconciled_sha ?? '';
+  // Rebase/squash/force-push can erase the reconcile baseline — flag it instead of a bogus 0.
+  report.baseline_lost = Boolean(sha) && git(root, ['cat-file', '-e', `${sha}^{commit}`]) === null;
   // Empty sha: ""..HEAD is not a valid range — all history counts as unreconciled.
-  const count = sha
-    ? git(root, ['rev-list', '--count', `${sha}..HEAD`])
-    : git(root, ['rev-list', '--count', 'HEAD']);
+  const count = report.baseline_lost
+    ? null
+    : sha
+      ? git(root, ['rev-list', '--count', `${sha}..HEAD`])
+      : git(root, ['rev-list', '--count', 'HEAD']);
   report.drift = count === null ? null : Number(count);
   // Record-only dirt never warrants a reconcile offer — ignore .sunoku/ paths.
   const porcelain = git(root, ['status', '--porcelain']);
@@ -58,15 +63,27 @@ report.roadmap = roadmap === null ? 'absent' : isStub(roadmap) ? 'stub' : 'prese
 
 const tasksFile = readRecordFile(root, 'TASKS.md');
 report.tasks = null;
+report.milestones = null;
 if (tasksFile !== null && !isStub(tasksFile)) {
   const counts = { todo: 0, doing: 0, done: 0, blocked: 0 };
+  const milestones = [];
+  let current = null;
   for (const line of tasksFile.split('\n')) {
+    const heading = line.match(/^## (M\d+.*)$/);
+    if (heading) { current = { name: heading[1].trim(), total: 0, done: 0 }; milestones.push(current); continue; }
+    if (/^## /.test(line)) { current = null; continue; }
     if (!line.startsWith('|')) continue;
     const cells = line.split('|').map((c) => c.trim()).filter(Boolean);
     const last = cells[cells.length - 1];
-    if (last in counts) counts[last] += 1;
+    if (!(last in counts)) continue;
+    counts[last] += 1;
+    if (current) {
+      current.total += 1;
+      if (last === 'done') current.done += 1;
+    }
   }
   report.tasks = counts;
+  report.milestones = milestones;
 }
 
 const journal = readRecordFile(root, 'JOURNAL.md');

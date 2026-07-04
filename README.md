@@ -86,10 +86,9 @@ For local development, skip the marketplace and point Claude Code straight at yo
 claude --plugin-dir /path/to/sunoku
 ```
 
-**Windows note:** Sunoku's ambient hooks (session-start context injection, the stop-time nudge to
-log undocumented changes) are Bash scripts invoked via `bash "${CLAUDE_PLUGIN_ROOT}/..."`. On
-Windows you need Git Bash available on PATH for these to run — without it, the hooks silently
-no-op and you lose the ambient nudges, though the three commands below still work normally.
+**Runtime note:** everything mechanical — the ambient hooks (session-start context, stop-time
+nudge, the status.json write guard) and the record scripts — runs on Node ≥18, the same runtime
+Claude Code itself needs. No shell dependency, no platform caveats.
 
 **Upgrading:** nothing to migrate by hand. Records written by an older plugin self-migrate in
 place the next time any Sunoku command touches them (the session-start hook flags the version

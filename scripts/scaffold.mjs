@@ -44,6 +44,7 @@ const copies = [
   ['QUESTIONS.md', 'QUESTIONS.md'],
   ['EVIDENCE.md', join('research', 'EVIDENCE.md')],
   ['sunoku.gitignore', '.gitignore'],
+  ['sunoku.gitattributes', '.gitattributes'],
 ];
 for (const [from, to] of copies) {
   const dest = join(sunoku, to);

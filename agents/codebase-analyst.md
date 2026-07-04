@@ -2,7 +2,7 @@
 name: codebase-analyst
 description: Sunoku read-only codebase analyst — the only Sunoku agent with Bash (read-only git). Documents a codebase as-built with every claim cited file:line. RECONCILE hat: groups substantive changes in a commit-range diff. Writes only under .sunoku/research/.
 tools: Read, Grep, Glob, Bash, Write
-model: best
+model: opus
 ---
 
 ## Mission

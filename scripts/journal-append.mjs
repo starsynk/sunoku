@@ -5,12 +5,12 @@
 //
 //   node journal-append.mjs --type track --what "..." --why "..." --refs "abc123"
 // Optional: --date YYYY-MM-DD (defaults to today).
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import {
   computeSummary, die, journalEntries, projectRoot, readStatus, stampAndWrite, STUB_SENTINEL,
-  todayLocal,
+  todayLocal, writeFileAtomic,
 } from './lib.mjs';
 
 const TYPES = ['track', 'reshape', 'decision'];
@@ -31,6 +31,11 @@ const { values } = parseArgs({
 for (const field of ['type', 'what', 'why', 'refs']) {
   if (!values[field]) die(`--${field} is required`);
 }
+// Entry fields are single-line by format (`**What:** ...`); collapse any stray newlines so a
+// multi-line argument can never break the machine-scanned entry shape.
+for (const field of ['what', 'why', 'refs']) {
+  values[field] = values[field].replace(/\s+/g, ' ').trim();
+}
 if (!TYPES.includes(values.type)) die(`invalid type: ${values.type} (${TYPES.join('|')})`);
 if (!/^\d{4}-\d{2}-\d{2}$/.test(values.date)) die(`invalid date: ${values.date} (YYYY-MM-DD)`);
 
@@ -48,7 +53,7 @@ if (content.split('\n', 1)[0].trim() === STUB_SENTINEL) {
 
 const entry = `## ${values.date} — ${values.type}\n**What:** ${values.what}\n**Why:** ${values.why}\n**Refs:** ${values.refs}\n`;
 content = `${content.replace(/\n*$/, '')}\n\n${entry}`;
-writeFileSync(journalPath, content);
+writeFileAtomic(journalPath, content);
 
 let rolled = 0;
 if (statSync(journalPath).size > ROLLOVER_AT) {
@@ -67,12 +72,12 @@ if (statSync(journalPath).size > ROLLOVER_AT) {
     const oldest = kept.shift();
     const archivePath = join(archiveDir, `${oldest.date.slice(0, 4)}.md`);
     const block = `${oldest.text.replace(/\n*$/, '')}\n`;
-    writeFileSync(archivePath, existsSync(archivePath)
+    writeFileAtomic(archivePath, existsSync(archivePath)
       ? `${readFileSync(archivePath, 'utf8').replace(/\n*$/, '')}\n\n${block}`
       : block);
     rolled += 1;
   }
-  writeFileSync(journalPath, `${keptHeader}\n\n${kept.map((e) => e.text.replace(/\n*$/, '')).join('\n\n')}\n`);
+  writeFileAtomic(journalPath, `${keptHeader}\n\n${kept.map((e) => e.text.replace(/\n*$/, '')).join('\n\n')}\n`);
 }
 
 // Canon statusfile.md: every write that changes a summary source refreshes the index.
