@@ -103,6 +103,10 @@ release is in [CHANGELOG.md](CHANGELOG.md); the exact record fixes live in
   and load on demand (see the canon Disclosure map).
 - `reference/contracts/` — per-hat output contracts for multi-hat agents, named in dispatches.
 - `skills/*/references/` — lane and phase procedures loaded only when that branch runs.
+- `scripts/` — zero-dependency Node (≥18) scripts that perform every mechanical record write:
+  canonical status.json serialization, journal append + rollover, question flushes, task-status
+  flips, scaffolding, resume done-maps, migrations, and the one-call status report. Skills
+  decide *what* to record; these scripts make the bytes deterministic.
 
 ## The three commands
 

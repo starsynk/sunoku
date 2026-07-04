@@ -4,6 +4,26 @@ Notable changes to the Sunoku plugin. Record-schema changes additionally land as
 [reference/MIGRATIONS.md](reference/MIGRATIONS.md), which skills apply to legacy records
 automatically on the first touch after an upgrade.
 
+## 1.5.0 — 2026-07-04
+
+Deterministic record scripts.
+
+- New `scripts/` layer: nine zero-dependency Node scripts perform every mechanical record
+  operation — `status-write.mjs` (all canonical status.json writes), `report.mjs` (the whole
+  `sunoku:status` step-2 report as one JSON call), `journal-append.mjs` (entry append, stub
+  sentinel, 30KB→15KB rollover, summary refresh), `questions-flush.mjs` (answered-block
+  deletion, never renumbering), `tasks-set.mjs` (Status cell flips), `scaffold.mjs` (fresh-init
+  record), `sentinels.mjs` (resume done-map), `migrate.mjs` (MIGRATIONS.md applier), sharing
+  internals via `lib.mjs`.
+- Skills and canon now run these scripts instead of hand-editing: judgment (triage lanes, blast
+  radius, entry prose) stays with the orchestrator; serialization, counts, timestamps, shas,
+  and rollovers are computed. Hand-written status.json risked breaking the byte patterns hooks
+  grep; the report path drops from ~6 tool calls to 1.
+- `report.mjs` counts a working tree as dirty only outside `.sunoku/` — record-only edits no
+  longer trigger a reconcile offer.
+- No record-shape change, so no new MIGRATIONS.md row; `sunokuVersion` restamps on next touch.
+- Tests: `tests/test-scripts.sh` (100 assertions) covers all nine scripts.
+
 ## 1.4.0 — 2026-07-04
 
 QUESTIONS.md answer-and-flush lifecycle.

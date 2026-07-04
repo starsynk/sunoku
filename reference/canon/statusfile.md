@@ -1,14 +1,17 @@
 # Canon — StatusFile
 
 `status.json` lives at the `.sunoku/` root and is the single lifecycle source of truth. Only the
-orchestrator writes it — agents never touch it. Canonical serialization (one key per line, two-space
-indent, exact key order below) is mandatory; hooks match on exact byte patterns like
-`"tracking": true` and `"lifecycle": "live"`, so any other formatting breaks them:
+orchestrator writes it — agents never touch it — and every write goes through the plugin scripts
+(`scripts/status-write.mjs`, or `scripts/scaffold.mjs` for the first write; `journal-append.mjs`
+and `questions-flush.mjs` refresh it as a side effect), never a hand edit. Canonical serialization
+(one key per line, two-space indent, exact key order below) is mandatory; hooks match on exact
+byte patterns like `"tracking": true` and `"lifecycle": "live"`, so any other formatting breaks
+them. The scripts implement this contract:
 
 ```json
 {
   "version": 1,
-  "sunokuVersion": "1.4.0",
+  "sunokuVersion": "1.5.0",
   "product": "<name>",
   "origin": "greenfield|existing",
   "lifecycle": "<lifecycle>",

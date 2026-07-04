@@ -52,8 +52,8 @@ assert_max_bytes skills/status/SKILL.md 6400
 assert_contains skills/log/SKILL.md "references/reshape.md"
 assert_contains skills/status/SKILL.md "references/reconcile.md"
 
-# Task 6: no whole-file reads on the report path
-assert_contains skills/status/SKILL.md "grep -c"
+# Task 6: no whole-file reads on the report path (report script + drill-in only)
+assert_contains skills/status/SKILL.md "report.mjs"
 assert_contains skills/status/SKILL.md "tail"
 
 # Task 8: descriptions trimmed but trigger phrases intact
@@ -88,8 +88,27 @@ assert_contains skills/status/SKILL.md "one_liner"
 assert_contains skills/log/SKILL.md ".sunoku/journal/"
 
 # Task 13: version aligned
-assert_contains .claude-plugin/plugin.json '"version": "1.4.0"'
-assert_contains CHANGELOG.md "## 1.4.0"
+assert_contains .claude-plugin/plugin.json '"version": "1.5.0"'
+assert_contains CHANGELOG.md "## 1.5.0"
+
+# Scripts layer: deterministic record writes live in scripts/, docs point at them
+for f in lib status-write report journal-append questions-flush tasks-set scaffold sentinels migrate; do
+  assert_file "scripts/$f.mjs"
+done
+assert_contains skills/log/SKILL.md "journal-append.mjs"
+assert_contains skills/log/SKILL.md "status-write.mjs"
+assert_contains skills/log/references/reshape.md "status-write.mjs"
+assert_contains skills/status/SKILL.md "status-write.mjs"
+assert_contains skills/status/SKILL.md "migrate.mjs"
+assert_contains skills/status/references/reconcile.md "tasks-set.mjs"
+assert_contains skills/status/references/reconcile.md "sha-head"
+assert_contains skills/init/SKILL.md "scaffold.mjs"
+assert_contains skills/init/SKILL.md "sentinels.mjs"
+assert_contains reference/canon/statusfile.md "status-write.mjs"
+assert_contains reference/canon/record-migrations.md "migrate.mjs"
+assert_contains reference/canon/assumptions.md "questions-flush.mjs"
+assert_contains reference/canon/sentinels-resume.md "sentinels.mjs"
+assert_contains reference/MIGRATIONS.md "migrate.mjs"
 
 # QUESTIONS answer-and-flush lifecycle
 assert_contains reference/canon/assumptions.md "## Answering"

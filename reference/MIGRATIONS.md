@@ -1,10 +1,11 @@
 # Sunoku Record Migrations
 
 Shape-sniffed fixes applied in place by whichever skill touches a `.sunoku/` record first, per
-canon "Record migrations". Grouped by the plugin version that introduced them, newest section
-last. Rows are idempotent: Detect describes exactly the legacy shape, so a migrated record never
-matches again. Migrations are SILENT-lane — no journal entry; one line in the skill's output is
-the only trace.
+canon "Record migrations" — mechanically, by running `scripts/migrate.mjs` (this file is the
+human-readable registry; the script is the applier). Grouped by the plugin version that
+introduced them, newest section last. Rows are idempotent: Detect describes exactly the legacy
+shape, so a migrated record never matches again. Migrations are SILENT-lane — no journal entry;
+the script's output lines are the only trace.
 
 ## 1.1.0
 

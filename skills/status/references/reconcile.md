@@ -22,11 +22,11 @@ per the Disclosure map.
   Multiple RESHAPE groups in one reconcile get one checkpoint each, never combined into a
   single omnibus checkpoint.
 - **Task statuses** (canon Execution contract): while triaging, when a group's diff shows the
-  work of a planned TASKS.md task has landed, flip that row's Status to `done` (a `doing` row
+  work of a planned TASKS.md task has landed, flip that row via
+  `node "${CLAUDE_PLUGIN_ROOT}/scripts/tasks-set.mjs" --id <id> --status done` (a `doing` row
   whose work the diff completes flips the same way) and cite the evidence in the reconcile
   summary. Never infer completion the diff doesn't show — partial work stays as-is, noted.
-- When all groups are resolved, set `last_reconciled_sha` to the current HEAD and update
-  `updated`, in the canonical status.json serialization (one key per line, two-space indent,
-  exact key order — hooks grep this byte-for-byte), and refresh the summary fields (one_liner,
-  open_questions, high_stakes, last_entry) per canon statusfile.md — same write, canonical
-  serialization.
+- When all groups are resolved, run
+  `node "${CLAUDE_PLUGIN_ROOT}/scripts/status-write.mjs" --sha-head --refresh` — one write
+  that sets `last_reconciled_sha` to HEAD, restamps `updated`, and refreshes the summary
+  fields in the canonical serialization (canon statusfile.md).
