@@ -75,3 +75,9 @@
 **Refs:** conversation
 **By:** Patrick Villanueva
 **Tags:** tooling, record
+
+## 2026-07-05 — track
+**What:** Question triage now leads with the recommended answer: recorded default is option one, labeled "(Recommended)", in checkpoint batches and AskUserQuestion prompts
+**Why:** Users answering flagged questions had to hunt for the default Sunoku already chose; surfacing the recorded default first and marking it makes confirm-or-flip a one-glance decision. Encoded in canon assumptions (new Asking section), canon checkpoints, and the status skill's answer prompt so all three asking surfaces obey it.
+**Refs:** conversation
+**Tags:** canon, questions, ux
