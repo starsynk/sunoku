@@ -31,11 +31,11 @@ c. **Present ONE checkpoint**: the full delta as a single unit — proposed PRD 
    until the user approves it as a whole. Do not split this into multiple approval rounds.
 
 d. **On approval, reconcile in this exact order**, writing each in turn:
-   i. Append the `reshape` journal entry to `.sunoku/JOURNAL.md` (delete the stub sentinel
-      if this is the first entry).
+   i. Append the `reshape` journal entry via
+      `node "${CLAUDE_PLUGIN_ROOT}/scripts/journal-append.mjs" --type reshape --what ... --why ... --refs ...`.
    ii. Apply the approved PRD section edits to `.sunoku/PRD.md` and append a Change Log row
        (`| Date | Change | Why | Journal ref |`) pointing at the entry just written.
    iii. Apply the approved patch to `.sunoku/ROADMAP.md` / `TASKS.md`.
-   iv. Update `.sunoku/status.json` `updated` timestamp and refresh the summary fields
-       (one_liner, open_questions, high_stakes, last_entry) per canon statusfile.md — same
-       write, canonical serialization.
+   iv. Run `node "${CLAUDE_PLUGIN_ROOT}/scripts/status-write.mjs" --refresh` — restamps
+       `updated` and recomputes the summary fields from the files just written, in the
+       canonical serialization (canon statusfile.md).

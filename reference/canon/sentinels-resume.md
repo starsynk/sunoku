@@ -13,6 +13,8 @@ Resume is two-level, checked in order:
 
 1. **status.json `lifecycle`** — tells the orchestrator which phase the product is broadly in.
 2. **Per-artifact sentinel checks** — within that phase, which specific files are actually done.
+   `node "${CLAUDE_PLUGIN_ROOT}/scripts/sentinels.mjs"` prints the whole done-map as JSON in
+   one call (done | stub | empty | empty-ledger | missing per artifact).
 
 A resumed run never restarts a phase from scratch and never clobbers an artifact that already
 passed its done-check. It picks up at the first not-done artifact.

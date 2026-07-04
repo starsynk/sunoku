@@ -56,25 +56,20 @@ accurate as it was before the change, no more ceremony than that requires.
    - **RESHAPE** (touches core bet, product scope, architecture, target segment, or pricing) —
      run the RESHAPE procedure in step 6 instead of the plain TRACK write.
 
-5. **Journal entry format (exact, for TRACK and RESHAPE alike; `decision` entries use the same
-   shape with type `decision`):**
+5. **Journal entry (TRACK and RESHAPE alike; `decision` entries use the same shape with type
+   `decision`):** author the three prose fields, then write via the script — never by hand:
 
-   ```markdown
-   ## 2026-07-02 — track
-   **What:** <one-line summary>
-   **Why:** <rationale — the story-changing part>
-   **Refs:** <commit shas / PR numbers / "conversation" if uncommitted>
+   ```bash
+   node "${CLAUDE_PLUGIN_ROOT}/scripts/journal-append.mjs" --type track \
+     --what "<one-line summary>" \
+     --why "<rationale — the story-changing part>" \
+     --refs "<commit shas / PR numbers / 'conversation' if uncommitted>"
    ```
 
-   Append to `.sunoku/JOURNAL.md`, newest entry at the bottom. If this is the first real entry
-   (the file still carries `<!-- sunoku:stub -->` as its first line), delete that sentinel line
-   as part of this write — the file is append-only from here on.
-
-   **Rollover:** after appending, if `.sunoku/JOURNAL.md` exceeds 30KB, move the oldest whole
-   entries (never split an entry) into `.sunoku/journal/<year-of-entry>.md` — create the
-   directory if missing, append in original order — until JOURNAL.md is under 15KB. Leave the
-   header block in place and ensure it carries the line `> Older entries: .sunoku/journal/`.
-   Entry bodies are never edited during the move; the archive files are append-only too.
+   The script appends to `.sunoku/JOURNAL.md` (newest at the bottom, `## YYYY-MM-DD — <type>`
+   header), deletes the stub sentinel on the first real entry, performs the 30KB→15KB
+   rollover into `.sunoku/journal/<year>.md` when needed, and refreshes the status.json
+   summary fields in the canonical serialization.
 
 6. **RESHAPE procedure** — load the canon section files the Disclosure map names for
    "log — RESHAPE", then read `${CLAUDE_PLUGIN_ROOT}/skills/log/references/reshape.md` and
@@ -82,9 +77,8 @@ accurate as it was before the change, no more ceremony than that requires.
    checkpoint, and the reconcile write order.
 
 7. **After any write in this run** (TRACK entry, ambiguous TRACK+flag, or full RESHAPE
-   reconcile), update `.sunoku/status.json`'s `updated` field to the current timestamp,
-   preserving the exact canonical serialization (one key per line, two-space indent, exact key
-   order) — hooks grep this file byte-for-byte, so reformatting it breaks them even if the JSON
-   is still valid, and refresh the summary fields (one_liner, open_questions, high_stakes,
-   last_entry) per canon statusfile.md — same write, canonical serialization. A SILENT outcome
-   makes no status.json write at all.
+   reconcile), status.json must be current. `journal-append.mjs` already refreshed it; if a
+   later write touched a summary source (PRD Problem, QUESTIONS.md), run
+   `node "${CLAUDE_PLUGIN_ROOT}/scripts/status-write.mjs" --refresh`. Never edit status.json
+   by hand — the scripts own the canonical serialization hooks grep byte-for-byte (canon
+   statusfile.md). A SILENT outcome makes no status.json write at all.

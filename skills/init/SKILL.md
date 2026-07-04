@@ -34,9 +34,9 @@ fans out to a subagent and reports back to you; agents never message each other.
      VALIDATE fresh and produces a NEW dated report beside the old one (the old report is immutable —
      never edit or delete it); set `lifecycle` back to `validating` and resume step 4's VALIDATE.
    - **`validating` / `defining` / `planning`** (phase-in-progress) → resume. Do not restart the
-     phase and never clobber an artifact that passes its done-check (canon Sentinels: exists +
-     non-empty + sentinel absent; ledgers need ≥1 real row). Within the phase named by `lifecycle`,
-     walk the phase's ordered steps, find the furthest step whose artifacts are all done, and
+     phase and never clobber an artifact that passes its done-check (canon Sentinels). Run
+     `node "${CLAUDE_PLUGIN_ROOT}/scripts/sentinels.mjs"` for the per-artifact done-map, walk
+     the phase's ordered steps, find the furthest step whose artifacts are all done, and
      continue from the first not-done step. Announce in one line exactly what you are resuming (e.g.
      "Resuming DEFINE: PRD Problem/Personas/Features done, picking up at the UX section"). Then
      proceed into the matching flow (step 4 greenfield / step 5 existing) at that step, loading the
@@ -55,30 +55,24 @@ fans out to a subagent and reports back to you; agents never message each other.
      `${CLAUDE_PLUGIN_ROOT}/skills/init/references/onboarding.md` now and follow it exactly; it ends
      by routing into a phase below.
 
-3. **Scaffold (fresh init only).** Create `.sunoku/` and its `research/` and `research/.fragments/`
-   subdirectories. Copy `sunoku.gitignore` → `.sunoku/.gitignore` (verbatim). Copy the template
-   stubs the chosen flow needs, sentinel line (`<!-- sunoku:stub -->`) intact — never strip it here;
-   only the filling agent removes it:
-   - **Both flows:** `BRIEF.md`, `PRD.md`, `JOURNAL.md`, `QUESTIONS.md`, `research/EVIDENCE.md`.
-   - **Greenfield adds:** the `validation/` directory (empty — the dated report is composed later,
-     not scaffolded from a stub in place).
-   - `ROADMAP.md` / `TASKS.md` are scaffolded only if and when PLAN runs — a record without a roadmap
-     is valid, so do not pre-scaffold them.
-   Then write `status.json` following the canonical serialization and key order in
-   `reference/canon/statusfile.md` exactly, `sunokuVersion` from plugin.json. Set `product` to a
-   display name, `origin` to the flow, `lifecycle` to the first phase (`validating` greenfield,
-   `defining` existing or a committed greenfield skip), `tracking` to `false` until arm,
-   `last_reconciled_sha` to `""`, `created` / `updated` to now, and the summary fields to their
-   initial values: `one_liner` the product name, `open_questions` / `high_stakes` `0`,
-   `last_entry` `""`. You are the only writer of this file for the whole run.
+3. **Scaffold (fresh init only).** Run
+   `node "${CLAUDE_PLUGIN_ROOT}/scripts/scaffold.mjs" --product "<display name>" --origin <flow>`
+   (add `--lifecycle defining` for a committed greenfield skip). It creates `.sunoku/` with
+   `research/.fragments/`, copies the template stubs sentinel-intact (`BRIEF.md`, `PRD.md`,
+   `JOURNAL.md`, `QUESTIONS.md`, `research/EVIDENCE.md`, `.gitignore`; greenfield adds the empty
+   `validation/` directory), and writes the initial canonical `status.json` (`tracking` false
+   until arm, `last_reconciled_sha` `""`, summary fields at initial values). It refuses to run
+   over an existing record and never clobbers a file already present. `ROADMAP.md` / `TASKS.md`
+   are scaffolded only if and when PLAN runs — a record without a roadmap is valid. All later
+   status.json writes go through `scripts/status-write.mjs`; no agent ever touches the file.
 
 4. **Greenfield flow.** (canon Checkpoints bind you: only go/no-go, PRD approve, roadmap approve.)
 
    a. **Scoping.** Done in `references/onboarding.md` (read above): BRIEF.md written.
 
    b. **Committed-already branch.** If the user says they are already committed to building it, VALIDATE
-      is a first-class skip. Append a `decision` journal entry (canon header `## YYYY-MM-DD — decision`
-      + **What/Why/Refs**) recording the skip and its reason; record "validation skipped — user
+      is a first-class skip. Append a `decision` journal entry (via
+      `scripts/journal-append.mjs --type decision`) recording the skip and its reason; record "validation skipped — user
       already committed" in the BRIEF Commitment section. Set `lifecycle` to `defining` and go
       straight to step 4d (DEFINE). No validation report is ever produced for this record.
 
@@ -100,16 +94,16 @@ fans out to a subagent and reports back to you; agents never message each other.
       Run this phase from `${CLAUDE_PLUGIN_ROOT}/skills/init/references/plan.md` — read it now and
       follow it exactly.
 
-   f. **Arm TRACK** (one step, in this exact order): set `lifecycle` to `live`, `tracking` to `true`,
-      and `last_reconciled_sha` to the current `git HEAD` (empty string `""` if the repo has no
-      commits yet), stamping the four summary fields (`one_liner`, `open_questions`,
-      `high_stakes`, `last_entry` — canon statusfile.md) for the first time, writing the canonical
-      `status.json`. Append a journal entry (`## YYYY-MM-DD —
-      track`, **What:** "Sunoku record armed", **Why:** short arming note, **Refs:** the HEAD sha or
-      "conversation"). Then tell the user the three-command surface: `sunoku:log` to record changes,
-      `sunoku:status` for state and drift, and that `sunoku:init` will now hand off to status. If
-      a roadmap was planned, add that `TASKS.md` is an open contract worked by any executor the
-      user prefers (canon Execution contract) — Sunoku records outcomes, it never executes.
+   f. **Arm TRACK** (one step, in this exact order): append the arming journal entry via
+      `node "${CLAUDE_PLUGIN_ROOT}/scripts/journal-append.mjs" --type track --what "Sunoku record armed"
+      --why "<short arming note>" --refs "<HEAD sha or 'conversation'>"`, then run
+      `node "${CLAUDE_PLUGIN_ROOT}/scripts/status-write.mjs" --set lifecycle=live --set tracking=true
+      --sha-head --refresh` — one canonical write for the lifecycle flip, the reconcile
+      baseline, and the summary stamp. Then tell the user the three-command surface: `sunoku:log`
+      to record changes, `sunoku:status` for state and drift, and that `sunoku:init` will now hand
+      off to status. If a roadmap was planned, add that `TASKS.md` is an open contract worked by
+      any executor the user prefers (canon Execution contract) — Sunoku records outcomes, it
+      never executes.
 
 5. **Existing-code flow.** (`origin: existing`; VALIDATE is never offered.)
 
@@ -128,10 +122,10 @@ fans out to a subagent and reports back to you; agents never message each other.
 - **Assumptions flow to QUESTIONS.md.** When inference is required and it isn't worth a checkpoint
   slot, take the default and log it in `QUESTIONS.md` (canon Assumptions format); the run continues
   without waiting.
-- **status.json is orchestrator-only.** You are its sole writer, always in the canonical
-  serialization — hooks grep it byte-for-byte (`"tracking": true`, `"lifecycle": "live"`), so any
-  reformatting breaks them even if the JSON stays valid. Every write updates `updated`; `created`
-  never changes after the first write.
+- **status.json is orchestrator-only, script-written.** Agents never touch it, and you write it
+  only through `scripts/scaffold.mjs` / `scripts/status-write.mjs` — hooks grep the file
+  byte-for-byte (`"tracking": true`, `"lifecycle": "live"`), and the scripts are what guarantee
+  the canonical serialization, the `updated` restamp, and an untouched `created`.
 - **Garbage output → one corrective re-dispatch** that names the specific failure (canon Garbage
   output), then surface to the user if it comes back bad again. Never invent an agent's missing
   content to paper over a bad run.
