@@ -8,8 +8,8 @@
   "one_liner": "Planning artifacts rot.",
   "open_questions": 2,
   "high_stakes": 0,
-  "last_entry": "2026-07-04 — track — 1.3.0 progressive disclosure: canon split into an always-read core (Prime directive, Coexistence, Triage, new Disclosure map) plus per-lane section files; RESHAPE/reconcile/init-phase/first-run-onboarding procedures and multi-hat agent contracts load on demand; guards precede canon reads; hook CTX compressed with a direction-aware version-skew nudge; skill/agent descriptions trimmed to routing triggers; status.json gained a four-field summary index (one_liner, open_questions, high_stakes, last_entry) with a 1.2.x→1.3.0 self-migration; JOURNAL.md rolls entries past 30KB into .sunoku/journal/<year>.md.",
-  "last_reconciled_sha": "76789887ed1553c40d068f573af7d0634ab138cd",
+  "last_entry": "2026-07-04 — track — Reconciled the PRD to as-built through commit a728727 (46 commits unreconciled since 76789887; 47-commit reconcile range): rewrote the Architecture rulebook bullet for the canon core + ten reference/canon/ section files + Disclosure map, corrected file count 40→70 and canon 238→70 lines, re-pointed moved traces across features/UX/out-of-scope/metrics, folded journal 30KB rollover into feature 9, refreshed features 10/15/16/19, added a Change Log row.",
+  "last_reconciled_sha": "a728727d612f74373933cb22dc0f0959b0143703",
   "created": "2026-07-02T13:26:16Z",
-  "updated": "2026-07-04T09:15:37Z"
+  "updated": "2026-07-04T09:43:44Z"
 }
