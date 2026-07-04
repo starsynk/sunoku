@@ -37,9 +37,9 @@ recollection.
 | 4 | VALIDATE phase producing an immutable dated go/no-go/go-if report with an evidence table and adversarial verification | P1 | skills/init/references/validate.md; reference/templates/validation-report.md:1-27 (AB-37) |
 | 5 | DEFINE phase assembling `PRD.md` from parallel product/design/architecture fragments, red-teamed | P0 | skills/init/references/define.md (AB-28) |
 | 6 | Optional PLAN phase → `ROADMAP.md` (M1 = walking skeleton) + `TASKS.md`, critic-reviewed, no calendar estimates | P1 | skills/init/references/plan.md; reference/templates/ROADMAP.md:4-6 (AB-35) |
-| 7 | `sunoku:log` triage engine — SILENT / TRACK / RESHAPE, ceremony scaled to the lane | P0 | skills/log/SKILL.md:38-51 (AB-21); reference/canon.md:35-53 |
+| 7 | `sunoku:log` triage engine — SILENT / TRACK / RESHAPE, ceremony scaled to the lane | P0 | skills/log/SKILL.md:41-54 (AB-21); reference/canon.md:35-53 |
 | 8 | `sunoku:status` surface — state summary, journal tail, open questions, drift check, reconcile, mute/unmute | P0 | skills/status/SKILL.md:27-84 (AB-22) |
-| 9 | Append-only living record: JOURNAL.md (entries past 30KB roll into `.sunoku/journal/<year>.md`), EVIDENCE.md, QUESTIONS.md, PRD Change Log | P0 | skills/log/SKILL.md:70-74; reference/templates/JOURNAL.md; EVIDENCE.md; QUESTIONS.md (AB-29, AB-33) |
+| 9 | Living record ledgers: append-only JOURNAL.md (entries past 30KB roll into `.sunoku/journal/<year>.md`) and EVIDENCE.md; QUESTIONS.md holds open questions only — answering flushes the block to a journal `decision` entry via triage; PRD Change Log | P0 | skills/log/SKILL.md:73-77; reference/canon/assumptions.md:18-35; reference/templates/JOURNAL.md; EVIDENCE.md; QUESTIONS.md (AB-29, AB-33) |
 | 10 | `status.json` lifecycle state machine, single-writer, canonical serialization (12 keys incl. `one_liner`/`open_questions`/`high_stakes`/`last_entry` summary index) | P0 | reference/canon/statusfile.md:1-56 (AB-16, AB-17, AB-25) |
 | 11 | Ambient SessionStart hook: injects standing triage rule + drift count when tracking is live | P1 | hooks/scripts/session-start.sh:33-40 (AB-45) |
 | 12 | Ambient Stop hook: one-shot per-session nudge to `sunoku:log` when code changed but journal didn't | P1 | hooks/scripts/stop-nudge.sh:24-33 (AB-47, AB-48) |
@@ -54,7 +54,7 @@ recollection.
 
 Sunoku is **not application code** — it is a hub-and-spoke orchestration built entirely from
 prompt-engineered Markdown contracts plus two Bash hooks, running on the Claude Code plugin
-substrate. There is no compiled runtime and no package manifest (`git ls-files` = 70 files, all
+substrate. There is no compiled runtime and no package manifest (`git ls-files` = 71 files, all
 `.md`/`.json`/`.sh`/LICENSE — AB-1).
 
 - **Substrate**: Claude Code plugin. Three skills (`skills/*/SKILL.md`) are the orchestrators;
@@ -71,10 +71,10 @@ substrate. There is no compiled runtime and no package manifest (`git ls-files` 
   AB-25). Its `lifecycle` drives the state machine `validating → defining → planning → live`, with
   `defining → live` for existing/as-built products and `(any) → shelved` on kill
   (`reference/canon/statusfile.md:47-51`, AB-17).
-- **Shared rulebook (progressive disclosure)**: `reference/canon.md` is a 70-line always-read
+- **Shared rulebook (progressive disclosure)**: `reference/canon.md` is a 71-line always-read
   **core** — Prime directive, Coexistence, Triage, and a Disclosure map — read by each skill
   *after* its record guard passes (`skills/log/SKILL.md:14-27`, `skills/status/SKILL.md:13-25`,
-  `skills/init/SKILL.md:23-56`, AB-13). The Disclosure map (`reference/canon.md:55-70`) names, per
+  `skills/init/SKILL.md:23-56`, AB-13). The Disclosure map (`reference/canon.md:55-71`) names, per
   lane, exactly which of the ten `reference/canon/` section files to load and nothing beyond it —
   Checkpoints, Assumptions, Dispatch, Fragments, Garbage output, Conflict, Sentinels & resume,
   StatusFile, Record migrations, and Execution contract each live in their own file, loaded on
@@ -187,3 +187,4 @@ gap roadmap over these is optional and, given none are must-haves, not warranted
 | 2026-07-03 | Added feature 18 (`sunoku:work` execution loop); prime directive scoped to planning agents; out-of-scope and UX surface updated | Complete the loop: plan → execute → track without leaving the record | 2026-07-03 — reshape |
 | 2026-07-03 | Dropped feature 18 (`sunoku:work`) in 1.2.0; command surface back to three; prime directive restored to plans-and-documents-only; TASKS.md Status/Blocked schema kept as the open Execution contract with reconcile status catch-up; canon gained the Coexistence principle | Owning execution displaced other plugins' process discipline (design gates pre-satisfied, questions forbidden mid-run); record-keeping is the product, execution is commodity | 2026-07-03 — reshape (sunoku:work drop) |
 | 2026-07-04 | Reconciled the PRD to as-built through `a728727` for the 1.3.0 progressive-disclosure release: rewrote the Architecture "Shared rulebook" bullet for the canon core + ten `reference/canon/` section files + Disclosure map, corrected `git ls-files` 40→70 and canon 238→70 lines, re-pointed moved `reference/canon/` and `skills/*/references/` traces across features/UX/out-of-scope/metrics, added journal 30KB rollover to feature 9, refreshed features 10/15/16/19 | The 1.3.0 work was TRACK-lane and journaled, but TRACK does not edit the PRD, so the snapshot had drifted 46 commits — reconcile-forward, not a reshape (architecture substance unchanged, only canon packaging moved) | 2026-07-04 — track (reconcile) |
+| 2026-07-04 | Reconciled through `23167f8`: feature 9 reworded — QUESTIONS.md is an open-questions working set with the answer-and-flush lifecycle (canon assumptions `## Answering`), no longer blanket append-only; corrected canon 70→71 lines and `git ls-files` 70→71; re-pointed shifted `skills/log/SKILL.md` traces | The answer-and-flush lifecycle was TRACK-lane and journaled, but the PRD still described QUESTIONS.md as append-only — reconcile-forward, not a reshape | 2026-07-04 — track |
