@@ -4,6 +4,23 @@ Notable changes to the Sunoku plugin. Record-schema changes additionally land as
 [reference/MIGRATIONS.md](reference/MIGRATIONS.md), which skills apply to legacy records
 automatically on the first touch after an upgrade.
 
+## 1.4.0 — 2026-07-04
+
+QUESTIONS.md answer-and-flush lifecycle.
+
+- Canon assumptions gained `## Answering`: answering a flagged question appends a journal
+  `decision` entry first (crash-safe order), triages the flip through the normal lanes (an
+  answer is never SILENT), deletes the `## Q-<n>` block from QUESTIONS.md, and refreshes the
+  status.json summary fields in the same run.
+- QUESTIONS.md is now an open-questions-only working set; the chronicle lives in the journal,
+  where history queries already read. Q-ids stay monotonic — surviving entries never renumber.
+- Disclosure map row: answering a QUESTIONS.md entry loads `assumptions.md` + `statusfile.md`.
+- `sunoku:log` gained the question-answer subject trigger; `sunoku:status` routes answers to
+  `sunoku:log`.
+- Template header rewritten; the `status:` field only ever holds `open` while an entry exists.
+- No record migration: answered entries left in older records are inert (tooling matches
+  `status: open` only) — flush them by answering, or leave them.
+
 ## 1.3.0 — 2026-07-04
 
 Token optimization: progressive disclosure across the plugin.

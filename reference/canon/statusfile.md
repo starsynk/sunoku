@@ -8,7 +8,7 @@ indent, exact key order below) is mandatory; hooks match on exact byte patterns 
 ```json
 {
   "version": 1,
-  "sunokuVersion": "1.3.0",
+  "sunokuVersion": "1.4.0",
   "product": "<name>",
   "origin": "greenfield|existing",
   "lifecycle": "<lifecycle>",

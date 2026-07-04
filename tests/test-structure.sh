@@ -88,8 +88,8 @@ assert_contains skills/status/SKILL.md "one_liner"
 assert_contains skills/log/SKILL.md ".sunoku/journal/"
 
 # Task 13: version aligned
-assert_contains .claude-plugin/plugin.json '"version": "1.3.0"'
-assert_contains CHANGELOG.md "## 1.3.0"
+assert_contains .claude-plugin/plugin.json '"version": "1.4.0"'
+assert_contains CHANGELOG.md "## 1.4.0"
 
 # QUESTIONS answer-and-flush lifecycle
 assert_contains reference/canon/assumptions.md "## Answering"
