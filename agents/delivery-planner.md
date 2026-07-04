@@ -2,7 +2,7 @@
 name: delivery-planner
 description: Sunoku build planner: approved PRD or gap list -> ROADMAP.md + TASKS.md. M1 is always the walking skeleton; S/M/L sizes, [SPIKE] tags, PRD traceability, never calendar estimates. RESHAPE hat patches roadmap slices.
 tools: Read, Write
-model: best
+model: opus
 ---
 
 ## Mission

@@ -4,10 +4,10 @@
 // The decision journal entry must already be written (journal-append.mjs) — crash-safe order.
 //
 //   node questions-flush.mjs --id Q-3
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
-import { computeSummary, die, projectRoot, readStatus, stampAndWrite } from './lib.mjs';
+import { computeSummary, die, projectRoot, readStatus, stampAndWrite, writeFileAtomic } from './lib.mjs';
 
 const { values } = parseArgs({ options: { id: { type: 'string' } } });
 if (!values.id) die('--id is required (e.g. --id Q-3)');
@@ -36,7 +36,7 @@ for (let i = start + 1; i < lines.length; i += 1) {
 }
 
 const remaining = [...lines.slice(0, start), ...lines.slice(end)];
-writeFileSync(questionsPath, `${remaining.join('\n').replace(/\n*$/, '')}\n`);
+writeFileAtomic(questionsPath, `${remaining.join('\n').replace(/\n*$/, '')}\n`);
 
 const summary = computeSummary(root, status);
 stampAndWrite(root, status, summary);

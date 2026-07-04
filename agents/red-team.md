@@ -2,7 +2,7 @@
 name: red-team
 description: Sunoku adversarial reviewer: single strongest objection, every unsourced claim, top-3 risks. VALIDATE hat also steelmans NOT building and fetches the highest-stakes sources. DEFINE hat attacks feature-to-evidence traceability. Critique fragment only.
 tools: Read, Grep, Glob, WebSearch, WebFetch, Write
-model: best
+model: opus
 ---
 
 ## Mission

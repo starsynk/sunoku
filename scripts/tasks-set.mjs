@@ -4,10 +4,10 @@
 // script only makes the edit mechanical.
 //
 //   node tasks-set.mjs --id T2 --status done
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
-import { die, projectRoot } from './lib.mjs';
+import { die, projectRoot, writeFileAtomic } from './lib.mjs';
 
 const STATUSES = ['todo', 'doing', 'done', 'blocked'];
 
@@ -27,7 +27,9 @@ try {
   die(`no tasks file: ${tasksPath}`);
 }
 
-const rowPattern = new RegExp(`^\\|\\s*${values.id}\\s*\\|`);
+// Escape the id: `T1.` must not wildcard-match `T12`'s row.
+const idEsc = values.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const rowPattern = new RegExp(`^\\|\\s*${idEsc}\\s*\\|`);
 const lines = content.split('\n');
 const matches = lines.map((l, i) => (rowPattern.test(l) ? i : -1)).filter((i) => i !== -1);
 if (matches.length === 0) die(`task ${values.id} not found in TASKS.md`);
@@ -40,5 +42,5 @@ if (flipped === lines[i] && !new RegExp(`\\| ${values.status} \\|\\s*$`).test(li
   die(`could not rewrite status cell of: ${lines[i]}`);
 }
 lines[i] = flipped;
-writeFileSync(tasksPath, lines.join('\n'));
+writeFileAtomic(tasksPath, lines.join('\n'));
 process.stdout.write(`${lines[i]}\n`);

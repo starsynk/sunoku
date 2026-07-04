@@ -1,0 +1,6 @@
+# Append-only ledgers: union-merge so two branches appending entries never conflict.
+# union keeps both sides' lines (order may interleave) — right for ledgers, wrong for
+# anything edited in place. Do not add non-append-only files here.
+JOURNAL.md merge=union
+journal/*.md merge=union
+research/EVIDENCE.md merge=union

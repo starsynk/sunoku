@@ -40,13 +40,16 @@ optionally act (reconcile, mute/unmute) only when the user asks or accepts an of
      (month granularity). Omit this line entirely when the list is empty (e.g. existing-code
      origin, or committed first-class skip).
    - **Drift** — `drift`/`dirty`, as "N commits since last reconcile" (plus "working tree has
-     uncommitted changes" if dirty). 0 and clean → report "up to date."
+     uncommitted changes" if dirty). `baseline_lost` true → say the reconcile baseline no longer
+     resolves (history rewritten) instead of a count. 0 and clean → report "up to date."
    - **Suggested next action** — exactly one, chosen by this priority order: (1) offer reconcile
-     if drift > 0 or the tree is dirty; (2) else prompt to answer the highest-stakes open
-     question if one exists (answers route through `sunoku:log`); (3) else, if `lifecycle` is
-     `live` and `roadmap` is `absent` or `stub`, offer an optional PLAN pass; (4) else, if
-     `tasks` has any `todo`, `doing`, or `blocked`, report the counts (e.g. "6 todo, 1 blocked",
-     or "1 doing — an interrupted task to resume") and note the backlog is ready to work with
+     if drift > 0, `baseline_lost` is true (a full reconcile — the procedure treats a lost
+     baseline like an empty one), or the tree is dirty; (2) else prompt to answer the
+     highest-stakes open question if one exists (answers route through `sunoku:log`); (3) else,
+     if `lifecycle` is `live` and `roadmap` is `absent` or `stub`, offer an optional PLAN pass;
+     (4) else, if `tasks` has any `todo`, `doing`, or `blocked`, report the counts with
+     per-milestone progress from `milestones` (e.g. "M1 3/5 done; 6 todo, 1 blocked", or
+     "1 doing — an interrupted task to resume") and note the backlog is ready to work with
      whatever executor the user prefers (canon Execution contract) — report, never execute;
      (5) else state plainly that nothing needs attention right now.
 

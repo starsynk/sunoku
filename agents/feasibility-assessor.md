@@ -2,7 +2,7 @@
 name: feasibility-assessor
 description: Sunoku feasibility and architecture assessor. VALIDATE hat: buildability verdict, effort class, top build risks. DEFINE hat: recommended architecture plus one seriously-considered rejected alternative. Dispatched with the hat named.
 tools: Read, Grep, Glob, WebSearch, WebFetch, Write
-model: best
+model: opus
 ---
 
 ## Mission

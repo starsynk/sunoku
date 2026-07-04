@@ -337,4 +337,68 @@ assert_exit0 $RC "migrate: legend run exits 0"
 assert_nogrepf .sunoku/TASKS.md 'sunoku:work' "migrate: stale legend replaced"
 assert_grepf .sunoku/TASKS.md 'reconcile flips rows whose work the diff proves landed' "migrate: current legend present"
 
+# ---------- 1.6.0: baseline-lost detection ----------
+
+D="$(mktemp -d)"; mkrecord "$D"
+OUT="$(run report.mjs)"
+echo "$OUT" | grep -qF '"baseline_lost": false' && pass "report: reachable sha -> baseline_lost false" || fail "report: baseline_lost false" "$OUT"
+sed -i.bak 's/"last_reconciled_sha": "[a-f0-9]*"/"last_reconciled_sha": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef"/' .sunoku/status.json
+OUT="$(run report.mjs)"
+echo "$OUT" | grep -qF '"baseline_lost": true' && pass "report: unreachable sha -> baseline_lost true" || fail "report: baseline_lost true" "$OUT"
+echo "$OUT" | grep -qF '"drift": null' && pass "report: lost baseline -> drift null" || fail "report: lost baseline drift" "$OUT"
+
+# ---------- 1.6.0: journal field sanitization + last_entry cap ----------
+
+D="$(mktemp -d)"; mkrecord "$D"
+OUT="$(run journal-append.mjs --type track --what "$(printf 'Line one.\nLine two.')" --why "W." --refs c)"; RC=$?
+assert_exit0 $RC "journal: newline in --what accepted"
+assert_grepf .sunoku/JOURNAL.md '**What:** Line one. Line two.' "journal: newlines collapsed to one line"
+
+LONG="$(printf 'x%.0s' $(seq 1 200))"
+OUT="$(run journal-append.mjs --type track --what "$LONG" --why "W." --refs c)"
+assert_grepf .sunoku/JOURNAL.md "$LONG" "journal: full What kept in entry"
+grep -oE 'x{150}' .sunoku/status.json >/dev/null && fail "status: last_entry capped" "150+ run of x in status.json" || pass "status: last_entry capped"
+assert_grepf .sunoku/status.json '…' "status: capped last_entry marked with ellipsis"
+
+# ---------- 1.6.0: tasks-set id regex-escaped ----------
+
+D="$(mktemp -d)"; mkrecord "$D"
+OUT="$(run tasks-set.mjs --id "T1." --status done)"; RC=$?
+assert_exitn $RC "tasks: dot in id does not wildcard-match"
+
+# ---------- 1.6.0: report per-milestone counts ----------
+
+D="$(mktemp -d)"; mkrecord "$D"
+OUT="$(run report.mjs)"
+echo "$OUT" | grep -qF '"milestones"' && pass "report: milestones key" || fail "report: milestones key" "$OUT"
+echo "$OUT" | node -e '
+const r = JSON.parse(require("fs").readFileSync(0, "utf8"));
+const m = (r.milestones || [])[0] || {};
+process.exit(m.name === "M1 — Walking skeleton" && m.total === 2 && m.done === 1 ? 0 : 1);
+' && pass "report: per-milestone counts" || fail "report: per-milestone counts" "$OUT"
+
+# ---------- 1.6.0: merge=union gitattributes (scaffold + migrate) ----------
+
+D="$(mktemp -d)"; cd "$D"; export CLAUDE_PROJECT_DIR="$D"; git init -q
+run scaffold.mjs --product "Fresh" --origin greenfield >/dev/null
+[ -f .sunoku/.gitattributes ] && pass "scaffold: .gitattributes created" || fail "scaffold: .gitattributes created"
+assert_grepf .sunoku/.gitattributes 'JOURNAL.md merge=union' "scaffold: journal merge=union"
+
+D="$(mktemp -d)"; mkrecord "$D"
+OUT="$(run migrate.mjs)"; RC=$?
+assert_exit0 $RC "migrate: gitattributes run exits 0"
+[ -f .sunoku/.gitattributes ] && pass "migrate: .gitattributes backfilled" || fail "migrate: .gitattributes backfilled"
+assert_grepf .sunoku/.gitattributes 'JOURNAL.md merge=union' "migrate: journal merge=union backfilled"
+OUT="$(run migrate.mjs)"
+echo "$OUT" | grep -qi 'up to date' && pass "migrate: gitattributes idempotent" || fail "migrate: gitattributes idempotent" "$OUT"
+
+# ---------- 1.6.0: atomic writes leave no temp files ----------
+
+D="$(mktemp -d)"; mkrecord "$D"
+run journal-append.mjs --type track --what "A." --why "B." --refs c >/dev/null
+run status-write.mjs --refresh >/dev/null
+run questions-flush.mjs --id Q-1 >/dev/null
+STRAY="$(find .sunoku -name '*.tmp-*' | wc -l | tr -d ' ')"
+[ "$STRAY" = "0" ] && pass "atomic: no stray temp files" || fail "atomic: no stray temp files" "found $STRAY"
+
 echo "---"; echo "$PASS passed, $FAIL failed"; [ "$FAIL" -eq 0 ]

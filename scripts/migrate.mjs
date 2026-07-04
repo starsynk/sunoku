@@ -2,11 +2,11 @@
 // Apply every reference/MIGRATIONS.md row whose Detect shape matches, in place (canon Record
 // migrations: shape-sniffed, idempotent, SILENT lane). Prints one line per applied fix, or
 // "record up to date" when nothing matched.
-import { readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   computeSummary, isStub, nowIso, PLUGIN_ROOT, pluginVersion, projectRoot, readRecordFile,
-  readStatus, writeStatus,
+  readStatus, writeFileAtomic, writeStatus,
 } from './lib.mjs';
 
 const root = projectRoot();
@@ -82,7 +82,15 @@ if (tasks !== null && !isStub(tasks)) {
     applied.push('TASKS.md: executor-agnostic Status legend (1.2.0)');
   }
 
-  if (changed) writeFileSync(tasksPath, `${lines.join('\n').replace(/\n*$/, '')}\n`);
+  if (changed) writeFileAtomic(tasksPath, `${lines.join('\n').replace(/\n*$/, '')}\n`);
+}
+
+// --- 1.6.0: union-merge ledgers ---
+
+const gitattributesPath = join(root, '.sunoku', '.gitattributes');
+if (!existsSync(gitattributesPath)) {
+  copyFileSync(join(PLUGIN_ROOT, 'reference', 'templates', 'sunoku.gitattributes'), gitattributesPath);
+  applied.push('.gitattributes: union-merge ledgers created (1.6.0)');
 }
 
 if (applied.length === 0) {

@@ -4,6 +4,39 @@ Notable changes to the Sunoku plugin. Record-schema changes additionally land as
 [reference/MIGRATIONS.md](reference/MIGRATIONS.md), which skills apply to legacy records
 automatically on the first touch after an upgrade.
 
+## 1.6.0 — 2026-07-05
+
+Reliability hardening: Node hooks, a status.json write guard, and crash-safe record writes.
+
+- **Hooks ported to Node** (`hooks/scripts/*.mjs`) — one runtime for the whole plugin (Node ≥18,
+  same as `scripts/`); the Git-Bash-on-Windows requirement is gone. Behavior unchanged, plus:
+  - **Baseline-lost detection** — when `last_reconciled_sha` no longer resolves (rebase, squash
+    merge, force-push), the session-start context says so and points at a full reconcile instead
+    of silently reporting zero drift. `report.mjs` carries the same fact as `baseline_lost`, and
+    the reconcile procedure treats an unreachable sha like an empty one (full-tree read).
+  - **Cache pruning** — `.sunoku/.cache/` entries older than 14 days are deleted at session
+    start; the cache no longer grows without bound.
+- **New PreToolUse guard** (`guard-record-writes.mjs`) — denies Edit/Write tool calls that target
+  `.sunoku/status.json` and names `scripts/status-write.mjs` as the sanctioned path. The
+  script-only invariant is now enforced mechanically, not just by canon instruction.
+- **Crash-safe record writes** — every script write (status.json, journal + archives, questions,
+  tasks) goes through temp-file + rename (`writeFileAtomic`), so a crash mid-write can never
+  leave a half-written record file.
+- **Agent `model:` fix** — five agents declared the undocumented value `best` (silently ignored);
+  they now declare `opus` explicitly.
+- **Journal field hygiene** — `journal-append.mjs` collapses newlines in `--what/--why/--refs`
+  (entry fields are single-line by format), and the denormalized `status.json.last_entry` caps
+  the What excerpt at 140 chars; the full text stays in the journal.
+- **`tasks-set.mjs`** escapes regex metacharacters in `--id` (a `T1.` can no longer
+  wildcard-match another row).
+- **Union-merge ledgers** — scaffold now writes `.sunoku/.gitattributes` marking JOURNAL.md, its
+  archives, and EVIDENCE.md `merge=union`, so two branches appending entries stop conflicting.
+  Migration row backfills it on existing records (1.6.0).
+- **`report.mjs`** gains per-milestone `milestones` counts (name/total/done) for burnup narration.
+- **CI** — GitHub Actions runs all three suites on Node 18/20/22 for every push and PR.
+- `plugin.json` gains `homepage`/`repository`.
+- Tests: scripts suite 100 → 118 assertions, hooks suite 16 → 26 checks.
+
 ## 1.5.0 — 2026-07-04
 
 Deterministic record scripts.

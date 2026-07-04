@@ -2,7 +2,7 @@
 name: delivery-critic
 description: Sunoku delivery adversary: attacks build-plan sequencing (thinnest walking skeleton? real dependency order?), PRD coverage gaps, and sizes hiding [SPIKE]-shaped unknowns. Findings only; writes the plan critique fragment.
 tools: Read, Write
-model: best
+model: opus
 ---
 
 ## Mission

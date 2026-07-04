@@ -3,15 +3,16 @@
 `status.json` lives at the `.sunoku/` root and is the single lifecycle source of truth. Only the
 orchestrator writes it — agents never touch it — and every write goes through the plugin scripts
 (`scripts/status-write.mjs`, or `scripts/scaffold.mjs` for the first write; `journal-append.mjs`
-and `questions-flush.mjs` refresh it as a side effect), never a hand edit. Canonical serialization
-(one key per line, two-space indent, exact key order below) is mandatory; hooks match on exact
-byte patterns like `"tracking": true` and `"lifecycle": "live"`, so any other formatting breaks
-them. The scripts implement this contract:
+and `questions-flush.mjs` refresh it as a side effect), never a hand edit. A PreToolUse guard
+hook enforces this mechanically: Edit/Write tool calls targeting the file are denied with a
+pointer at the script. Canonical serialization (one key per line, two-space indent, exact key
+order below) is mandatory — it keeps diffs deterministic and gives the contract exactly one
+implementation. The scripts implement this contract:
 
 ```json
 {
   "version": 1,
-  "sunokuVersion": "1.5.0",
+  "sunokuVersion": "1.6.0",
   "product": "<name>",
   "origin": "greenfield|existing",
   "lifecycle": "<lifecycle>",
@@ -43,7 +44,8 @@ Field semantics:
 The four summary fields (`one_liner`, `open_questions`, `high_stakes`, `last_entry`) are a
 denormalized index of the record. Every write that changes their source (journal append, PRD
 Problem edit, QUESTIONS.md change) refreshes them in the same status.json write. They are
-advisory for fast reporting; drill-in answers verify against the record files.
+advisory for fast reporting; drill-in answers verify against the record files. `last_entry`
+caps its What excerpt at 140 chars — the full text lives in the journal.
 
 Lifecycle transitions:
 

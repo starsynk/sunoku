@@ -1,7 +1,7 @@
 // Shared internals for the record scripts. Not a command — every entry point imports from here
 // so the canonical status.json serialization has exactly one implementation.
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, renameSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -19,6 +19,7 @@ export const KEY_ORDER = [
 
 export const LIFECYCLES = ['validating', 'defining', 'planning', 'live', 'shelved'];
 export const ORIGINS = ['greenfield', 'existing'];
+export const LAST_ENTRY_MAX = 140;
 
 export function projectRoot() {
   return process.env.CLAUDE_PROJECT_DIR || process.cwd();
@@ -38,11 +39,19 @@ export function readStatus(root) {
   }
 }
 
+// All record writes go through this: temp file in the same dir + rename, so a crash
+// mid-write can never leave a half-written status.json/JOURNAL.md behind.
+export function writeFileAtomic(path, content) {
+  const tmp = `${path}.tmp-${process.pid}`;
+  writeFileSync(tmp, content);
+  renameSync(tmp, path);
+}
+
 export function writeStatus(root, status) {
   const ordered = {};
   for (const k of KEY_ORDER) if (k in status) ordered[k] = status[k];
   for (const k of Object.keys(status)) if (!(k in ordered)) ordered[k] = status[k];
-  writeFileSync(statusPath(root), JSON.stringify(ordered, null, 2) + '\n');
+  writeFileAtomic(statusPath(root), JSON.stringify(ordered, null, 2) + '\n');
   return ordered;
 }
 
@@ -132,8 +141,11 @@ export function computeSummary(root, status) {
     const { entries } = journalEntries(journal);
     const last = entries[entries.length - 1];
     if (last) {
-      const what = last.text.match(/^\*\*What:\*\* (.*)$/m);
-      summary.last_entry = `${last.date} — ${last.type} — ${what ? what[1].trim() : ''}`.trimEnd();
+      const m = last.text.match(/^\*\*What:\*\* (.*)$/m);
+      // The index is for fast reporting, not the story — cap it; the full What stays in the journal.
+      let what = m ? m[1].trim() : '';
+      if (what.length > LAST_ENTRY_MAX) what = `${what.slice(0, LAST_ENTRY_MAX - 1).trimEnd()}…`;
+      summary.last_entry = `${last.date} — ${last.type} — ${what}`.trimEnd();
     }
   }
 

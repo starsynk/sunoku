@@ -5,10 +5,11 @@ per the Disclosure map.
 
 - Read the actual code diff: `git diff <last_reconciled_sha>..HEAD` (code-reading is the
   evidence; never substitute commit-message summaries for reading the diff, per canon).
-  **Empty `last_reconciled_sha`**: `""..HEAD` is not a valid range and would silently read as
-  an empty diff — if `last_reconciled_sha` is empty, read the full current tree instead of a
-  diff (e.g. `git diff $(git hash-object -t tree /dev/null)..HEAD`, or read the tracked files
-  directly) before triaging, so nothing since arming is skipped.
+  **Empty or unreachable `last_reconciled_sha`**: `""..HEAD` is not a valid range and would
+  silently read as an empty diff, and a sha erased by rebase/squash/force-push (`report.mjs`
+  flags it as `baseline_lost`) is just as gone — in either case, read the full current tree
+  instead of a diff (e.g. `git diff $(git hash-object -t tree /dev/null)..HEAD`, or read the
+  tracked files directly) before triaging, so nothing since arming is skipped.
 - **Size gate**: if the diff touches ≲20 files AND ≲2k changed lines, read it inline
   yourself. If it exceeds either threshold, dispatch `sunoku:codebase-analyst` with the
   RECONCILE hat, scoped per canon Dispatch (absolute `.sunoku/` path, the exact sha range to
