@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "sunokuVersion": "1.6.0",
+  "sunokuVersion": "1.7.0",
   "product": "Sunoku",
   "origin": "existing",
   "lifecycle": "live",
@@ -8,8 +8,8 @@
   "one_liner": "Planning artifacts rot.",
   "open_questions": 2,
   "high_stakes": 0,
-  "last_entry": "2026-07-05 — track — 1.6.0 reliability hardening: Node hooks (+baseline-lost detection, cache pruning), PreToolUse status.json write guard, crash-safe atomic re…",
-  "last_reconciled_sha": "44a7c3ad018d4495770ba2bc3f9345c54a727f51",
+  "last_entry": "2026-07-05 — track — 1.7.0 record self-service: doctor integrity check, digest one-pager, validation staleness + re-validate lane, journal tags with windowed/ta…",
+  "last_reconciled_sha": "6da2427bc1aa345088692008c0e2f0741b87fa7f",
   "created": "2026-07-02T13:26:16Z",
-  "updated": "2026-07-04T16:31:20Z"
+  "updated": "2026-07-04T17:24:39Z"
 }
