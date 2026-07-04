@@ -36,6 +36,8 @@ optionally act (reconcile, mute/unmute) only when the user asks or accepts an of
      for more; never read the whole journal for this line.
    - **Open QUESTIONS count** — `open_questions`/`high_stakes`. When `high_stakes` > 0, name
      the entries from `high_stakes_titles`, reading only those blocks (title + one-line gist).
+     `questions_aging` non-empty and its oldest > 30 days → append the age (e.g. "oldest open
+     Q-4, 214 days").
    - **Validation-report age**, from `validation_reports` — cite as "validated 2026-07" style
      (month granularity). `validation_stale` true → add that the newest report is over 6 months
      old. Omit this line entirely when the list is empty (e.g. existing-code origin, or

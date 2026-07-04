@@ -151,4 +151,21 @@ OUT="$(printf '%s' "$GIN" | CLAUDE_PROJECT_DIR="$D" node "$GW")"; check "guard a
 # 19. Guard: malformed stdin -> silent allow (never blocks a session on its own bug)
 OUT="$(printf '{broken' | CLAUDE_PROJECT_DIR="$D" node "$GW")"; check "guard malformed no-op" 0 "" $? "$OUT"
 
+# 20. Drift escalation: >20 unreconciled commits -> stronger wording
+D="$(mktemp -d)"; mkrepo "$D"
+for i in $(seq 1 21); do git commit -qm "x$i" --allow-empty; done
+OUT="$(printf '%s' "$STDIN_MAIN" | CLAUDE_PROJECT_DIR="$D" node "$SS")"
+check "drift escalation wording" 0 "falling behind" $? "$OUT"
+check "drift escalation keeps count" 0 "Drift: 21" $? "$OUT"
+
+# 21. Guard: journal + archives are script-written too
+D="$(mktemp -d)"; mkrepo "$D"
+GIN='{"session_id":"s1","hook_event_name":"PreToolUse","tool_name":"Edit","tool_input":{"file_path":"'$D'/.sunoku/JOURNAL.md","old_string":"a","new_string":"b"}}'
+OUT="$(printf '%s' "$GIN" | CLAUDE_PROJECT_DIR="$D" node "$GW")"
+check "guard denies JOURNAL.md edit" 0 '"permissionDecision": *"deny"' $? "$OUT"
+check "guard names journal-append" 0 "journal-append.mjs" $? "$OUT"
+GIN='{"session_id":"s1","hook_event_name":"PreToolUse","tool_name":"Write","tool_input":{"file_path":"'$D'/.sunoku/journal/2025.md","content":"x"}}'
+OUT="$(printf '%s' "$GIN" | CLAUDE_PROJECT_DIR="$D" node "$GW")"
+check "guard denies journal archive write" 0 '"permissionDecision": *"deny"' $? "$OUT"
+
 echo "---"; echo "$PASS passed, $FAIL failed"; [ "$FAIL" -eq 0 ]

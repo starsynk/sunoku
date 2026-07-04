@@ -1,7 +1,7 @@
 {
   "name": "sunoku",
   "displayName": "Sunoku",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "The single source of documentation for what is happening to a software project: pre-commitment validation, a living PRD, an optional build plan, and a permanent journal of what changed and why.",
   "author": { "name": "Patrick Villanueva", "email": "patrick@webicient.com" },
   "homepage": "https://github.com/starsynk/sunoku",

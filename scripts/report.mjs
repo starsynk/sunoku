@@ -38,11 +38,28 @@ const report = {
 
 const questions = readRecordFile(root, 'QUESTIONS.md');
 report.high_stakes_titles = [];
+report.questions_aging = [];
 if (questions !== null && !isStub(questions)) {
-  for (const line of questions.split('\n')) {
-    const m = line.match(/^## (.+?)\s+\(stakes: high, status: open\)/);
-    if (m) report.high_stakes_titles.push(m[1]);
+  const qlines = questions.split('\n');
+  for (let i = 0; i < qlines.length; i += 1) {
+    const m = qlines[i].match(/^## (.+?)\s+\(stakes: (high|normal), status: open\)/);
+    if (!m) continue;
+    if (m[2] === 'high') report.high_stakes_titles.push(m[1]);
+    // Aging needs an **Opened:** line inside the block; undated entries just don't age.
+    for (let j = i + 1; j < qlines.length && !/^## /.test(qlines[j]); j += 1) {
+      const o = qlines[j].match(/^\*\*Opened:\*\* (\d{4}-\d{2}-\d{2})/);
+      if (!o) continue;
+      const id = m[1].match(/^(Q-\d+)/)?.[1] ?? m[1];
+      report.questions_aging.push({
+        id,
+        stakes: m[2],
+        opened: o[1],
+        days_open: Math.floor((Date.now() - new Date(o[1]).getTime()) / (24 * 60 * 60 * 1000)),
+      });
+      break;
+    }
   }
+  report.questions_aging.sort((a, b) => b.days_open - a.days_open);
 }
 
 report.drift = null;
@@ -110,7 +127,11 @@ if (values.since || values.tag) {
       return tags.includes(values.tag.toLowerCase());
     })
     .map((e) => ({
-      date: e.date, type: e.type, what: entryField(e.text, 'What'), tags: entryField(e.text, 'Tags'),
+      date: e.date,
+      type: e.type,
+      what: entryField(e.text, 'What'),
+      tags: entryField(e.text, 'Tags'),
+      by: entryField(e.text, 'By'),
     }));
 }
 

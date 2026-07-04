@@ -25,6 +25,7 @@ const { values } = parseArgs({
     why: { type: 'string' },
     refs: { type: 'string' },
     tags: { type: 'string' },
+    by: { type: 'string' },
     date: { type: 'string', default: todayLocal() },
   },
 });
@@ -34,7 +35,7 @@ for (const field of ['type', 'what', 'why', 'refs']) {
 }
 // Entry fields are single-line by format (`**What:** ...`); collapse any stray newlines so a
 // multi-line argument can never break the machine-scanned entry shape.
-for (const field of ['what', 'why', 'refs', 'tags']) {
+for (const field of ['what', 'why', 'refs', 'tags', 'by']) {
   if (values[field]) values[field] = values[field].replace(/\s+/g, ' ').trim();
 }
 if (!TYPES.includes(values.type)) die(`invalid type: ${values.type} (${TYPES.join('|')})`);
@@ -53,6 +54,7 @@ if (content.split('\n', 1)[0].trim() === STUB_SENTINEL) {
 }
 
 const entry = `## ${values.date} — ${values.type}\n**What:** ${values.what}\n**Why:** ${values.why}\n**Refs:** ${values.refs}\n`
+  + (values.by ? `**By:** ${values.by}\n` : '')
   + (values.tags ? `**Tags:** ${values.tags}\n` : '');
 content = `${content.replace(/\n*$/, '')}\n\n${entry}`;
 writeFileAtomic(journalPath, content);
