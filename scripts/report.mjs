@@ -1,11 +1,24 @@
 #!/usr/bin/env node
 // One-shot record report for sunoku:status: every fact the step-2 report needs, as one JSON
 // object on stdout. Read-only — never writes the record.
+//
+//   node report.mjs [--since YYYY-MM-DD] [--tag <tag>]   # either adds journal_matches
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { parseArgs } from 'node:util';
 import {
-  computeSummary, die, git, isStub, journalEntries, projectRoot, readRecordFile, readStatus,
+  allJournalEntries, computeSummary, die, entryField, git, isStub, journalEntries, projectRoot,
+  readRecordFile, readStatus, taskTables,
 } from './lib.mjs';
+
+const VALIDATION_STALE_DAYS = 180;
+
+const { values } = parseArgs({
+  options: { since: { type: 'string' }, tag: { type: 'string' } },
+});
+if (values.since && !/^\d{4}-\d{2}-\d{2}$/.test(values.since)) {
+  die(`invalid --since: ${values.since} (YYYY-MM-DD)`);
+}
 
 const root = projectRoot();
 const status = readStatus(root);
@@ -58,6 +71,17 @@ report.validation_reports = existsSync(validationDir)
   ? readdirSync(validationDir).filter((f) => /\d{4}-\d{2}/.test(f)).sort()
   : [];
 
+// Evidence ages: past ~6 months the go decision deserves a fresh look (re-validate lane).
+report.validation_stale = null;
+if (report.validation_reports.length > 0) {
+  const newest = report.validation_reports[report.validation_reports.length - 1];
+  const dated = newest.match(/\d{4}-\d{2}(-\d{2})?/);
+  if (dated) {
+    const when = new Date(dated[1] ? dated[0] : `${dated[0]}-01`).getTime();
+    report.validation_stale = Date.now() - when > VALIDATION_STALE_DAYS * 24 * 60 * 60 * 1000;
+  }
+}
+
 const roadmap = readRecordFile(root, 'ROADMAP.md');
 report.roadmap = roadmap === null ? 'absent' : isStub(roadmap) ? 'stub' : 'present';
 
@@ -65,23 +89,7 @@ const tasksFile = readRecordFile(root, 'TASKS.md');
 report.tasks = null;
 report.milestones = null;
 if (tasksFile !== null && !isStub(tasksFile)) {
-  const counts = { todo: 0, doing: 0, done: 0, blocked: 0 };
-  const milestones = [];
-  let current = null;
-  for (const line of tasksFile.split('\n')) {
-    const heading = line.match(/^## (M\d+.*)$/);
-    if (heading) { current = { name: heading[1].trim(), total: 0, done: 0 }; milestones.push(current); continue; }
-    if (/^## /.test(line)) { current = null; continue; }
-    if (!line.startsWith('|')) continue;
-    const cells = line.split('|').map((c) => c.trim()).filter(Boolean);
-    const last = cells[cells.length - 1];
-    if (!(last in counts)) continue;
-    counts[last] += 1;
-    if (current) {
-      current.total += 1;
-      if (last === 'done') current.done += 1;
-    }
-  }
+  const { counts, milestones } = taskTables(tasksFile);
   report.tasks = counts;
   report.milestones = milestones;
 }
@@ -90,6 +98,20 @@ const journal = readRecordFile(root, 'JOURNAL.md');
 report.journal_recent = [];
 if (journal !== null && !isStub(journal)) {
   report.journal_recent = journalEntries(journal).entries.slice(-5).map((e) => `${e.date} — ${e.type}`);
+}
+
+// Windowed/tagged history scan across archives + live journal, only when asked.
+if (values.since || values.tag) {
+  report.journal_matches = allJournalEntries(root)
+    .filter((e) => !values.since || e.date >= values.since)
+    .filter((e) => {
+      if (!values.tag) return true;
+      const tags = entryField(e.text, 'Tags').split(',').map((t) => t.trim().toLowerCase()).filter(Boolean);
+      return tags.includes(values.tag.toLowerCase());
+    })
+    .map((e) => ({
+      date: e.date, type: e.type, what: entryField(e.text, 'What'), tags: entryField(e.text, 'Tags'),
+    }));
 }
 
 // Advisory freshness check: does the denormalized index match its sources right now?

@@ -24,6 +24,7 @@ const { values } = parseArgs({
     what: { type: 'string' },
     why: { type: 'string' },
     refs: { type: 'string' },
+    tags: { type: 'string' },
     date: { type: 'string', default: todayLocal() },
   },
 });
@@ -33,8 +34,8 @@ for (const field of ['type', 'what', 'why', 'refs']) {
 }
 // Entry fields are single-line by format (`**What:** ...`); collapse any stray newlines so a
 // multi-line argument can never break the machine-scanned entry shape.
-for (const field of ['what', 'why', 'refs']) {
-  values[field] = values[field].replace(/\s+/g, ' ').trim();
+for (const field of ['what', 'why', 'refs', 'tags']) {
+  if (values[field]) values[field] = values[field].replace(/\s+/g, ' ').trim();
 }
 if (!TYPES.includes(values.type)) die(`invalid type: ${values.type} (${TYPES.join('|')})`);
 if (!/^\d{4}-\d{2}-\d{2}$/.test(values.date)) die(`invalid date: ${values.date} (YYYY-MM-DD)`);
@@ -51,7 +52,8 @@ if (content.split('\n', 1)[0].trim() === STUB_SENTINEL) {
   content = content.split('\n').slice(1).join('\n');
 }
 
-const entry = `## ${values.date} — ${values.type}\n**What:** ${values.what}\n**Why:** ${values.why}\n**Refs:** ${values.refs}\n`;
+const entry = `## ${values.date} — ${values.type}\n**What:** ${values.what}\n**Why:** ${values.why}\n**Refs:** ${values.refs}\n`
+  + (values.tags ? `**Tags:** ${values.tags}\n` : '');
 content = `${content.replace(/\n*$/, '')}\n\n${entry}`;
 writeFileAtomic(journalPath, content);
 

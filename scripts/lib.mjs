@@ -1,7 +1,7 @@
 // Shared internals for the record scripts. Not a command — every entry point imports from here
 // so the canonical status.json serialization has exactly one implementation.
 import { execFileSync } from 'node:child_process';
-import { readFileSync, renameSync, writeFileSync, existsSync } from 'node:fs';
+import { readdirSync, readFileSync, renameSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -65,13 +65,16 @@ export function nowIso() {
   return new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
 }
 
-export function todayLocal() {
-  const d = new Date();
+export function localDate(d) {
   return [
     d.getFullYear(),
     String(d.getMonth() + 1).padStart(2, '0'),
     String(d.getDate()).padStart(2, '0'),
   ].join('-');
+}
+
+export function todayLocal() {
+  return localDate(new Date());
 }
 
 export function readRecordFile(root, rel) {
@@ -101,26 +104,71 @@ export function journalEntries(content) {
   return { header, entries };
 }
 
+// First prose paragraph of the PRD Problem section, whitespace-collapsed; null while stubbed.
+export function prdProblemParagraph(root) {
+  const prd = readRecordFile(root, 'PRD.md');
+  if (prd === null || isStub(prd)) return null;
+  const lines = prd.split('\n');
+  const start = lines.findIndex((l) => /^## Problem\b/.test(l));
+  if (start === -1) return null;
+  const body = [];
+  for (let i = start + 1; i < lines.length && !/^#{1,6} /.test(lines[i]); i += 1) body.push(lines[i]);
+  return body.join('\n').split(/\n\s*\n/)
+    .map((p) => p.replace(/\s+/g, ' ').trim())
+    .find((p) => p && !p.startsWith('>') && !p.startsWith('<!--')) ?? null;
+}
+
+// One line of a `**Name:** value` entry block ('' when absent).
+export function entryField(text, name) {
+  const m = text.match(new RegExp(`^\\*\\*${name}:\\*\\* (.*)$`, 'm'));
+  return m ? m[1].trim() : '';
+}
+
+// Every journal entry, archives (year files, oldest first) then the live file.
+export function allJournalEntries(root) {
+  const out = [];
+  const dir = join(root, '.sunoku', 'journal');
+  if (existsSync(dir)) {
+    for (const f of readdirSync(dir).filter((n) => n.endsWith('.md')).sort()) {
+      out.push(...journalEntries(readFileSync(join(dir, f), 'utf8')).entries);
+    }
+  }
+  const live = readRecordFile(root, 'JOURNAL.md');
+  if (live !== null && !isStub(live)) out.push(...journalEntries(live).entries);
+  return out;
+}
+
+// Status totals + per-milestone progress from TASKS.md content — shared by report and digest.
+export function taskTables(content) {
+  const counts = { todo: 0, doing: 0, done: 0, blocked: 0 };
+  const milestones = [];
+  let current = null;
+  for (const line of content.split('\n')) {
+    const heading = line.match(/^## (M\d+.*)$/);
+    if (heading) { current = { name: heading[1].trim(), total: 0, done: 0 }; milestones.push(current); continue; }
+    if (/^## /.test(line)) { current = null; continue; }
+    if (!line.startsWith('|')) continue;
+    const cells = line.split('|').map((c) => c.trim()).filter(Boolean);
+    const last = cells[cells.length - 1];
+    if (!(last in counts)) continue;
+    counts[last] += 1;
+    if (current) {
+      current.total += 1;
+      if (last === 'done') current.done += 1;
+    }
+  }
+  return { counts, milestones };
+}
+
 // The four denormalized summary fields, recomputed from their source files (canon statusfile.md).
 export function computeSummary(root, status) {
   const summary = {};
 
-  const prd = readRecordFile(root, 'PRD.md');
   summary.one_liner = status.product ?? '';
-  if (prd !== null && !isStub(prd)) {
-    const lines = prd.split('\n');
-    const start = lines.findIndex((l) => /^## Problem\b/.test(l));
-    if (start !== -1) {
-      const body = [];
-      for (let i = start + 1; i < lines.length && !/^#{1,6} /.test(lines[i]); i += 1) body.push(lines[i]);
-      const paragraph = body.join('\n').split(/\n\s*\n/)
-        .map((p) => p.replace(/\s+/g, ' ').trim())
-        .find((p) => p && !p.startsWith('>') && !p.startsWith('<!--'));
-      if (paragraph) {
-        const sentence = paragraph.match(/^(.*?\.)(\s|$)/);
-        summary.one_liner = sentence ? sentence[1] : paragraph;
-      }
-    }
+  const paragraph = prdProblemParagraph(root);
+  if (paragraph) {
+    const sentence = paragraph.match(/^(.*?\.)(\s|$)/);
+    summary.one_liner = sentence ? sentence[1] : paragraph;
   }
 
   const questions = readRecordFile(root, 'QUESTIONS.md');

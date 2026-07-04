@@ -392,6 +392,81 @@ assert_grepf .sunoku/.gitattributes 'JOURNAL.md merge=union' "migrate: journal m
 OUT="$(run migrate.mjs)"
 echo "$OUT" | grep -qi 'up to date' && pass "migrate: gitattributes idempotent" || fail "migrate: gitattributes idempotent" "$OUT"
 
+# ---------- 1.7.0: doctor.mjs ----------
+
+D="$(mktemp -d)"; mkrecord "$D"
+node "$S/migrate.mjs" >/dev/null 2>&1        # healthy = migrated (gitattributes present)
+node "$S/status-write.mjs" --refresh >/dev/null 2>&1 # ...and summary index in sync
+OUT="$(run doctor.mjs)"; RC=$?
+assert_exit0 $RC "doctor: healthy record exits 0"
+echo "$OUT" | grep -qF '"ok": true' && pass "doctor: healthy record ok" || fail "doctor: healthy ok" "$OUT"
+
+# break things: duplicate task id, bad journal header, unreachable baseline, stray tmp, two doing
+sed -i.bak 's/| T2 | Thing | M | F-2 | T1 | todo |/| T1 | Thing | M | F-2 | T1 | doing |/' .sunoku/TASKS.md
+printf '\n## 2026-13-99 broken header\ntext\n' >> .sunoku/JOURNAL.md
+sed -i.bak 's/"last_reconciled_sha": "[a-f0-9]*"/"last_reconciled_sha": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef"/' .sunoku/status.json
+touch .sunoku/PRD.md.tmp-999
+OUT="$(run doctor.mjs)"; RC=$?
+assert_exit0 $RC "doctor: findings still exit 0"
+echo "$OUT" | grep -qF '"ok": false' && pass "doctor: broken record not ok" || fail "doctor: broken not ok" "$OUT"
+for check in tasks_duplicate_id journal_header baseline_unreachable stray_tmp; do
+  echo "$OUT" | grep -qF "\"$check\"" && pass "doctor: flags $check" || fail "doctor: flags $check" "$OUT"
+done
+
+D2="$(mktemp -d)"; cd "$D2"; export CLAUDE_PROJECT_DIR="$D2"
+OUT="$(run doctor.mjs)"; RC=$?
+assert_exitn $RC "doctor: no record -> nonzero"
+
+# ---------- 1.7.0: digest.mjs ----------
+
+D="$(mktemp -d)"; mkrecord "$D"
+run journal-append.mjs --type track --what "Fresh work landed." --why "Because tests." --refs c >/dev/null
+OUT="$(run digest.mjs)"; RC=$?
+assert_exit0 $RC "digest: exits 0"
+DG=".sunoku/digest/$(date +%F).md"
+[ -f "$DG" ] && pass "digest: dated file written" || fail "digest: dated file written" "$OUT"
+assert_grepf "$DG" 'Testo' "digest: product named"
+assert_grepf "$DG" 'Planning artifacts rot' "digest: problem excerpt"
+assert_grepf "$DG" 'Fresh work landed.' "digest: recent journal entry included"
+assert_grepf "$DG" 'Second question' "digest: open question listed"
+OUT="$(run digest.mjs --days 1)"
+grep -qF 'Record armed.' "$DG" && fail "digest: --days window excludes old entries" || pass "digest: --days window excludes old entries"
+
+# ---------- 1.7.0: validation staleness ----------
+
+D="$(mktemp -d)"; mkrecord "$D"
+OUT="$(run report.mjs)"
+echo "$OUT" | grep -qF '"validation_stale": null' && pass "report: no reports -> stale null" || fail "report: stale null" "$OUT"
+mkdir -p .sunoku/validation
+echo x > .sunoku/validation/2020-01-01-validation.md
+OUT="$(run report.mjs)"
+echo "$OUT" | grep -qF '"validation_stale": true' && pass "report: old report -> stale true" || fail "report: stale true" "$OUT"
+echo x > ".sunoku/validation/$(date +%F)-validation.md"
+OUT="$(run report.mjs)"
+echo "$OUT" | grep -qF '"validation_stale": false' && pass "report: fresh report -> stale false" || fail "report: stale false" "$OUT"
+
+# ---------- 1.7.0: journal tags + report --since/--tag ----------
+
+D="$(mktemp -d)"; mkrecord "$D"
+OUT="$(run journal-append.mjs --type decision --what "Priced it." --why "W." --refs c --tags "pricing, auth")"; RC=$?
+assert_exit0 $RC "journal: --tags accepted"
+assert_grepf .sunoku/JOURNAL.md '**Tags:** pricing, auth' "journal: Tags line written"
+run journal-append.mjs --type track --what "Untagged." --why "W." --refs c >/dev/null
+N="$(grep -c '\*\*Tags:\*\*' .sunoku/JOURNAL.md)"
+[ "$N" = "1" ] && pass "journal: no Tags line without --tags" || fail "journal: no Tags line without --tags" "count=$N"
+
+OUT="$(run report.mjs --tag pricing)"
+echo "$OUT" | node -e '
+const r = JSON.parse(require("fs").readFileSync(0, "utf8"));
+const whats = (r.journal_matches || []).map((m) => m.what);
+process.exit(whats.includes("Priced it.") && !whats.includes("Untagged.") ? 0 : 1);
+' && pass "report: --tag matches tagged, excludes untagged" || fail "report: --tag filter" "$OUT"
+OUT="$(run report.mjs --since 2020-01-01)"
+echo "$OUT" | grep -qF '"journal_matches"' && pass "report: --since emits matches" || fail "report: --since emits matches" "$OUT"
+echo "$OUT" | grep -qF 'Record armed.' && pass "report: --since includes window" || fail "report: --since window" "$OUT"
+OUT="$(run report.mjs --since 2999-01-01)"
+echo "$OUT" | grep -qF 'Record armed.' && fail "report: --since excludes older" "$OUT" || pass "report: --since excludes older"
+
 # ---------- 1.6.0: atomic writes leave no temp files ----------
 
 D="$(mktemp -d)"; mkrecord "$D"

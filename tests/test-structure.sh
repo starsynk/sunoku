@@ -36,7 +36,7 @@ done
 assert_contains reference/canon.md "## Disclosure map"
 assert_absent reference/canon.md "## Dispatch (hub-and-spoke)"
 assert_absent reference/canon.md "## StatusFile"
-assert_max_bytes reference/canon.md 4096
+assert_max_bytes reference/canon.md 4608 # bumped 1.7.0: re-validate disclosure row
 
 # Task 4: skills point at core + disclosure map, not full-file section reads
 assert_contains skills/log/SKILL.md "Disclosure map"
@@ -48,7 +48,7 @@ assert_absent skills/log/SKILL.md "Obey its Triage, Checkpoints, Dispatch, and S
 assert_file skills/log/references/reshape.md
 assert_file skills/status/references/reconcile.md
 assert_max_bytes skills/log/SKILL.md 6144
-assert_max_bytes skills/status/SKILL.md 6400
+assert_max_bytes skills/status/SKILL.md 8192 # bumped 1.7.0: doctor/digest/re-validate surfaces
 assert_contains skills/log/SKILL.md "references/reshape.md"
 assert_contains skills/status/SKILL.md "references/reconcile.md"
 
@@ -88,8 +88,8 @@ assert_contains skills/status/SKILL.md "one_liner"
 assert_contains skills/log/SKILL.md ".sunoku/journal/"
 
 # Task 13: version aligned
-assert_contains .claude-plugin/plugin.json '"version": "1.6.0"'
-assert_contains CHANGELOG.md "## 1.6.0"
+assert_contains .claude-plugin/plugin.json '"version": "1.7.0"'
+assert_contains CHANGELOG.md "## 1.7.0"
 
 # Scripts layer: deterministic record writes live in scripts/, docs point at them
 for f in lib status-write report journal-append questions-flush tasks-set scaffold sentinels migrate; do
@@ -140,5 +140,21 @@ assert_contains reference/MIGRATIONS.md "1.6.0"
 # 1.6.0: CI wired
 assert_file .github/workflows/test.yml
 assert_contains .github/workflows/test.yml "test-scripts.sh"
+
+# 1.7.0: doctor + digest scripts, wired into the status surface
+assert_file scripts/doctor.mjs
+assert_file scripts/digest.mjs
+assert_contains skills/status/SKILL.md "doctor.mjs"
+assert_contains skills/status/SKILL.md "digest.mjs"
+
+# 1.7.0: validation staleness + re-validate lane
+assert_contains skills/status/SKILL.md "validation_stale"
+assert_file skills/status/references/revalidate.md
+assert_contains skills/status/SKILL.md "references/revalidate.md"
+assert_contains reference/canon.md "re-validate"
+
+# 1.7.0: journal tags + record queries
+assert_contains reference/templates/JOURNAL.md "Tags:"
+assert_contains skills/status/SKILL.md "--since"
 
 exit $FAIL
