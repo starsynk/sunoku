@@ -8,8 +8,8 @@
   "one_liner": "Planning artifacts rot.",
   "open_questions": 2,
   "high_stakes": 0,
-  "last_entry": "2026-07-04 — track — Reconciled the PRD to as-built through commit a728727 (46 commits unreconciled since 76789887; 47-commit reconcile range): rewrote the Architecture rulebook bullet for the canon core + ten reference/canon/ section files + Disclosure map, corrected file count 40→70 and canon 238→70 lines, re-pointed moved traces across features/UX/out-of-scope/metrics, folded journal 30KB rollover into feature 9, refreshed features 10/15/16/19, added a Change Log row.",
+  "last_entry": "2026-07-04 — track — QUESTIONS.md answer-and-flush lifecycle: canon assumptions gained an Answering section (journal decision entry first, triage the flip, delete the block, status refresh), Disclosure map row, log/status skill hooks, template header now open-questions-only. No record migration.",
   "last_reconciled_sha": "a728727d612f74373933cb22dc0f0959b0143703",
   "created": "2026-07-02T13:26:16Z",
-  "updated": "2026-07-04T09:43:44Z"
+  "updated": "2026-07-04T11:29:17Z"
 }
