@@ -8,6 +8,7 @@ it as a flagged assumption rather than blocking. Format, every field required:
 - **Reasoning** — why that default.
 - **Flip-if-wrong** — what changes if the assumption is wrong.
 - **Stakes** — high or normal.
+- **Opened** — the date the flag was raised (YYYY-MM-DD); powers the status aging report.
 
 Log every flagged assumption to QUESTIONS.md immediately; the run continues without waiting.
 Once 3 or more high-stakes assumptions have accrued, surface them inside the next checkpoint —

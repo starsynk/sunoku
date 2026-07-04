@@ -4,6 +4,25 @@ Notable changes to the Sunoku plugin. Record-schema changes additionally land as
 [reference/MIGRATIONS.md](reference/MIGRATIONS.md), which skills apply to legacy records
 automatically on the first touch after an upgrade.
 
+## 1.8.0 — 2026-07-05
+
+Record hygiene at scale: aging, attribution, escalation, release notes, wider write guard.
+
+- **Question aging** — flagged assumptions gain an `**Opened:** YYYY-MM-DD` field (canon
+  Assumptions + template); `report.mjs` returns `questions_aging` (id, stakes, days open,
+  oldest first) and `sunoku:status` names the oldest when it passes 30 days. Undated legacy
+  entries simply don't age — no migration needed.
+- **Journal attribution** — `journal-append.mjs --by <name>` writes an optional `**By:**` line
+  (opt-in; solo records stay clean); `report.mjs` journal matches carry `by`.
+- **Drift escalation** — past 20 unreconciled commits the session-start nudge switches to
+  "the record is falling behind" wording instead of the routine one-liner.
+- **Write guard widened** — the PreToolUse guard now also denies direct Edit/Write on
+  `.sunoku/JOURNAL.md` (use `journal-append.mjs`) and `.sunoku/journal/*` archives
+  (immutable rollover history).
+- **`scripts/release-notes.mjs`** — journal window (`--since`, optional `--tag`) → markdown
+  changelog draft on stdout; the missing 20% on top of digest/`--since` queries.
+- Tests: scripts suite 144 → 156 assertions, hooks suite 26 → 31 checks.
+
 ## 1.7.0 — 2026-07-05
 
 Record self-service: doctor, digest, re-validation, tagged history.

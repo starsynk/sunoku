@@ -11,6 +11,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const PRUNE_AFTER_MS = 14 * 24 * 60 * 60 * 1000;
+const DRIFT_ESCALATE_AT = 20;
 
 function git(root, args) {
   try {
@@ -63,7 +64,11 @@ try {
           ctx += ` Reconcile baseline ${lastSha.slice(0, 7)} unreachable (history rewritten?) -> sunoku:status for a full reconcile.`;
         } else if (lastSha && lastSha !== headSha) {
           const drift = Number(git(root, ['rev-list', '--count', `${lastSha}..${headSha}`]) ?? 0);
-          if (drift > 0) ctx += ` Drift: ${drift} commit(s) unreconciled -> sunoku:status.`;
+          if (drift > DRIFT_ESCALATE_AT) {
+            ctx += ` Drift: ${drift} commits unreconciled — the record is falling behind; reconcile via sunoku:status before more history piles up.`;
+          } else if (drift > 0) {
+            ctx += ` Drift: ${drift} commit(s) unreconciled -> sunoku:status.`;
+          }
         }
 
         const pluginJson = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '.claude-plugin', 'plugin.json');

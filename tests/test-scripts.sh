@@ -68,6 +68,7 @@ EOF
 **Assumption taken:** D.
 **Reasoning:** E.
 **Flip if wrong:** F.
+**Opened:** 2020-01-01
 EOF
   cat > .sunoku/JOURNAL.md <<'EOF'
 # Journal — Testo
@@ -466,6 +467,45 @@ echo "$OUT" | grep -qF '"journal_matches"' && pass "report: --since emits matche
 echo "$OUT" | grep -qF 'Record armed.' && pass "report: --since includes window" || fail "report: --since window" "$OUT"
 OUT="$(run report.mjs --since 2999-01-01)"
 echo "$OUT" | grep -qF 'Record armed.' && fail "report: --since excludes older" "$OUT" || pass "report: --since excludes older"
+
+# ---------- 1.8.0: question aging ----------
+
+D="$(mktemp -d)"; mkrecord "$D"
+OUT="$(run report.mjs)"
+echo "$OUT" | node -e '
+const r = JSON.parse(require("fs").readFileSync(0, "utf8"));
+const a = r.questions_aging || [];
+const q2 = a.find((q) => q.id === "Q-2");
+process.exit(q2 && q2.stakes === "high" && q2.days_open >= 1 && !a.some((q) => q.id === "Q-1") ? 0 : 1);
+' && pass "report: questions_aging dates Q-2, skips undated Q-1" || fail "report: questions_aging" "$OUT"
+
+# ---------- 1.8.0: journal --by attribution ----------
+
+D="$(mktemp -d)"; mkrecord "$D"
+OUT="$(run journal-append.mjs --type track --what "Attributed." --why "W." --refs c --by "Pat V")"; RC=$?
+assert_exit0 $RC "journal: --by accepted"
+assert_grepf .sunoku/JOURNAL.md '**By:** Pat V' "journal: By line written"
+run journal-append.mjs --type track --what "Anon." --why "W." --refs c >/dev/null
+N="$(grep -c '\*\*By:\*\*' .sunoku/JOURNAL.md)"
+[ "$N" = "1" ] && pass "journal: no By line without --by" || fail "journal: no By line without --by" "count=$N"
+OUT="$(run report.mjs --since 2020-01-01)"
+echo "$OUT" | grep -qF '"by": "Pat V"' && pass "report: journal_matches carries by" || fail "report: matches by" "$OUT"
+
+# ---------- 1.8.0: release-notes.mjs ----------
+
+D="$(mktemp -d)"; mkrecord "$D"
+run journal-append.mjs --type decision --what "Chose plan." --why "Cheaper." --refs c --tags launch >/dev/null
+OUT="$(run release-notes.mjs --since 2020-01-01)"; RC=$?
+assert_exit0 $RC "release-notes: exits 0"
+echo "$OUT" | grep -qF '# Testo — changes since 2020-01-01' && pass "release-notes: titled" || fail "release-notes: titled" "$OUT"
+echo "$OUT" | grep -qF 'Record armed.' && pass "release-notes: entry in window" || fail "release-notes: entry in window" "$OUT"
+echo "$OUT" | grep -qF 'Chose plan.' && pass "release-notes: includes decision" || fail "release-notes: decision" "$OUT"
+OUT="$(run release-notes.mjs --since 2999-01-01)"
+echo "$OUT" | grep -qF 'Record armed.' && fail "release-notes: window excludes older" "$OUT" || pass "release-notes: window excludes older"
+OUT="$(run release-notes.mjs --since bogus)"; RC=$?
+assert_exitn $RC "release-notes: invalid --since rejected"
+OUT="$(run release-notes.mjs)"; RC=$?
+assert_exitn $RC "release-notes: --since required"
 
 # ---------- 1.6.0: atomic writes leave no temp files ----------
 

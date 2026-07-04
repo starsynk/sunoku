@@ -69,7 +69,8 @@ accurate as it was before the change, no more ceremony than that requires.
    The script appends to `.sunoku/JOURNAL.md` (newest at the bottom, `## YYYY-MM-DD — <type>`
    header), deletes the stub sentinel on the first real entry, performs the 30KB→15KB
    rollover into `.sunoku/journal/<year>.md` when needed, and refreshes the status.json
-   summary fields in the canonical serialization.
+   summary fields in the canonical serialization. Optional flags: `--tags "a, b"` (later
+   retrieval via `report.mjs --tag`) and `--by <name>` (attribution on team repos).
 
 6. **RESHAPE procedure** — load the canon section files the Disclosure map names for
    "log — RESHAPE", then read `${CLAUDE_PLUGIN_ROOT}/skills/log/references/reshape.md` and
