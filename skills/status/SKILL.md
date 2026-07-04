@@ -48,7 +48,7 @@ optionally act (reconcile, mute/unmute) only when the user asks or accepts an of
      count = `git rev-list --count HEAD`.
    - **Suggested next action** — exactly one, chosen by this priority order: (1) offer reconcile
      if drift > 0 or the tree is dirty; (2) else prompt to answer the highest-stakes open
-     question if one exists; (3) else, if `lifecycle` is `live` with no roadmap
+     question if one exists (answers route through `sunoku:log`); (3) else, if `lifecycle` is `live` with no roadmap
      (`ROADMAP.md`/`TASKS.md` absent or still stub-sentineled), offer an optional PLAN pass;
      (4) else, if `.sunoku/TASKS.md` has any `todo`, `doing`, or `blocked` task, report the counts
      (e.g. "6 todo, 1 blocked in M2", or "1 doing — an interrupted task to resume" when a `doing`

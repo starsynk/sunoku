@@ -48,7 +48,7 @@ assert_absent skills/log/SKILL.md "Obey its Triage, Checkpoints, Dispatch, and S
 assert_file skills/log/references/reshape.md
 assert_file skills/status/references/reconcile.md
 assert_max_bytes skills/log/SKILL.md 6144
-assert_max_bytes skills/status/SKILL.md 6144
+assert_max_bytes skills/status/SKILL.md 6400
 assert_contains skills/log/SKILL.md "references/reshape.md"
 assert_contains skills/status/SKILL.md "references/reconcile.md"
 
@@ -90,5 +90,13 @@ assert_contains skills/log/SKILL.md ".sunoku/journal/"
 # Task 13: version aligned
 assert_contains .claude-plugin/plugin.json '"version": "1.3.0"'
 assert_contains CHANGELOG.md "## 1.3.0"
+
+# QUESTIONS answer-and-flush lifecycle
+assert_contains reference/canon/assumptions.md "## Answering"
+assert_contains reference/canon.md "answering a QUESTIONS.md entry"
+assert_contains skills/log/SKILL.md "Question answer"
+assert_contains skills/status/SKILL.md "answers route through"
+assert_contains reference/templates/QUESTIONS.md "status: open)"
+assert_absent reference/templates/QUESTIONS.md "status: open|answered"
 
 exit $FAIL

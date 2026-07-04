@@ -26,13 +26,16 @@ accurate as it was before the change, no more ceremony than that requires.
    none; a TRACK loads statusfile.md at its write step; a RESHAPE loads its four before step 6.
    Obey loaded sections verbatim; this skill does not restate their rules.
 
-3. **Establish the subject.** Two triggers:
+3. **Establish the subject.** Three triggers:
    - **User-stated** — the user's own sentence ("we decided...", "we're dropping X...") is the
      subject; take it at face value, do not go hunting for corroborating diffs.
    - **Hook-triggered** — no explicit statement, just a triage request for "this session's
      work." Inspect the conversation for what was actually done, then run `git status` and
      `git diff` read-only (never write, stage, or commit) to see what actually changed on disk.
      Build the subject from what you find, not from what the session intended to do.
+   - **Question answer** — the user supplies the answer to a flagged QUESTIONS.md entry. Load
+     `reference/canon/assumptions.md` and run its Answering lifecycle; the flip still routes
+     through the step-4 lanes, but an answer is never SILENT.
 
 4. **Apply the canon Triage test verbatim** — "after this change, would the PRD or roadmap need
    editing to stay accurate?" — and route into exactly one lane:
