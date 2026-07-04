@@ -4,6 +4,32 @@ Notable changes to the Sunoku plugin. Record-schema changes additionally land as
 [reference/MIGRATIONS.md](reference/MIGRATIONS.md), which skills apply to legacy records
 automatically on the first touch after an upgrade.
 
+## 1.7.0 — 2026-07-05
+
+Record self-service: doctor, digest, re-validation, tagged history.
+
+- **`scripts/doctor.mjs`** — read-only integrity check as one JSON verdict: status.json enum
+  values + canonical key order, summary-index freshness, live-with-stub-PRD, malformed or
+  out-of-order journal headers, duplicate/malformed Q-ids, duplicate task ids / bad statuses /
+  multiple `doing`, orphan phase fragments, crashed-write `*.tmp-*` leftovers, unreachable
+  reconcile baseline, missing 1.6.0 `.gitattributes`. Every finding names its fix.
+  `sunoku:status` narrates it on "check the record".
+- **`scripts/digest.mjs`** — stakeholder one-pager assembled mechanically from the record
+  (Problem paragraph, lifecycle + per-milestone standing, journal window, open questions) into
+  `.sunoku/digest/<date>.md`. Derived and regenerate-anytime; `--days N` sets the window.
+- **Validation staleness** — `report.mjs` flags `validation_stale` when the newest validation
+  report is older than ~6 months; `sunoku:status` surfaces it and offers the new re-validate
+  lane (`skills/status/references/revalidate.md`): VALIDATE machinery re-runs against the
+  current PRD, produces a new immutable dated report beside the old, and the verdict lands as
+  a `decision` journal entry — lifecycle stays `live` throughout.
+- **Journal tags** — `journal-append.mjs --tags "pricing, auth"` writes an optional
+  `**Tags:**` line; `report.mjs --since YYYY-MM-DD` / `--tag <t>` returns `journal_matches`
+  across archives + live journal in one call. History queries stop degrading as the journal
+  spans years.
+- Disclosure map row: "status — re-validate". Canon core and status-skill size caps bumped
+  consciously (4096 → 4608, 6400 → 8192) for the three new surfaces.
+- Tests: scripts suite 118 → 144 assertions.
+
 ## 1.6.0 — 2026-07-05
 
 Reliability hardening: Node hooks, a status.json write guard, and crash-safe record writes.

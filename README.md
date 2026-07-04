@@ -105,7 +105,9 @@ release is in [CHANGELOG.md](CHANGELOG.md); the exact record fixes live in
 - `scripts/` — zero-dependency Node (≥18) scripts that perform every mechanical record write:
   canonical status.json serialization, journal append + rollover, question flushes, task-status
   flips, scaffolding, resume done-maps, migrations, and the one-call status report. Skills
-  decide *what* to record; these scripts make the bytes deterministic.
+  decide *what* to record; these scripts make the bytes deterministic. Two read-mostly extras:
+  `doctor.mjs` (record integrity check, every finding names its fix) and `digest.mjs` (a
+  stakeholder one-pager under `.sunoku/digest/`, regenerate-anytime).
 
 ## The three commands
 
@@ -125,7 +127,11 @@ you to status instead.
   SILENT / TRACK / RESHAPE triage and does exactly as much ceremony as the answer requires.
 - **`sunoku:status`** — the ongoing surface. Current product state, recent journal entries, open
   questions, a drift check against the last reconciled commit (with a reconcile offer), and
-  answers to history questions straight from the journal and PRD change log.
+  answers to history questions straight from the journal and PRD change log (tag- and
+  window-scoped via `report.mjs --since/--tag`). Also on request: a record health check
+  ("check the record"), a stakeholder digest ("digest"), and — when the newest validation
+  report is over six months old — a re-validate pass that writes a fresh dated report beside
+  the immutable old one.
 Sample prompts:
 
 - "is this worth building?" — kicks off VALIDATE on a new idea.
