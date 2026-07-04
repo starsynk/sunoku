@@ -62,3 +62,9 @@
 **What:** 1.6.0 reliability hardening: Node hooks (+baseline-lost detection, cache pruning), PreToolUse status.json write guard, crash-safe atomic record writes, agent model fix (best->opus), union-merge ledgers, per-milestone report counts, CI.
 **Why:** Repo review found invariants enforced by instruction only, silent tracking holes (rewritten history), and platform/runtime debt; 1.6.0 makes them mechanical. Closes PRD gaps G1 (CI) and G2 (Windows bash hooks).
 **Refs:** conversation
+
+## 2026-07-05 — track
+**What:** 1.7.0 record self-service: doctor integrity check, digest one-pager, validation staleness + re-validate lane, journal tags with windowed/tagged report queries.
+**Why:** Record needed self-diagnosis (closes gap G3), an early-value shareable surface, an aging policy on validation evidence, and history queries that survive multi-year journals.
+**Refs:** conversation
+**Tags:** tooling, record

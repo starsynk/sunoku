@@ -171,7 +171,6 @@ not absent must-have features**, and are classified as such:
 
 | # | Gap | Kind | Must-have? | Evidence |
 |---|-----|------|-----------|----------|
-| G3 | No field-level `status.json` schema validator — hooks now JSON-parse the file (malformed → silent no-op) and a PreToolUse guard denies hand edits, but no script validates field shapes | Robustness (reduced 1.6.0) | No (nice-to-have) | hooks/scripts/session-start.mjs:40-42; hooks/scripts/guard-record-writes.mjs |
 | G4 | `test-hooks.sh` has an undocumented `python3` dependency (`json.tool`) | Test infra nit | No | AB-11; tests/test-hooks.sh:94 |
 | G5 | Reconcile flow completion not guaranteed under all subagent models (D4 stalled on sonnet, passed on opus retry) | Reliability edge | No — model-following, not plugin logic | AB-58; tests/scenarios.md:174-179 |
 
