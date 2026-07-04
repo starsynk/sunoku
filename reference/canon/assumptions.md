@@ -16,6 +16,13 @@ never as a standalone interruption — using this line verbatim:
 
 > "I assumed X, Y, Z — confirm or this is built on sand."
 
+## Asking
+
+Whenever an open QUESTIONS.md entry is put to the user for triage — a checkpoint batch, a status
+"answer the highest-stakes question" prompt, or a direct ask — the entry's **Chosen default** is
+the recommended answer. Present it first, label suffixed with "(Recommended)". In a
+multiple-choice questionnaire (AskUserQuestion), it is option one; alternatives follow.
+
 ## Answering
 
 When the user answers a flagged question ("Q-2 is answered: ...", "the answer to X is ..."),

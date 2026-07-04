@@ -12,7 +12,7 @@ implementation. The scripts implement this contract:
 ```json
 {
   "version": 1,
-  "sunokuVersion": "1.8.0",
+  "sunokuVersion": "1.8.1",
   "product": "<name>",
   "origin": "greenfield|existing",
   "lifecycle": "<lifecycle>",

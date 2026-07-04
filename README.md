@@ -19,9 +19,8 @@ with dated entries and `file:line` citations.
 /plugin install sunoku
 ```
 
-Requires Node ≥ 18 for the record scripts. **Windows:** the ambient hooks (session-start context,
-the stop-time nudge) are Bash scripts — have Git Bash on PATH, or the hooks silently no-op while
-the three commands keep working.
+Requires Node ≥ 18 — the record scripts and the ambient hooks (session-start context, the
+stop-time nudge) all run on it, on every platform. No other runtime needed.
 
 **Upgrading:** nothing to migrate by hand — records written by an older plugin self-migrate the
 next time any Sunoku command touches them. Per-release changes in [CHANGELOG.md](CHANGELOG.md),
@@ -149,7 +148,8 @@ the loop.
 - `skills/*/references/` — lane and phase procedures loaded only when that branch runs.
 - `scripts/` — zero-dependency Node (≥18) scripts that perform every mechanical record write:
   canonical `status.json` serialization, journal append + rollover, question flushes, task-status
-  flips, scaffolding, migrations. Skills decide *what* to record; scripts make the bytes
+  flips, scaffolding, migrations — plus read-only reporting (`report.mjs`, `doctor.mjs`,
+  `digest.mjs`, `release-notes.mjs`). Skills decide *what* to record; scripts make the bytes
   deterministic.
 
 ## License

@@ -4,6 +4,19 @@ Notable changes to the Sunoku plugin. Record-schema changes additionally land as
 [reference/MIGRATIONS.md](reference/MIGRATIONS.md), which skills apply to legacy records
 automatically on the first touch after an upgrade.
 
+## 1.8.1 — 2026-07-05
+
+Recommended answer leads every question prompt.
+
+- **Recommended-first question prompts** — wherever an open QUESTIONS.md entry or a batched
+  checkpoint question is put to the user, the recorded default is presented as the recommended
+  answer: always the first option, labeled "(Recommended)" (in AskUserQuestion, option one).
+  New canon assumptions "Asking" section, a checkpoints rule for batched sets, and an inline
+  pointer in `sunoku:status`'s answer-highest-stakes prompt (its lane loads no canon sections).
+- README repairs: stale Git Bash note removed (hooks run on Node since 1.6.0) and the read-only
+  reporting scripts (`report.mjs`, `doctor.mjs`, `digest.mjs`, `release-notes.mjs`) listed —
+  restores two structure-test assertions the README restructure had broken.
+
 ## 1.8.0 — 2026-07-05
 
 Record hygiene at scale: aging, attribution, escalation, release notes, wider write guard.

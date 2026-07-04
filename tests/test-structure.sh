@@ -88,8 +88,8 @@ assert_contains skills/status/SKILL.md "one_liner"
 assert_contains skills/log/SKILL.md ".sunoku/journal/"
 
 # Task 13: version aligned
-assert_contains .claude-plugin/plugin.json '"version": "1.8.0"'
-assert_contains CHANGELOG.md "## 1.8.0"
+assert_contains .claude-plugin/plugin.json '"version": "1.8.1"'
+assert_contains CHANGELOG.md "## 1.8.1"
 
 # Scripts layer: deterministic record writes live in scripts/, docs point at them
 for f in lib status-write report journal-append questions-flush tasks-set scaffold sentinels migrate; do
@@ -167,5 +167,11 @@ assert_contains hooks/scripts/guard-record-writes.mjs "journal-append.mjs"
 assert_contains hooks/scripts/session-start.mjs "falling behind"
 assert_file scripts/release-notes.mjs
 assert_contains README.md "release-notes.mjs"
+
+# 1.8.1: recommended answer leads question prompts
+assert_contains reference/canon/assumptions.md "## Asking"
+assert_contains reference/canon/assumptions.md "(Recommended)"
+assert_contains reference/canon/checkpoints.md "(Recommended)"
+assert_contains skills/status/SKILL.md "(Recommended)"
 
 exit $FAIL

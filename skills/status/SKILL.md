@@ -48,7 +48,9 @@ optionally act (reconcile, mute/unmute) only when the user asks or accepts an of
    - **Suggested next action** — exactly one, chosen by this priority order: (1) offer reconcile
      if drift > 0, `baseline_lost` is true (a full reconcile — the procedure treats a lost
      baseline like an empty one), or the tree is dirty; (2) else prompt to answer the
-     highest-stakes open question if one exists (answers route through `sunoku:log`); (3) else,
+     highest-stakes open question if one exists (answers route through `sunoku:log`); when
+     presenting it, the entry's recorded default is the recommended answer — first option,
+     labeled "(Recommended)" (canon assumptions, Asking); (3) else,
      if `validation_stale` is true, offer a re-validate pass (step 6); (4) else, if `lifecycle`
      is `live` and `roadmap` is `absent` or `stub`, offer an optional PLAN pass; (5) else, if
      `tasks` has any `todo`, `doing`, or `blocked`, report the counts with per-milestone

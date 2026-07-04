@@ -11,3 +11,7 @@ No other pause points exist. An orchestrator never stops unplanned mid-run to as
 questions get batched. Each checkpoint scopes to one batched question set, capped at 5 questions,
 infer-first (only ask what cannot be reasonably inferred), folded into the first phase's entry
 conversation rather than sprinkled across the run.
+
+When a batched question has a defensible default, lead with it: the recommended answer is always
+the **first** option, its label suffixed with "(Recommended)". In a multiple-choice questionnaire
+(AskUserQuestion), that recommended option is option one — never buried mid-list.
