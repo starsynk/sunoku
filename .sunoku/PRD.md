@@ -48,14 +48,17 @@ recollection.
 | 15 | Eight single-purpose subagents dispatched hub-and-spoke, each a tool-scoped Markdown contract; multi-hat output contracts split into `reference/contracts/` | P0 | agents/*.md (AB-5, AB-6, AB-14); reference/canon/dispatch.md:1-19; reference/contracts/ (11 files) |
 | 16 | Hook regression suite (26 checks) exercising all three hook scripts in isolated repos | P2 | tests/test-hooks.sh:47-153 (AB-52) |
 | 17 | Scenario regression log — 11 headless full-plugin runs (A, B, C, D1–D5, E, F, F3) | P2 | tests/scenarios.md:28-375 (AB-54–AB-58) |
-| 19 | Self-migrating record schema — MIGRATIONS.md registry applied on first touch, `sunokuVersion` stamp, version-skew session nudge | P1 | reference/MIGRATIONS.md; reference/canon/record-migrations.md; hooks/scripts/session-start.mjs:69-77 |
+| 19 | Self-migrating record schema — MIGRATIONS.md registry applied on first touch by `scripts/migrate.mjs`, `sunokuVersion` stamp, version-skew session nudge | P1 | reference/MIGRATIONS.md; scripts/migrate.mjs; reference/canon/record-migrations.md; hooks/scripts/session-start.mjs:69-77 |
+| 20 | Deterministic record-write + self-service scripts — twelve zero-dependency Node ESM executables under `scripts/` (`lib.mjs` = one canonical-serialization implementation) perform every mechanical `.sunoku/` write and record self-service (status.json, journal append + rollover, question flush, task flip, scaffold, resume done-map, migrations, report, doctor, digest, release-notes); PreToolUse guard enforces script-only writes | P0 | scripts/*.mjs (12); scripts/lib.mjs; hooks/scripts/guard-record-writes.mjs; tests/test-scripts.sh |
 
 ## Architecture
 
-Sunoku is **not application code** — it is a hub-and-spoke orchestration built entirely from
-prompt-engineered Markdown contracts plus two Bash hooks, running on the Claude Code plugin
-substrate. There is no compiled runtime and no package manifest (`git ls-files` = 71 files, all
-`.md`/`.json`/`.sh`/LICENSE — AB-1).
+Sunoku is **not application code** — it is a hub-and-spoke orchestration built from
+prompt-engineered Markdown contracts, three Node hooks, and a zero-dependency Node scripts layer
+that performs every mechanical record write, running on the Claude Code plugin substrate. There
+is still no compiled runtime and no package manifest — all Node is dependency-free ESM run
+directly (`git ls-files` = 95 files, `.md`/`.json`/`.mjs`/`.sh`/LICENSE — AB-1; the original Bash
+hooks and hand-edited record were replaced by Node hooks + scripts across v1.5.0–1.8.0).
 
 - **Substrate**: Claude Code plugin. Three skills (`skills/*/SKILL.md`) are the orchestrators;
   eight subagents (`agents/*.md`) are dispatched workers, each with a `tools:` allowlist and a
@@ -67,10 +70,18 @@ substrate. There is no compiled runtime and no package manifest (`git ls-files` 
   fragment merged onto EVIDENCE.md at the phase barrier (`reference/canon/fragments.md:4-10`, AB-15).
 - **Single source of truth**: `status.json` at the `.sunoku/` root, written only by the
   orchestrator, in a mandated canonical serialization (one key per line, two-space indent, fixed key
-  order) because the hooks `grep` it byte-for-byte (`reference/canon/statusfile.md:4-24`, AB-16, AB-18,
-  AB-25). Its `lifecycle` drives the state machine `validating → defining → planning → live`, with
+  order) so record diffs stay deterministic and the scripts have exactly one serialization to write
+  (`reference/canon/statusfile.md:4-24`, AB-16, AB-18, AB-25). Its `lifecycle` drives the state machine `validating → defining → planning → live`, with
   `defining → live` for existing/as-built products and `(any) → shelved` on kill
   (`reference/canon/statusfile.md:47-51`, AB-17).
+- **Mechanical writes are computed, not hand-typed**: a zero-dependency Node scripts layer —
+  twelve ESM executables under `scripts/`, with `scripts/lib.mjs` the single canonical-serialization
+  implementation — performs every `.sunoku/` record write and record self-service: status.json
+  (`status-write.mjs`, `scaffold.mjs`), journal append + rollover (`journal-append.mjs`), question
+  flush (`questions-flush.mjs`), task-status flip (`tasks-set.mjs`), resume done-map (`sentinels.mjs`),
+  migrations (`migrate.mjs`), the one-call status report (`report.mjs`), and doctor/digest/release-notes
+  (`doctor.mjs`, `digest.mjs`, `release-notes.mjs`). Skills and canon invoke the scripts instead of
+  hand-editing; the PreToolUse guard makes that mechanical, and `tests/test-scripts.sh` covers them.
 - **Shared rulebook (progressive disclosure)**: `reference/canon.md` is a 71-line always-read
   **core** — Prime directive, Coexistence, Triage, and a Disclosure map — read by each skill
   *after* its record guard passes (`skills/log/SKILL.md:14-27`, `skills/status/SKILL.md:13-25`,
@@ -79,9 +90,12 @@ substrate. There is no compiled runtime and no package manifest (`git ls-files` 
   Checkpoints, Assumptions, Dispatch, Fragments, Garbage output, Conflict, Sentinels & resume,
   StatusFile, Record migrations, and Execution contract each live in their own file, loaded on
   demand.
-- **Ambient layer**: two hooks (`hooks/hooks.json`, AB-8) gated on `tracking:true` + `lifecycle:live`
+- **Ambient layer**: three hooks (`hooks/hooks.json`, AB-8) gated on `tracking:true` + `lifecycle:live`
   — SessionStart injects the triage rule and drift count; Stop nudges once per session when code
-  changed but the journal didn't. Both are `bash "${CLAUDE_PLUGIN_ROOT}/..."` invocations (AB-50).
+  changed but the journal didn't; a PreToolUse guard (`hooks/scripts/guard-record-writes.mjs`) denies
+  hand-edits to the script-written record files (`.sunoku/status.json`, `JOURNAL.md`, and `journal/`
+  archives), pointing the caller at the owning script. All three are
+  `node "${CLAUDE_PLUGIN_ROOT}/..."` invocations (AB-50).
 - **Prime directive**: Sunoku never writes application code and writes only `.sunoku/` at the
   consumer repo root. Executing the backlog is an open contract worked by any executor the user
   chooses, with reconcile flipping diff-proven tasks to `done`
@@ -185,3 +199,4 @@ gap roadmap over these is optional and, given none are must-haves, not warranted
 | 2026-07-03 | Dropped feature 18 (`sunoku:work`) in 1.2.0; command surface back to three; prime directive restored to plans-and-documents-only; TASKS.md Status/Blocked schema kept as the open Execution contract with reconcile status catch-up; canon gained the Coexistence principle | Owning execution displaced other plugins' process discipline (design gates pre-satisfied, questions forbidden mid-run); record-keeping is the product, execution is commodity | 2026-07-03 — reshape (sunoku:work drop) |
 | 2026-07-04 | Reconciled the PRD to as-built through `a728727` for the 1.3.0 progressive-disclosure release: rewrote the Architecture "Shared rulebook" bullet for the canon core + ten `reference/canon/` section files + Disclosure map, corrected `git ls-files` 40→70 and canon 238→70 lines, re-pointed moved `reference/canon/` and `skills/*/references/` traces across features/UX/out-of-scope/metrics, added journal 30KB rollover to feature 9, refreshed features 10/15/16/19 | The 1.3.0 work was TRACK-lane and journaled, but TRACK does not edit the PRD, so the snapshot had drifted 46 commits — reconcile-forward, not a reshape (architecture substance unchanged, only canon packaging moved) | 2026-07-04 — track (reconcile) |
 | 2026-07-04 | Reconciled through `23167f8`: feature 9 reworded — QUESTIONS.md is an open-questions working set with the answer-and-flush lifecycle (canon assumptions `## Answering`), no longer blanket append-only; corrected canon 70→71 lines and `git ls-files` 70→71; re-pointed shifted `skills/log/SKILL.md` traces | The answer-and-flush lifecycle was TRACK-lane and journaled, but the PRD still described QUESTIONS.md as append-only — reconcile-forward, not a reshape | 2026-07-04 — track |
+| 2026-07-05 | Reconciled the Architecture section forward to the as-built tree across v1.5.0–1.8.0: "two Bash hooks" → three Node hooks (SessionStart, Stop, PreToolUse write-guard); `git ls-files` 71→95 with `.mjs` added to the extension set; dropped the stale "hooks `grep` byte-for-byte" rationale; added a "computed writes" Architecture bullet and feature 20 for the twelve-script Node layer; named `scripts/migrate.mjs` as feature 19's applier | The 1.5–1.8 reliability/self-service work was TRACK-lane and journaled, but earlier reconciles refreshed only the feature-table cites, never the Architecture prose — it still claimed a Bash-only, no-scripts, 71-file repo. Reconcile-forward, not a reshape (hub-and-spoke, plugin-substrate, single-source-of-truth bet unchanged; only the write mechanism moved) | 2026-07-05 — track |
