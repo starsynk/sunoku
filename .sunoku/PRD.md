@@ -41,14 +41,14 @@ recollection.
 | 8 | `sunoku:status` surface — state summary, journal tail, open questions, drift check, reconcile, mute/unmute | P0 | skills/status/SKILL.md:27-84 (AB-22) |
 | 9 | Living record ledgers: append-only JOURNAL.md (entries past 30KB roll into `.sunoku/journal/<year>.md`) and EVIDENCE.md; QUESTIONS.md holds open questions only — answering flushes the block to a journal `decision` entry via triage; PRD Change Log | P0 | skills/log/SKILL.md:73-77; reference/canon/assumptions.md:18-35; reference/templates/JOURNAL.md; EVIDENCE.md; QUESTIONS.md (AB-29, AB-33) |
 | 10 | `status.json` lifecycle state machine, single-writer, canonical serialization (12 keys incl. `one_liner`/`open_questions`/`high_stakes`/`last_entry` summary index) | P0 | reference/canon/statusfile.md:1-56 (AB-16, AB-17, AB-25) |
-| 11 | Ambient SessionStart hook: injects standing triage rule + drift count when tracking is live | P1 | hooks/scripts/session-start.sh:33-40 (AB-45) |
-| 12 | Ambient Stop hook: one-shot per-session nudge to `sunoku:log` when code changed but journal didn't | P1 | hooks/scripts/stop-nudge.sh:24-33 (AB-47, AB-48) |
-| 13 | Mute switch — `tracking:false` silences hooks while preserving the record | P1 | skills/status/SKILL.md:88-91; hooks/scripts/session-start.sh:17 (AB-18) |
-| 14 | Drift + reconcile — count commits since `last_reconciled_sha`, offer to diff/group/re-triage | P1 | skills/status/SKILL.md:39-86; hooks/scripts/session-start.sh:27-37 |
+| 11 | Ambient SessionStart hook: injects standing triage rule + drift count when tracking is live | P1 | hooks/scripts/session-start.mjs:57-66 (AB-45) |
+| 12 | Ambient Stop hook: one-shot per-session nudge to `sunoku:log` when code changed but journal didn't | P1 | hooks/scripts/stop-nudge.mjs:36-46 (AB-47, AB-48) |
+| 13 | Mute switch — `tracking:false` silences hooks while preserving the record | P1 | skills/status/SKILL.md:88-91; hooks/scripts/session-start.mjs:41 (AB-18) |
+| 14 | Drift + reconcile — count commits since `last_reconciled_sha`, offer to diff/group/re-triage | P1 | skills/status/SKILL.md:39-86; hooks/scripts/session-start.mjs:60-67 |
 | 15 | Eight single-purpose subagents dispatched hub-and-spoke, each a tool-scoped Markdown contract; multi-hat output contracts split into `reference/contracts/` | P0 | agents/*.md (AB-5, AB-6, AB-14); reference/canon/dispatch.md:1-19; reference/contracts/ (11 files) |
-| 16 | Hook regression suite (16 assertions) exercising both scripts in isolated repos | P2 | tests/test-hooks.sh:46-121 (AB-52) |
+| 16 | Hook regression suite (26 checks) exercising all three hook scripts in isolated repos | P2 | tests/test-hooks.sh:47-153 (AB-52) |
 | 17 | Scenario regression log — 11 headless full-plugin runs (A, B, C, D1–D5, E, F, F3) | P2 | tests/scenarios.md:28-375 (AB-54–AB-58) |
-| 19 | Self-migrating record schema — MIGRATIONS.md registry applied on first touch, `sunokuVersion` stamp, version-skew session nudge | P1 | reference/MIGRATIONS.md; reference/canon/record-migrations.md; hooks/scripts/session-start.sh:40-54 |
+| 19 | Self-migrating record schema — MIGRATIONS.md registry applied on first touch, `sunokuVersion` stamp, version-skew session nudge | P1 | reference/MIGRATIONS.md; reference/canon/record-migrations.md; hooks/scripts/session-start.mjs:69-77 |
 
 ## Architecture
 
@@ -171,9 +171,7 @@ not absent must-have features**, and are classified as such:
 
 | # | Gap | Kind | Must-have? | Evidence |
 |---|-----|------|-----------|----------|
-| G1 | No automated CI — `test-hooks.sh` and the scenario runs are manual only; nothing enforces re-run before a change lands | Ops / quality | No (nice-to-have) | as-built Gaps; AB-59; tests/scenarios.md:7-16 |
-| G2 | Windows hook fragility — both hooks are `bash "${CLAUDE_PLUGIN_ROOT}/..."`; no Windows-native fallback, silent no-op without Git Bash | Reliability (documented) | No — degrades gracefully, README-disclosed | AB-49, AB-50; README.md:89-92 |
-| G3 | No `status.json` schema validator — hooks guard on two substring greps only; a malformed-but-parseable file could pass undetected | Robustness | No (nice-to-have) | as-built Gaps; hooks/scripts/session-start.sh:17-18 |
+| G3 | No field-level `status.json` schema validator — hooks now JSON-parse the file (malformed → silent no-op) and a PreToolUse guard denies hand edits, but no script validates field shapes | Robustness (reduced 1.6.0) | No (nice-to-have) | hooks/scripts/session-start.mjs:40-42; hooks/scripts/guard-record-writes.mjs |
 | G4 | `test-hooks.sh` has an undocumented `python3` dependency (`json.tool`) | Test infra nit | No | AB-11; tests/test-hooks.sh:94 |
 | G5 | Reconcile flow completion not guaranteed under all subagent models (D4 stalled on sonnet, passed on opus retry) | Reliability edge | No — model-following, not plugin logic | AB-58; tests/scenarios.md:174-179 |
 
