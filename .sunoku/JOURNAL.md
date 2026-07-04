@@ -68,3 +68,10 @@
 **Why:** Record needed self-diagnosis (closes gap G3), an early-value shareable surface, an aging policy on validation evidence, and history queries that survive multi-year journals.
 **Refs:** conversation
 **Tags:** tooling, record
+
+## 2026-07-05 — track
+**What:** 1.8.0 record hygiene at scale: question aging (Opened field + status narration), opt-in journal attribution (--by), drift escalation past 20 commits, write guard widened to JOURNAL.md + archives, release-notes.mjs changelog drafts.
+**Why:** Closes the remaining small items from the July repo review: open questions now age visibly, team repos get attribution, long-unreconciled records nudge harder, the journal's script-only invariant is mechanical, and the journal can draft its own release notes.
+**Refs:** conversation
+**By:** Patrick Villanueva
+**Tags:** tooling, record
