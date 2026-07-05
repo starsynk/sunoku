@@ -47,7 +47,7 @@ assert_absent skills/log/SKILL.md "Obey its Triage, Checkpoints, Dispatch, and S
 # Task 5: lane files exist; hot bodies shrank
 assert_file skills/log/references/reshape.md
 assert_file skills/status/references/reconcile.md
-assert_max_bytes skills/log/SKILL.md 6144
+assert_max_bytes skills/log/SKILL.md 6656 # bumped 2026-07-05: SILENT task-flip lane + journal grain bound
 assert_max_bytes skills/status/SKILL.md 8192 # bumped 1.7.0: doctor/digest/re-validate surfaces
 assert_contains skills/log/SKILL.md "references/reshape.md"
 assert_contains skills/status/SKILL.md "references/reconcile.md"

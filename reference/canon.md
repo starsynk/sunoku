@@ -36,14 +36,19 @@ craft.
 
 Every change to a tracked product runs through one test before anything else. Ask it verbatim:
 
-> "after this change, would the PRD or roadmap need editing to stay accurate?"
+> "after this change, would the PRD or the plan need editing beyond a task-status flip — or
+> did it complete a milestone?"
 
 Route the answer into exactly one of three lanes:
 
-- **SILENT** — bugfix, styling, refactor, perf, config, copy. Do nothing. No journal entry, no
-  agent, no file touch.
+- **SILENT** — the change alters implementation, not the product story: the PRD stays accurate
+  as written (bugfixes, styling, refactors, perf, config, copy land here). Work a TASKS.md
+  row already plans is silent too: flip it via `scripts/tasks-set.mjs` and stop; the task
+  trace is the record. No journal entry, no agent, no other file touch.
 - **TRACK** — fits the current direction and changes none of the reshape set. One journal entry,
   plus a task append if a roadmap exists. Zero ceremony: no subagents, no checkpoint gate.
+  Journal grain is milestone/theme, never per task: a completed milestone earns one entry, a
+  single planned task never does.
 - **RESHAPE** — changes one of the reshape set: **{core bet, product scope, architecture, target segment, pricing}**.
   Triggers a scoped re-run, exactly one checkpoint, and a reconcile pass: journal → PRD → roadmap,
   plus a Change Log row.

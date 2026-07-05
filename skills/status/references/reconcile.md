@@ -15,13 +15,17 @@ per the Disclosure map.
   RECONCILE hat, scoped per canon Dispatch (absolute `.sunoku/` path, the exact sha range to
   diff, the exact report/fragment path to write, sentinel+summary obligation) rather than
   reading the whole diff yourself.
-- **Group** the resulting changes into coherent units (inline or from the dispatched report).
-- Run **each group** through the same triage `sunoku:log` uses: SILENT (skip, note nothing) /
-  TRACK (append one journal entry per group, task row if applicable) / RESHAPE (invoke the
-  `sunoku:log` skill's RESHAPE procedure in full for that group — blast radius, owning-agent
-  re-dispatch only, one checkpoint per RESHAPE group covering that group's full delta).
-  Multiple RESHAPE groups in one reconcile get one checkpoint each, never combined into a
-  single omnibus checkpoint.
+- **Group** the resulting changes into coherent units (inline or from the dispatched report) —
+  at milestone/theme grain, never per task: commits landing planned TASKS.md work form one
+  group per milestone or theme, not one group per task.
+- Run **each group** through the same triage `sunoku:log` uses: SILENT (skip, note nothing —
+  a group that only lands planned TASKS.md work is SILENT; the status flips in the next bullet
+  are its record, though a milestone those flips complete earns one TRACK entry summarizing
+  what landed and what stayed blocked) / TRACK (append one journal entry per group, task row
+  if applicable) / RESHAPE (invoke the `sunoku:log` skill's RESHAPE procedure in full for that
+  group — blast radius, owning-agent re-dispatch only, one checkpoint per RESHAPE group
+  covering that group's full delta). Multiple RESHAPE groups in one reconcile get one
+  checkpoint each, never combined into a single omnibus checkpoint.
 - **Task statuses** (canon Execution contract): while triaging, when a group's diff shows the
   work of a planned TASKS.md task has landed, flip that row via
   `node "${CLAUDE_PLUGIN_ROOT}/scripts/tasks-set.mjs" --id <id> --status done` (a `doing` row

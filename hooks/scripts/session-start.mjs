@@ -55,9 +55,12 @@ try {
         }
         writeFileSync(join(cacheDir, `session-${input.session_id}`), `${headSha} ${dirty}\n`);
 
-        let ctx = 'Sunoku record active (.sunoku/). After any substantive change ask: would '
-          + 'PRD.md or roadmap need edits to stay accurate? Yes/unsure -> run the sunoku:log '
-          + 'triage. Bugfix/styling/refactor/perf/config/copy -> silent, do nothing.';
+        let ctx = 'Sunoku record active (.sunoku/). The journal tracks the product story, not '
+          + 'the build. After substantive work apply one test: would PRD.md or the plan need '
+          + 'editing beyond a task-status flip, or did a milestone complete? If yes or unsure, '
+          + 'run the sunoku:log triage. Otherwise stay silent however large the diff — '
+          + 'implementation-only work records nothing, and planned TASKS.md work needs only '
+          + 'its status flip via tasks-set.mjs.';
 
         const lastSha = status.last_reconciled_sha ?? '';
         if (lastSha && git(root, ['cat-file', '-e', `${lastSha}^{commit}`]) === null) {

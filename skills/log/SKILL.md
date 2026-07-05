@@ -37,11 +37,16 @@ accurate as it was before the change, no more ceremony than that requires.
      `reference/canon/assumptions.md` and run its Answering lifecycle; the flip still routes
      through the step-4 lanes, but an answer is never SILENT.
 
-4. **Apply the canon Triage test verbatim** — "after this change, would the PRD or roadmap need
-   editing to stay accurate?" — and route into exactly one lane:
-   - **SILENT** — tell the user in one line that this was triaged as silent (bugfix, styling,
-     refactor, perf, config, copy) and stop. No journal entry, no file touch, no agent dispatch.
-     A SILENT change that gets a journal entry is a canon violation, not caution.
+4. **Apply the canon Triage test verbatim** — "after this change, would the PRD or the plan
+   need editing beyond a task-status flip — or did it complete a milestone?" — and route into
+   exactly one lane:
+   - **SILENT** — the change alters implementation, not the product story: the PRD stays
+     accurate as written (bugfixes, styling, refactors, perf, config, copy — and work a
+     TASKS.md row already plans). Tell the user in one line and stop. Planned task work gets
+     exactly one write, `scripts/tasks-set.mjs --id <id> --status done`: the task trace is the
+     record. No journal entry, no other file touch, no agent dispatch. A SILENT change that
+     gets a journal entry is a canon violation, not caution — journal grain is milestone/theme
+     (canon Triage), never one entry per task.
    - **TRACK** — append one journal entry (format in step 5). If a roadmap exists
      (`.sunoku/ROADMAP.md` / `TASKS.md` present and not stub-sentineled) and the work is
      genuinely new in-scope work (work consistent with the current scope — distinct from a
@@ -71,6 +76,10 @@ accurate as it was before the change, no more ceremony than that requires.
    rollover into `.sunoku/journal/<year>.md` when needed, and refreshes the status.json
    summary fields in the canonical serialization. Optional flags: `--tags "a, b"` (later
    retrieval via `report.mjs --tag`) and `--by <name>` (attribution on team repos).
+
+   **What stays one line, Why a few sentences.** The journal is a product chronicle, not a
+   build log: test counts, file inventories, and green-suite recitals belong in the commit
+   the Refs field cites. A What needing a paragraph is task-grained — wrong grain.
 
 6. **RESHAPE procedure** — load the canon section files the Disclosure map names for
    "log — RESHAPE", then read `${CLAUDE_PLUGIN_ROOT}/skills/log/references/reshape.md` and

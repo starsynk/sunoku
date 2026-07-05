@@ -40,7 +40,9 @@ try {
               hookEventName: 'Stop',
               additionalContext: 'Sunoku: code changed in this session but the journal did not. '
                 + 'Run the sunoku:log triage on the work from this session now. SILENT is a valid '
-                + 'outcome; if the PRD or roadmap would need edits to stay accurate, capture them.',
+                + 'outcome — planned TASKS.md task work needs only its status flip (tasks-set.mjs), '
+                + 'never a journal entry. Journal only if the PRD or the plan would need editing '
+                + 'beyond a status flip, or a milestone completed.',
             },
           })}\n`);
         }
