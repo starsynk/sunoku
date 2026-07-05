@@ -48,6 +48,7 @@ if (values.add) {
   }
   validate(row);
   const rows = readJsonl(path);
+  if (row.id !== undefined && rows.some((r) => r.id === row.id)) die(`duplicate id: ${row.id}`);
   row.id ??= nextTaskId(rows, row.type);
   appendJsonl(path, row);
   process.stdout.write(JSON.stringify(row) + '\n');

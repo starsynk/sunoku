@@ -37,6 +37,7 @@ if (values.add) {
   if (!STAKES.includes(row.stakes)) die(`invalid stakes: ${row.stakes} (${STAKES.join('|')})`);
   row.asked ??= todayLocal();
   const rows = readJsonl(path);
+  if (row.id !== undefined && rows.some((r) => r.id === row.id)) die(`duplicate id: ${row.id}`);
   row.id ??= nextTaskId(rows, 'decision');
   appendJsonl(path, row);
   process.stdout.write(JSON.stringify(row) + '\n');
