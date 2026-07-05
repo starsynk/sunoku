@@ -23,10 +23,13 @@ only writes this skill ever makes are the mute/unmute flag flips.
    1. High-stakes open decision → prompt to answer it, the row's `default` presented as
       "(Recommended)" first. Answers route through `sunoku:prd` (reshape) when they change the
       PRD; otherwise resolve directly via `decisions.mjs --resolve`.
-   2. `prd_stub` true, or staleness signals the PRD lags the code → point to `sunoku:prd`.
-   3. Ready tasks exist → report the frontier; any executor works it — Sunoku never executes.
-   4. Live record, no tasks → mention `sunoku:plan` is available.
-   5. Otherwise: nothing needs attention — say so.
+   2. Lifecycle is not `live` and `prd_stub` is false (an init run was interrupted after PRD
+      approval) → offer go-live:
+      `node "${CLAUDE_PLUGIN_ROOT}/scripts/status-write.mjs" --set lifecycle=live --set tracking=true`.
+   3. `prd_stub` true, or staleness signals the PRD lags the code → point to `sunoku:prd`.
+   4. Ready tasks exist → report the frontier; any executor works it — Sunoku never executes.
+   5. Live record, no tasks → mention `sunoku:plan` is available.
+   6. Otherwise: nothing needs attention — say so.
 4. Mute/unmute on explicit request:
    `node "${CLAUDE_PLUGIN_ROOT}/scripts/status-write.mjs" --set tracking=false` (or `true`);
    confirm the new state in one line.

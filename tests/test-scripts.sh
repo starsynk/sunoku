@@ -203,5 +203,15 @@ node "$Q" >/dev/null 2>&1
 assert_exitn $? "query: no flags dies"
 unset CLAUDE_PROJECT_DIR
 
+# --- duplicate id guards ---
+D="$(mktemp -d)"; mkrecord "$D"; export CLAUDE_PROJECT_DIR="$D"
+node "$S/tasks.mjs" --add '{"type":"task","title":"a","discipline":"backend","size":"S"}' >/dev/null
+node "$S/tasks.mjs" --add '{"type":"task","id":"T-001","title":"b","discipline":"backend","size":"S"}' >/dev/null 2>&1
+assert_exitn $? "tasks: duplicate explicit id rejected"
+node "$S/decisions.mjs" --add '{"question":"q","by":"prd"}' >/dev/null
+node "$S/decisions.mjs" --add '{"question":"q2","id":"D-001","by":"prd"}' >/dev/null 2>&1
+assert_exitn $? "decisions: duplicate explicit id rejected"
+unset CLAUDE_PROJECT_DIR
+
 echo; echo "test-scripts: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ] || exit 1

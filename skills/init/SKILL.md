@@ -25,7 +25,8 @@ application code and never touches anything outside `.sunoku/`.
    go/no-go recommendation as the checkpoint, recommended option first:
    - **NO-GO accepted** → delete the `.sunoku/` directory entirely (`rm -rf .sunoku`), tell the
      user nothing is kept and why that is fine (re-pitching means fresh validation), and stop.
-   - **GO** → invoke `sunoku:prd` (create mode).
+   - **GO** → run `node "${CLAUDE_PLUGIN_ROOT}/scripts/status-write.mjs" --set lifecycle=defining`,
+     then invoke `sunoku:prd` (create mode).
 
 5. **New idea, already committed** → skip validation, invoke `sunoku:prd` (create mode).
 
