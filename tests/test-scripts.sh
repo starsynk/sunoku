@@ -169,5 +169,33 @@ echo "$OUT" | grep -qF '"prd_stub": true' && pass "report: stub detected" || fai
 echo "$OUT" | grep -qF '"tasks": null' && pass "report: no tasks -> null" || fail "report: no tasks -> null" "$OUT"
 unset CLAUDE_PROJECT_DIR
 
+# --- query.mjs (read) ---
+Q="$HERE/skills/read/scripts/query.mjs"
+D="$(mktemp -d)"; mkrecord "$D"; export CLAUDE_PROJECT_DIR="$D"
+node "$S/tasks.mjs" --add '{"type":"milestone","title":"Skeleton"}' >/dev/null
+node "$S/tasks.mjs" --add '{"type":"epic","milestone":"M1","title":"Auth"}' >/dev/null
+node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"Contract","discipline":"backend","size":"S"}' >/dev/null
+node "$S/decisions.mjs" --add '{"question":"Open one?","by":"plan"}' >/dev/null
+printf '# Competitors\n\nAcme dominates.\n' > "$D/.sunoku/research/competitors.md"
+
+OUT="$(node "$Q" --prd Problem)"
+echo "$OUT" | grep -qF 'artifacts rot' && pass "query: prd section" || fail "query: prd section" "$OUT"
+OUT="$(node "$Q" --prd Nonexistent)"
+echo "$OUT" | grep -qF '"prd": null' && pass "query: missing section null" || fail "query: missing section null" "$OUT"
+OUT="$(node "$Q" --changelog --since 2026-06-15)"
+echo "$OUT" | grep -qF 'fast capture' && pass "query: changelog since hits" || fail "query: changelog since hits" "$OUT"
+echo "$OUT" | grep -qF 'teams tier' && fail "query: changelog since excludes" || pass "query: changelog since excludes"
+OUT="$(node "$Q" --tasks ready)"
+echo "$OUT" | grep -qF '"T-001"' && pass "query: tasks ready" || fail "query: tasks ready" "$OUT"
+OUT="$(node "$Q" --decisions open)"
+echo "$OUT" | grep -qF '"Open one?"' && pass "query: decisions open" || fail "query: decisions open" "$OUT"
+OUT="$(node "$Q" --research)"
+echo "$OUT" | grep -qF 'competitors.md' && pass "query: research list" || fail "query: research list" "$OUT"
+OUT="$(node "$Q" --research compet)"
+echo "$OUT" | grep -qF 'Acme dominates' && pass "query: research file content" || fail "query: research file content" "$OUT"
+node "$Q" >/dev/null 2>&1
+assert_exitn $? "query: no flags dies"
+unset CLAUDE_PROJECT_DIR
+
 echo; echo "test-scripts: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ] || exit 1
