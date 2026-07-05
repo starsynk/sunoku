@@ -99,5 +99,32 @@ assert_exitn $? "tasks: invalid type rejected"
 while IFS= read -r line; do echo "$line" | node -e 'JSON.parse(require("fs").readFileSync(0,"utf8"))' 2>/dev/null || { fail "tasks: jsonl valid"; break; }; done < "$D/.sunoku/tasks.jsonl" && pass "tasks: jsonl valid"
 unset CLAUDE_PROJECT_DIR
 
+# --- decisions.mjs ---
+D="$(mktemp -d)"; mkrecord "$D"; export CLAUDE_PROJECT_DIR="$D"
+node "$S/decisions.mjs" --add '{"question":"Pricing: flat or usage-based?","stakes":"high","default":"flat $29/mo","by":"prd"}' >/dev/null
+assert_exit0 $? "decisions: add"
+assert_grepf "$D/.sunoku/decisions.jsonl" '"id":"D-001"' "decisions: id D-001"
+assert_grepf "$D/.sunoku/decisions.jsonl" '"status":"open"' "decisions: default open"
+grep -qE '"asked":"[0-9]{4}-[0-9]{2}-[0-9]{2}"' "$D/.sunoku/decisions.jsonl" && pass "decisions: asked stamped" || fail "decisions: asked stamped"
+
+node "$S/decisions.mjs" --add '{"question":"Low stakes q","by":"research"}' >/dev/null
+OUT="$(node "$S/decisions.mjs" --list high)"
+echo "$OUT" | grep -qF '"D-001"' && pass "decisions: high filter hits" || fail "decisions: high filter hits" "$OUT"
+echo "$OUT" | grep -qF '"D-002"' && fail "decisions: high filter excludes low" || pass "decisions: high filter excludes low"
+
+node "$S/decisions.mjs" --resolve D-001 --answer "flat" >/dev/null
+assert_exit0 $? "decisions: resolve"
+assert_grepf "$D/.sunoku/decisions.jsonl" '"answer":"flat"' "decisions: answer written"
+OUT="$(node "$S/decisions.mjs" --list open)"
+echo "$OUT" | grep -qF '"D-001"' && fail "decisions: resolved leaves open list" || pass "decisions: resolved leaves open list"
+
+node "$S/decisions.mjs" --add '{"question":"x","by":"ceo"}' >/dev/null 2>&1
+assert_exitn $? "decisions: invalid by rejected"
+node "$S/decisions.mjs" --add '{"by":"prd"}' >/dev/null 2>&1
+assert_exitn $? "decisions: question required"
+node "$S/decisions.mjs" --resolve D-999 --answer x >/dev/null 2>&1
+assert_exitn $? "decisions: resolve unknown id dies"
+unset CLAUDE_PROJECT_DIR
+
 echo; echo "test-scripts: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ] || exit 1
