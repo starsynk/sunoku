@@ -81,3 +81,9 @@
 **Why:** Users answering flagged questions had to hunt for the default Sunoku already chose; surfacing the recorded default first and marking it makes confirm-or-flip a one-glance decision. Encoded in canon assumptions (new Asking section), canon checkpoints, and the status skill's answer prompt so all three asking surfaces obey it.
 **Refs:** conversation
 **Tags:** canon, questions, ux
+
+## 2026-07-05 — track
+**What:** Journal grain fixed: planned TASKS.md task work now triages SILENT (status flip via tasks-set.mjs is the record); milestone/theme grain encoded in canon Triage core, both hook nudges, log SILENT lane, and reconcile grouping; journal What bounded to one line.
+**Why:** Dogfooding on peak produced per-task TRACK entries flooding the journal: the milestone-grain rule existed only in execution-contract.md, which no triage path ever loads, and the hook question ('would PRD or roadmap need edits') made every task completion answer yes because its status row went stale. Rule moved into the always-read canon core so log and reconcile inherit it; hooks now name task flips as silent.
+**Refs:** conversation (uncommitted working tree at time of entry)
+**Tags:** canon, triage, record
