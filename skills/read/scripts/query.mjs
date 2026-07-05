@@ -13,7 +13,15 @@ import {
   changelogRows, die, filterDecisions, filterTasks, prdSection, projectRoot, readJsonl, recordPath,
 } from '../../../scripts/lib.mjs';
 
+const argv = process.argv.slice(2);
+// `--research` may come with no value: give it an empty one so parseArgs stays strict-parseable.
+const ri = argv.indexOf('--research');
+if (ri !== -1 && (ri === argv.length - 1 || argv[ri + 1].startsWith('--'))) {
+  argv.splice(ri + 1, 0, '');
+}
+
 const { values } = parseArgs({
+  args: argv,
   options: {
     tasks: { type: 'string' },
     decisions: { type: 'string' },
@@ -22,8 +30,6 @@ const { values } = parseArgs({
     prd: { type: 'string' },
     research: { type: 'string' },
   },
-  // `--research` with no value: tolerate by pre-scanning argv below.
-  strict: false,
 });
 if (values.since && !/^\d{4}-\d{2}-\d{2}$/.test(values.since)) {
   die(`invalid --since: ${values.since} (YYYY-MM-DD)`);
@@ -55,13 +61,14 @@ if (values.research !== undefined) {
   asked = true;
   const dir = recordPath(root, 'research');
   const files = existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith('.md')).sort() : [];
-  const fragment = typeof values.research === 'string' ? values.research : '';
+  const fragment = values.research;
   if (fragment) {
     const matches = files.filter((f) => f.includes(fragment));
-    out.research_file = matches.length === 1
-      ? { name: matches[0], content: readFileSync(join(dir, matches[0]), 'utf8') }
-      : null;
-    if (matches.length !== 1) out.research = matches;
+    if (matches.length === 1) {
+      out.research_file = { name: matches[0], content: readFileSync(join(dir, matches[0]), 'utf8') };
+    } else {
+      out.research = matches;
+    }
   } else {
     out.research = files;
   }

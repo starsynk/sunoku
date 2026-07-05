@@ -193,6 +193,12 @@ OUT="$(node "$Q" --research)"
 echo "$OUT" | grep -qF 'competitors.md' && pass "query: research list" || fail "query: research list" "$OUT"
 OUT="$(node "$Q" --research compet)"
 echo "$OUT" | grep -qF 'Acme dominates' && pass "query: research file content" || fail "query: research file content" "$OUT"
+OUT="$(node "$Q" --research --changelog)"
+echo "$OUT" | grep -qF 'competitors.md' && pass "query: bare research composes" || fail "query: bare research composes" "$OUT"
+echo "$OUT" | grep -qF '"changelog"' && pass "query: changelog survives bare research" || fail "query: changelog survives bare research" "$OUT"
+OUT="$(node "$Q" --research zzz)"
+echo "$OUT" | grep -qF '"research_file"' && fail "query: no null research_file key" || pass "query: no null research_file key"
+echo "$OUT" | grep -qF '"research": []' && pass "query: no-match returns empty list" || fail "query: no-match returns empty list" "$OUT"
 node "$Q" >/dev/null 2>&1
 assert_exitn $? "query: no flags dies"
 unset CLAUDE_PROJECT_DIR
