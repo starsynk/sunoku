@@ -126,5 +126,24 @@ node "$S/decisions.mjs" --resolve D-999 --answer x >/dev/null 2>&1
 assert_exitn $? "decisions: resolve unknown id dies"
 unset CLAUDE_PROJECT_DIR
 
+# --- scaffold.mjs (init) ---
+SCAF="$HERE/skills/init/scripts/scaffold.mjs"
+D="$(mktemp -d)"
+OUT="$(CLAUDE_PROJECT_DIR="$D" node "$SCAF" --product "Zed")"
+assert_exit0 $? "scaffold: fresh run exits 0"
+assert_grepf "$D/.sunoku/status.json" '"product": "Zed"' "scaffold: product written"
+assert_grepf "$D/.sunoku/status.json" '"lifecycle": "defining"' "scaffold: default lifecycle defining"
+assert_grepf "$D/.sunoku/status.json" '"tracking": false' "scaffold: tracking starts false"
+assert_grepf "$D/.sunoku/PRD.md" '<!-- sunoku:stub -->' "scaffold: PRD stub sentinel"
+assert_grepf "$D/.sunoku/.gitattributes" 'merge=union' "scaffold: jsonl merge=union"
+[ -d "$D/.sunoku/research" ] && pass "scaffold: research dir" || fail "scaffold: research dir"
+CLAUDE_PROJECT_DIR="$D" node "$SCAF" --product "Zed" >/dev/null 2>&1
+assert_exitn $? "scaffold: refuses over existing record"
+D2="$(mktemp -d)"
+CLAUDE_PROJECT_DIR="$D2" node "$SCAF" --product "Zed" --lifecycle validating >/dev/null
+assert_grepf "$D2/.sunoku/status.json" '"lifecycle": "validating"' "scaffold: lifecycle flag"
+CLAUDE_PROJECT_DIR="$(mktemp -d)" node "$SCAF" >/dev/null 2>&1
+assert_exitn $? "scaffold: product required"
+
 echo; echo "test-scripts: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ] || exit 1
