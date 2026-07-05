@@ -145,5 +145,29 @@ assert_grepf "$D2/.sunoku/status.json" '"lifecycle": "validating"' "scaffold: li
 CLAUDE_PROJECT_DIR="$(mktemp -d)" node "$SCAF" >/dev/null 2>&1
 assert_exitn $? "scaffold: product required"
 
+# --- report.mjs (status) ---
+REP="$HERE/skills/status/scripts/report.mjs"
+D="$(mktemp -d)"; mkrecord "$D"; export CLAUDE_PROJECT_DIR="$D"
+node "$S/decisions.mjs" --add '{"question":"Big call?","stakes":"high","default":"yes","by":"prd"}' >/dev/null
+node "$S/tasks.mjs" --add '{"type":"milestone","title":"Skeleton"}' >/dev/null
+node "$S/tasks.mjs" --add '{"type":"epic","milestone":"M1","title":"Auth"}' >/dev/null
+node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"Contract","discipline":"backend","size":"S"}' >/dev/null
+node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"UI","discipline":"frontend","size":"M","deps":["T-001"]}' >/dev/null
+touch "$D/.sunoku/research/competitors.md"
+OUT="$(cd "$D" && node "$REP")"
+assert_exit0 $? "report: exits 0"
+echo "$OUT" | grep -qF '"product": "Testo"' && pass "report: product" || fail "report: product" "$OUT"
+echo "$OUT" | grep -qF '"open": 1' && pass "report: open decisions" || fail "report: open decisions" "$OUT"
+echo "$OUT" | grep -qF '"Big call?"' && pass "report: high titles" || fail "report: high titles" "$OUT"
+echo "$OUT" | grep -qF '"todo": 2' && pass "report: task counts" || fail "report: task counts" "$OUT"
+echo "$OUT" | grep -qF '"ready": 1' && pass "report: ready frontier" || fail "report: ready frontier" "$OUT"
+echo "$OUT" | grep -qF 'competitors.md' && pass "report: research listed" || fail "report: research listed" "$OUT"
+echo "$OUT" | grep -qF '"prd_stub": false' && pass "report: prd filled" || fail "report: prd filled" "$OUT"
+D2="$(mktemp -d)"; CLAUDE_PROJECT_DIR="$D2" node "$HERE/skills/init/scripts/scaffold.mjs" --product P >/dev/null
+OUT="$(CLAUDE_PROJECT_DIR="$D2" node "$REP")"
+echo "$OUT" | grep -qF '"prd_stub": true' && pass "report: stub detected" || fail "report: stub detected" "$OUT"
+echo "$OUT" | grep -qF '"tasks": null' && pass "report: no tasks -> null" || fail "report: no tasks -> null" "$OUT"
+unset CLAUDE_PROJECT_DIR
+
 echo; echo "test-scripts: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ] || exit 1
