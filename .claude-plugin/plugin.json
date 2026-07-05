@@ -1,8 +1,8 @@
 {
   "name": "sunoku",
   "displayName": "Sunoku",
-  "version": "1.8.1",
-  "description": "The single source of documentation for what is happening to a software project: pre-commitment validation, a living PRD, an optional build plan, and a permanent journal of what changed and why.",
+  "version": "2.0.0",
+  "description": "Skill-based living product record: research, PRD, task breakdown, consent-gated tracking, and fast record retrieval — silent by default.",
   "author": { "name": "Patrick Villanueva", "email": "patrick@webicient.com" },
   "homepage": "https://github.com/starsynk/sunoku",
   "repository": "https://github.com/starsynk/sunoku",
