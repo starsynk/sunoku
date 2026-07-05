@@ -1,32 +1,25 @@
-// Shared internals for the record scripts. Not a command — every entry point imports from here
-// so the canonical status.json serialization has exactly one implementation.
+// Shared record plumbing. Not a command — the record scripts import from here so
+// serialization, JSONL access, id sequencing, and PRD parsing have one implementation.
 import { execFileSync } from 'node:child_process';
-import { readdirSync, readFileSync, renameSync, writeFileSync, existsSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
-export const PLUGIN_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-
+export const LIFECYCLES = ['validating', 'defining', 'live'];
+export const STATUS_KEY_ORDER = ['product', 'one_liner', 'lifecycle', 'tracking', 'created', 'updated'];
+export const TASK_STATUSES = ['todo', 'doing', 'done', 'blocked'];
+export const DISCIPLINES = ['design', 'frontend', 'backend', 'infra', 'qa', 'docs'];
 export const STUB_SENTINEL = '<!-- sunoku:stub -->';
-
-// Canon statusfile.md: exact key order, one key per line, two-space indent. Hooks grep the
-// serialized bytes, so this array is the single source of truth for the file's shape.
-export const KEY_ORDER = [
-  'version', 'sunokuVersion', 'product', 'origin', 'lifecycle', 'tracking',
-  'one_liner', 'open_questions', 'high_stakes', 'last_entry',
-  'last_reconciled_sha', 'created', 'updated',
-];
-
-export const LIFECYCLES = ['validating', 'defining', 'planning', 'live', 'shelved'];
-export const ORIGINS = ['greenfield', 'existing'];
-export const LAST_ENTRY_MAX = 140;
 
 export function projectRoot() {
   return process.env.CLAUDE_PROJECT_DIR || process.cwd();
 }
 
+export function recordPath(root, ...rel) {
+  return join(root, '.sunoku', ...rel);
+}
+
 export function statusPath(root) {
-  return join(root, '.sunoku', 'status.json');
+  return recordPath(root, 'status.json');
 }
 
 export function readStatus(root) {
@@ -39,8 +32,7 @@ export function readStatus(root) {
   }
 }
 
-// All record writes go through this: temp file in the same dir + rename, so a crash
-// mid-write can never leave a half-written status.json/JOURNAL.md behind.
+// Temp file + rename so a crash mid-write never leaves a half-written record file.
 export function writeFileAtomic(path, content) {
   const tmp = `${path}.tmp-${process.pid}`;
   writeFileSync(tmp, content);
@@ -49,23 +41,23 @@ export function writeFileAtomic(path, content) {
 
 export function writeStatus(root, status) {
   const ordered = {};
-  for (const k of KEY_ORDER) if (k in status) ordered[k] = status[k];
+  for (const k of STATUS_KEY_ORDER) if (k in status) ordered[k] = status[k];
   for (const k of Object.keys(status)) if (!(k in ordered)) ordered[k] = status[k];
   writeFileAtomic(statusPath(root), JSON.stringify(ordered, null, 2) + '\n');
   return ordered;
 }
 
-export function pluginVersion() {
-  const p = join(PLUGIN_ROOT, '.claude-plugin', 'plugin.json');
-  return JSON.parse(readFileSync(p, 'utf8')).version;
+// Every status.json write restamps `updated`, never touches `created`.
+export function stampAndWrite(root, status, changes = {}) {
+  return writeStatus(root, { ...status, ...changes, updated: nowIso() });
 }
 
-// ISO8601 without milliseconds, matching the timestamps skills have always written.
 export function nowIso() {
   return new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
 }
 
-export function localDate(d) {
+export function todayLocal() {
+  const d = new Date();
   return [
     d.getFullYear(),
     String(d.getMonth() + 1).padStart(2, '0'),
@@ -73,142 +65,117 @@ export function localDate(d) {
   ].join('-');
 }
 
-export function todayLocal() {
-  return localDate(new Date());
-}
-
-export function readRecordFile(root, rel) {
-  const p = join(root, '.sunoku', rel);
-  return existsSync(p) ? readFileSync(p, 'utf8') : null;
-}
-
 export function isStub(content) {
   return content !== null && content.split('\n', 1)[0].trim() === STUB_SENTINEL;
 }
 
-const ENTRY_HEADER = /^## (\d{4}-\d{2}-\d{2}) — (track|reshape|decision)\s*$/;
+// --- JSONL ---
 
-export function journalEntries(content) {
-  // Returns { header, entries } where header is everything before the first entry and each
-  // entry is the whole block from its `## YYYY-MM-DD — <type>` line to the next one.
-  const lines = content.split('\n');
-  const starts = [];
-  lines.forEach((l, i) => { if (ENTRY_HEADER.test(l)) starts.push(i); });
-  if (starts.length === 0) return { header: content, entries: [] };
-  const header = lines.slice(0, starts[0]).join('\n');
-  const entries = starts.map((s, idx) => {
-    const end = idx + 1 < starts.length ? starts[idx + 1] : lines.length;
-    const m = lines[s].match(ENTRY_HEADER);
-    return { date: m[1], type: m[2], text: lines.slice(s, end).join('\n') };
-  });
-  return { header, entries };
-}
-
-// First prose paragraph of the PRD Problem section, whitespace-collapsed; null while stubbed.
-export function prdProblemParagraph(root) {
-  const prd = readRecordFile(root, 'PRD.md');
-  if (prd === null || isStub(prd)) return null;
-  const lines = prd.split('\n');
-  const start = lines.findIndex((l) => /^## Problem\b/.test(l));
-  if (start === -1) return null;
-  const body = [];
-  for (let i = start + 1; i < lines.length && !/^#{1,6} /.test(lines[i]); i += 1) body.push(lines[i]);
-  return body.join('\n').split(/\n\s*\n/)
-    .map((p) => p.replace(/\s+/g, ' ').trim())
-    .find((p) => p && !p.startsWith('>') && !p.startsWith('<!--')) ?? null;
-}
-
-// One line of a `**Name:** value` entry block ('' when absent).
-export function entryField(text, name) {
-  const m = text.match(new RegExp(`^\\*\\*${name}:\\*\\* (.*)$`, 'm'));
-  return m ? m[1].trim() : '';
-}
-
-// Every journal entry, archives (year files, oldest first) then the live file.
-export function allJournalEntries(root) {
-  const out = [];
-  const dir = join(root, '.sunoku', 'journal');
-  if (existsSync(dir)) {
-    for (const f of readdirSync(dir).filter((n) => n.endsWith('.md')).sort()) {
-      out.push(...journalEntries(readFileSync(join(dir, f), 'utf8')).entries);
-    }
-  }
-  const live = readRecordFile(root, 'JOURNAL.md');
-  if (live !== null && !isStub(live)) out.push(...journalEntries(live).entries);
-  return out;
-}
-
-// Status totals + per-milestone progress from TASKS.md content — shared by report and digest.
-export function taskTables(content) {
-  const counts = { todo: 0, doing: 0, done: 0, blocked: 0 };
-  const milestones = [];
-  let current = null;
-  for (const line of content.split('\n')) {
-    const heading = line.match(/^## (M\d+.*)$/);
-    if (heading) { current = { name: heading[1].trim(), total: 0, done: 0 }; milestones.push(current); continue; }
-    if (/^## /.test(line)) { current = null; continue; }
-    if (!line.startsWith('|')) continue;
-    const cells = line.split('|').map((c) => c.trim()).filter(Boolean);
-    const last = cells[cells.length - 1];
-    if (!(last in counts)) continue;
-    counts[last] += 1;
-    if (current) {
-      current.total += 1;
-      if (last === 'done') current.done += 1;
-    }
-  }
-  return { counts, milestones };
-}
-
-// The four denormalized summary fields, recomputed from their source files (canon statusfile.md).
-export function computeSummary(root, status) {
-  const summary = {};
-
-  summary.one_liner = status.product ?? '';
-  const paragraph = prdProblemParagraph(root);
-  if (paragraph) {
-    const sentence = paragraph.match(/^(.*?\.)(\s|$)/);
-    summary.one_liner = sentence ? sentence[1] : paragraph;
-  }
-
-  const questions = readRecordFile(root, 'QUESTIONS.md');
-  summary.open_questions = 0;
-  summary.high_stakes = 0;
-  if (questions !== null && !isStub(questions)) {
-    for (const line of questions.split('\n')) {
-      if (/^## .*status: open\)/.test(line)) {
-        summary.open_questions += 1;
-        if (/stakes: high, status: open\)/.test(line)) summary.high_stakes += 1;
+export function readJsonl(path) {
+  if (!existsSync(path)) return [];
+  return readFileSync(path, 'utf8')
+    .split('\n')
+    .filter((l) => l.trim())
+    .map((l, i) => {
+      try {
+        return JSON.parse(l);
+      } catch {
+        die(`${path}:${i + 1} is not valid JSON`);
       }
-    }
-  }
-
-  const journal = readRecordFile(root, 'JOURNAL.md');
-  summary.last_entry = '';
-  if (journal !== null && !isStub(journal)) {
-    const { entries } = journalEntries(journal);
-    const last = entries[entries.length - 1];
-    if (last) {
-      const m = last.text.match(/^\*\*What:\*\* (.*)$/m);
-      // The index is for fast reporting, not the story — cap it; the full What stays in the journal.
-      let what = m ? m[1].trim() : '';
-      if (what.length > LAST_ENTRY_MAX) what = `${what.slice(0, LAST_ENTRY_MAX - 1).trimEnd()}…`;
-      summary.last_entry = `${last.date} — ${last.type} — ${what}`.trimEnd();
-    }
-  }
-
-  return summary;
+    });
 }
 
-// Every status.json write restamps `updated` and `sunokuVersion` (canon statusfile.md).
-export function stampAndWrite(root, status, changes = {}) {
-  const next = { ...status, ...changes, sunokuVersion: pluginVersion(), updated: nowIso() };
-  return writeStatus(root, next);
+export function writeJsonl(path, rows) {
+  writeFileAtomic(path, rows.map((r) => JSON.stringify(r)).join('\n') + (rows.length ? '\n' : ''));
+}
+
+export function appendJsonl(path, row) {
+  const rows = readJsonl(path);
+  rows.push(row);
+  writeJsonl(path, rows);
+  return row;
+}
+
+// Id shapes per spec: M1, E-01, T-001, D-001.
+const ID_SHAPE = {
+  milestone: { re: /^M(\d+)$/, make: (n) => `M${n}` },
+  epic: { re: /^E-(\d+)$/, make: (n) => `E-${String(n).padStart(2, '0')}` },
+  task: { re: /^T-(\d+)$/, make: (n) => `T-${String(n).padStart(3, '0')}` },
+  decision: { re: /^D-(\d+)$/, make: (n) => `D-${String(n).padStart(3, '0')}` },
+};
+
+export function nextTaskId(rows, type) {
+  const shape = ID_SHAPE[type] ?? die(`no id shape for type: ${type}`);
+  const max = rows.reduce((m, r) => {
+    const match = typeof r.id === 'string' && r.id.match(shape.re);
+    return match ? Math.max(m, Number(match[1])) : m;
+  }, 0);
+  return shape.make(max + 1);
+}
+
+// --- tasks queries (shared by tasks.mjs --list and read's query.mjs) ---
+
+export function readyTasks(rows) {
+  const done = new Set(rows.filter((r) => r.type === 'task' && r.status === 'done').map((r) => r.id));
+  return rows.filter((r) => r.type === 'task' && r.status === 'todo'
+    && (r.deps ?? []).every((d) => done.has(d)));
+}
+
+export function filterTasks(rows, expr) {
+  if (expr === 'all') return rows;
+  if (expr === 'ready') return readyTasks(rows);
+  const eq = expr.indexOf('=');
+  if (eq === -1) die(`invalid task filter: ${expr} (all|ready|status=X|milestone=X|epic=X)`);
+  const k = expr.slice(0, eq);
+  const v = expr.slice(eq + 1);
+  if (k === 'status') return rows.filter((r) => r.status === v);
+  if (k === 'epic') return rows.filter((r) => r.epic === v || (r.type === 'epic' && r.id === v));
+  if (k === 'milestone') {
+    const epics = new Set(rows.filter((r) => r.type === 'epic' && r.milestone === v).map((r) => r.id));
+    return rows.filter((r) => (r.type === 'task' && epics.has(r.epic))
+      || (r.type === 'epic' && r.milestone === v)
+      || (r.type === 'milestone' && r.id === v));
+  }
+  die(`unknown task filter key: ${k}`);
+}
+
+export function filterDecisions(rows, expr) {
+  if (expr === 'all') return rows;
+  if (expr === 'open' || expr === 'resolved') return rows.filter((r) => r.status === expr);
+  if (expr === 'high') return rows.filter((r) => r.stakes === 'high' && r.status === 'open');
+  die(`invalid decision filter: ${expr} (all|open|resolved|high)`);
+}
+
+// --- PRD parsing (shared by report.mjs and query.mjs) ---
+
+export function prdSection(content, name) {
+  const lines = content.split('\n');
+  const start = lines.findIndex((l) => new RegExp(`^## ${name}\\b`, 'i').test(l));
+  if (start === -1) return null;
+  let end = lines.length;
+  for (let i = start + 1; i < lines.length; i += 1) {
+    if (/^## /.test(lines[i])) { end = i; break; }
+  }
+  return lines.slice(start, end).join('\n').trim();
+}
+
+export function changelogRows(content, since) {
+  const section = prdSection(content, 'Change Log');
+  if (!section) return [];
+  return section.split('\n')
+    .filter((l) => /^\|\s*\d{4}-\d{2}-\d{2}\s*\|/.test(l))
+    .map((l) => {
+      const c = l.split('|').map((s) => s.trim());
+      return { date: c[1], change: c[2], why: c[3], trigger: c[4] ?? '' };
+    })
+    .filter((r) => !since || r.date >= since);
 }
 
 export function git(root, args) {
   try {
-    return execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' }).trim();
+    return execFileSync('git', ['-C', root, ...args], {
+      encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
   } catch {
     return null;
   }
