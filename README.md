@@ -50,6 +50,32 @@ fast.
 Sunoku plans and documents. It never writes application code, never executes tasks, and never
 syncs the record anywhere.
 
+## Loop
+
+Sunoku holds the backlog and state; it never executes. Claude Code's `/loop` drives whatever
+executor you prefer over the record.
+
+**Drain the backlog (self-paced):**
+
+```
+/loop run sunoku:status, take a ready task, build it, mark it done, repeat until the frontier is empty
+```
+
+Each tick reads the frontier from `sunoku:status`, builds one task (your executor, not Sunoku),
+flips it done via `tasks.mjs --set T-nnn status=done`.
+
+**Watch from the side (fixed interval):** `/loop 15m /sunoku:status` — dashboard on a cadence,
+silent unless something needs you.
+
+**Opinionated build loop** (needs the `superpowers` plugin):
+
+```
+/loop Pick a task from /sunoku:status. Never skip these superpowers steps: run
+superpowers:brainstorming and take the recommended approach; use
+superpowers:subagent-driven-development to build it; write specs and plans automatically.
+Maximum 10 tasks, then stop.
+```
+
 ## Tests
 
 ```
