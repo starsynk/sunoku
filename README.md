@@ -67,13 +67,34 @@ flips it done via `tasks.mjs --set T-nnn status=done`.
 **Watch from the side (fixed interval):** `/loop 15m /sunoku:status` — dashboard on a cadence,
 silent unless something needs you.
 
-**Opinionated build loop** (needs the `superpowers` plugin):
+**Opinionated build loop** (needs the `superpowers` plugin). Three variants by how the work
+lands:
+
+*Build in place* — no branch ceremony:
 
 ```
 /loop Pick a task from /sunoku:status. Never skip these superpowers steps: run
 superpowers:brainstorming and take the recommended approach; use
-superpowers:subagent-driven-development to build it; write specs and plans automatically.
-Maximum 10 tasks, then stop.
+superpowers:subagent-driven-development to build it; write specs and plans automatically. Do
+not create branches or worktrees — stay on the current branch. Maximum 10 tasks, then stop.
+```
+
+*One branch, one PR* — all tasks share a branch, single PR at the end:
+
+```
+/loop Pick a task from /sunoku:status. On the first task create a branch; commit each task to
+it. Never skip these superpowers steps: run superpowers:brainstorming and take the recommended
+approach; use superpowers:subagent-driven-development to build it; write specs and plans
+automatically. Maximum 10 tasks, then open one PR and stop.
+```
+
+*Branch + PR per task* — isolate every task (fits Sunoku's parallel-ready backlog):
+
+```
+/loop Pick a task from /sunoku:status. Create a fresh branch off main for the task. Never skip
+these superpowers steps: run superpowers:brainstorming and take the recommended approach; use
+superpowers:subagent-driven-development to build it; write specs and plans automatically. Open
+a PR for the task and return to main. Maximum 10 tasks, then stop.
 ```
 
 ## Tests
