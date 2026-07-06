@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.1.0 — 2026-07-06
+
+- `read` and `track` are now hidden from the `/` menu via `user-invocable: false` — model-only
+  invocation is enforced by frontmatter, not just prose. `init` stays user-only via
+  `disable-model-invocation`.
+- README: new `## Loop` section documents `/loop` with Sunoku — self-paced backlog drain,
+  fixed-interval watch, and three `superpowers` build-loop variants (in-place, one-PR,
+  PR-per-task).
+
 ## 2.0.0 — 2026-07-05
 
 Breaking rewrite. History before 2.0.0 is intentionally cleared.
