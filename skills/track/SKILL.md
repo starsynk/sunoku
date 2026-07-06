@@ -1,6 +1,7 @@
 ---
 name: track
 description: Internal — model-invoked consent gate, not a user command. Fires when a work prompt would reshape the PRD (scope, core bet, architecture, target segment, pricing) on a live record. Asks the user before any tracking; on consent hands off to sunoku:prd reshape mode.
+user-invocable: false
 ---
 
 ## Mission

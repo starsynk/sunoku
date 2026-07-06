@@ -1,6 +1,7 @@
 ---
 name: read
 description: Internal — model-invoked record retrieval, not a user command. Fires when the user asks what the record says: PRD content, decision history, task state, research findings, "why did we drop X?", "what changed since May?". Answers strictly from the record with citations.
+user-invocable: false
 ---
 
 ## Mission
