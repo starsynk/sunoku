@@ -2,13 +2,17 @@
 // The only sanctioned way to write .sunoku/status.json. Restamps `updated`, never `created`.
 //
 //   node status-write.mjs --set lifecycle=live --set tracking=true
+//   node status-write.mjs --touch   (restamp `updated` only — marks the record as freshly reviewed)
 import { parseArgs } from 'node:util';
 import { die, LIFECYCLES, projectRoot, readStatus, stampAndWrite } from './lib.mjs';
 
 const { values } = parseArgs({
-  options: { set: { type: 'string', multiple: true, default: [] } },
+  options: {
+    set: { type: 'string', multiple: true, default: [] },
+    touch: { type: 'boolean', default: false },
+  },
 });
-if (values.set.length === 0) die('nothing to do: pass --set key=value');
+if (values.set.length === 0 && !values.touch) die('nothing to do: pass --set key=value or --touch');
 
 const SETTABLE = {
   product: (v) => v,

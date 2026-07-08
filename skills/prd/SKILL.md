@@ -32,6 +32,7 @@ All references live under `${CLAUDE_PLUGIN_ROOT}/skills/prd/references/`.
   (`decisions.mjs --add`, `"by":"prd"`); the run continues without waiting.
 - A user answer that changes the PRD is a reshape; after patching, resolve the row
   (`decisions.mjs --resolve <id> --answer "..."`).
-- After any approved draft or patch: update the one-liner if it changed —
-  `node "${CLAUDE_PLUGIN_ROOT}/scripts/status-write.mjs" --set one_liner="..."`.
+- After any approved draft or patch, restamp the record so staleness counting resets:
+  `node "${CLAUDE_PLUGIN_ROOT}/scripts/status-write.mjs" --set one_liner="..."` when the
+  one-liner changed, `--touch` otherwise.
 - Never write application code; never touch files outside `.sunoku/`.

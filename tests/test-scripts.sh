@@ -63,6 +63,13 @@ assert_exitn $? "status-write: unknown key rejected"
 CLAUDE_PROJECT_DIR="$(mktemp -d)" node "$S/status-write.mjs" --set tracking=false >/dev/null 2>&1
 assert_exitn $? "status-write: no record dies"
 
+D2="$(mktemp -d)"; mkrecord "$D2"
+CLAUDE_PROJECT_DIR="$D2" node "$S/status-write.mjs" --touch >/dev/null
+assert_exit0 $? "status-write: touch exits 0"
+assert_nogrepf "$D2/.sunoku/status.json" '"updated": "2026-07-01T00:00:00Z"' "status-write: touch restamps updated"
+assert_grepf "$D2/.sunoku/status.json" '"one_liner": "Testo does things."' "status-write: touch preserves fields"
+assert_grepf "$D2/.sunoku/status.json" '"created": "2026-07-01T00:00:00Z"' "status-write: touch preserves created"
+
 # key order canonical: product first line after brace
 head -2 "$D/.sunoku/status.json" | tail -1 | grep -qF '"product"' && pass "status-write: key order" || fail "status-write: key order"
 

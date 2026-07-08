@@ -12,7 +12,8 @@ segment, pricing — from the user directly or a sunoku:track handoff).
    - Apply the section edits.
    - Append one Change Log row: `| <today> | <what changed> | <why — the story-changing part> | <user|track|D-nnn> |`.
    - Resolve any decision row this answers (`decisions.mjs --resolve`).
-   - `status-write.mjs --set one_liner="..."` if the one-liner changed.
+   - `status-write.mjs --set one_liner="..."` if the one-liner changed, `--touch` otherwise —
+     every approved patch restamps `updated`.
 4. If a task breakdown exists (`.sunoku/tasks.jsonl` non-empty), say in one line whether the
    reshape orphans or invalidates any epic and that `sunoku:plan` can re-plan it — do not
    re-plan unasked.

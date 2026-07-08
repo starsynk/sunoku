@@ -17,8 +17,9 @@ only writes this skill ever makes are the mute/unmute flag flips.
    - one-liner, lifecycle + tracking in plain words;
    - open decisions (count; name high-stakes ones with their recommended defaults);
    - tasks when present: counts, ready frontier, per-milestone progress ("M1 3/5 done");
-   - staleness when it signals: uncommitted work or commits landed since the record was last
-     touched.
+   - staleness when it signals, as context only: uncommitted work or commits landed since the
+     record was last touched. Commits landing is executors working the plan, not PRD drift —
+     never turn staleness into a suggestion; only the user decides the PRD drifted.
 3. Suggest ONE next action, first match wins:
    1. High-stakes open decision → prompt to answer it, the row's `default` presented as
       "(Recommended)" first. Answers route through `sunoku:prd` (reshape) when they change the
@@ -26,7 +27,9 @@ only writes this skill ever makes are the mute/unmute flag flips.
    2. Lifecycle is not `live` and `prd_stub` is false (an init run was interrupted after PRD
       approval) → offer go-live:
       `node "${CLAUDE_PLUGIN_ROOT}/scripts/status-write.mjs" --set lifecycle=live --set tracking=true`.
-   3. `prd_stub` true, or staleness signals the PRD lags the code → point to `sunoku:prd`.
+   3. `prd_stub` true → point to `sunoku:prd`. Staleness alone never triggers this — scope
+      changes are caught by `sunoku:track` at prompt time, and a refresh is available on
+      request when the user judges the PRD drifted.
    4. Ready tasks exist → report the frontier; any executor works it — Sunoku never executes.
    5. Live record, no tasks → mention `sunoku:plan` is available.
    6. Otherwise: nothing needs attention — say so.

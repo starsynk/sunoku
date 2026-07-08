@@ -12,6 +12,7 @@
 4. On approval: Change Log row `| <today> | Initial PRD (reconstructed) | <why> | existing |`;
    update `one_liner`.
 
-This mode is also the staleness answer: when `sunoku:status` reports the PRD has drifted from
-the code, re-run steps 1–4 as a refresh — the diff against the old PRD becomes reshape-style
-Change Log rows instead of the initial row.
+This mode is also the refresh path: when the user judges the PRD has drifted from the code
+(out-of-band commits, work done without tracking), re-run steps 1–4 — the diff against the old
+PRD becomes reshape-style Change Log rows instead of the initial row. Only the user makes that
+call; `sunoku:status` narrates staleness but never requests a refresh.
