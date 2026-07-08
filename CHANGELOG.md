@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.1.1 — 2026-07-09
+
+- `status` no longer suggests a PRD refresh from staleness — commits landing is executors
+  working the plan, not PRD drift. Staleness is narrate-only; only a stub PRD routes to
+  `sunoku:prd`. Drift calls belong to the user (refresh on request) and to `sunoku:track` at
+  prompt time.
+- New `status-write.mjs --touch` restamps `updated` with no other change; `prd` flows now
+  restamp after every approved draft/patch, so staleness counting resets even when the
+  one-liner is unchanged.
+
 ## 2.1.0 — 2026-07-06
 
 - `read` and `track` are now hidden from the `/` menu via `user-invocable: false` — model-only
