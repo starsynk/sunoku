@@ -1,7 +1,7 @@
 {
   "name": "sunoku",
   "displayName": "Sunoku",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Skill-based living product record: research, PRD, task breakdown, consent-gated tracking, and fast record retrieval — silent by default.",
   "author": { "name": "Patrick Villanueva", "email": "patrick@webicient.com" },
   "homepage": "https://github.com/starsynk/sunoku",

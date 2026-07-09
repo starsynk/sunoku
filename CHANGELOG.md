@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.2 — 2026-07-10
+
+- README superpowers loop prompts no longer force subagent-driven-development for every task:
+  build inline or with subagents, taking the recommended option; specs and plans are written
+  only when needed.
+
 ## 2.1.1 — 2026-07-09
 
 - `status` no longer suggests a PRD refresh from staleness — commits landing is executors
