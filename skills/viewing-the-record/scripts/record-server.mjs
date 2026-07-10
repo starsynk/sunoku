@@ -145,9 +145,14 @@ if (!values.serve) {
   });
 
   function shutdown() {
-    try { unlinkSync(infoPath); } catch { /* already gone */ }
+    // Only remove the info file if it still points at this process — a lost
+    // cold-start race means another live server may own it by now.
+    try {
+      if (JSON.parse(readFileSync(infoPath, 'utf8')).pid === process.pid) unlinkSync(infoPath);
+    } catch { /* already gone or unreadable */ }
     process.exit(0);
   }
+  process.on('SIGTERM', shutdown);
 
   // Idle watchdog: an open SSE connection counts as activity.
   setInterval(() => {
@@ -167,7 +172,7 @@ if (!values.serve) {
       url: `http://127.0.0.1:${port}/?key=${key}`,
       started: new Date().toISOString(),
     };
-    writeFileSync(infoPath, JSON.stringify(info) + '\n');
+    writeFileSync(infoPath, JSON.stringify(info) + '\n', { mode: 0o600 });
     armWatch();
   });
 }
