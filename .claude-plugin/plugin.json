@@ -2,7 +2,7 @@
   "name": "sunoku",
   "displayName": "Sunoku",
   "version": "2.1.2",
-  "description": "Skill-based living product record: research, PRD, task breakdown, consent-gated tracking, and fast record retrieval — silent by default.",
+  "description": "Living product record: a gateway skill routes product work to chained process skills — researching, writing the PRD, planning the work, consent-gated tracking, fast record retrieval. Silent by default.",
   "author": { "name": "Patrick Villanueva", "email": "patrick@webicient.com" },
   "homepage": "https://github.com/starsynk/sunoku",
   "repository": "https://github.com/starsynk/sunoku",
