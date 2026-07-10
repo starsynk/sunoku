@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.1.0 — 2026-07-10
+
+- **Task descriptions.** Task rows now require a `description` — self-contained enough
+  for an executor to act on (what, done-when, constraints, PRD ref). Enforced on
+  `tasks.mjs --add` for `type:"task"` only; existing records stay valid. `description`
+  is settable (`--set T-nnn description=...`). The planning methodology writes them; the
+  status frontier surfaces them (`report.mjs` gains a `frontier` array of
+  id/title/description).
+- **New skill: `sunoku:viewing-the-record`.** Renders `tasks.jsonl` + `decisions.jsonl`
+  into one self-contained `.sunoku/record.html` (milestone → epic → task hierarchy with
+  descriptions, status badges, filters; decisions with stakes/status/answers) and opens
+  it in the browser. Read-only snapshot — no server, no writes; refresh = re-run
+  `record-html.mjs`.
+
 ## 3.0.0 — 2026-07-10
 
 Full transformation to a gateway-driven skill architecture. Breaking: skill names change and
