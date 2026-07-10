@@ -80,8 +80,8 @@ assert_exit0 $? "tasks: add milestone"
 assert_grepf "$D/.sunoku/tasks.jsonl" '"id":"M1"' "tasks: milestone id M1"
 node "$S/tasks.mjs" --add '{"type":"epic","milestone":"M1","title":"Auth","prd":["F-1"]}' >/dev/null
 assert_grepf "$D/.sunoku/tasks.jsonl" '"id":"E-01"' "tasks: epic id E-01"
-node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"API contract","discipline":"backend","size":"S"}' >/dev/null
-node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"Frontend","discipline":"frontend","size":"M","deps":["T-001"]}' >/dev/null
+node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"API contract","description":"Define the auth API contract: endpoints, request/response shapes, error codes. Done when the OpenAPI stub is agreed.","discipline":"backend","size":"S"}' >/dev/null
+node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"Frontend","description":"Build the login form against the mocked contract. Done when submit round-trips against the mock.","discipline":"frontend","size":"M","deps":["T-001"]}' >/dev/null
 assert_grepf "$D/.sunoku/tasks.jsonl" '"id":"T-002"' "tasks: task ids sequence"
 assert_grepf "$D/.sunoku/tasks.jsonl" '"status":"todo"' "tasks: default status todo"
 
@@ -99,6 +99,17 @@ echo "$OUT" | grep -qF '"T-002"' && pass "tasks: milestone join filter" || fail 
 
 node "$S/tasks.mjs" --set T-001 status=bogus >/dev/null 2>&1
 assert_exitn $? "tasks: invalid status rejected"
+
+node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"No desc","discipline":"backend","size":"S"}' >/dev/null 2>&1
+assert_exitn $? "tasks: task without description rejected"
+node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"Empty desc","description":"","discipline":"backend","size":"S"}' >/dev/null 2>&1
+assert_exitn $? "tasks: task with empty description rejected"
+node "$S/tasks.mjs" --add '{"type":"milestone","title":"No-desc milestone"}' >/dev/null 2>&1
+assert_exit0 $? "tasks: milestone without description still fine"
+node "$S/tasks.mjs" --set T-001 description="Updated: also cover refresh tokens." >/dev/null
+assert_exit0 $? "tasks: set description"
+assert_grepf "$D/.sunoku/tasks.jsonl" 'also cover refresh tokens' "tasks: description updated"
+
 node "$S/tasks.mjs" --add '{"type":"task","title":"x","discipline":"ops"}' >/dev/null 2>&1
 assert_exitn $? "tasks: invalid discipline rejected"
 node "$S/tasks.mjs" --add '{"type":"phase","title":"x"}' >/dev/null 2>&1
@@ -158,8 +169,8 @@ D="$(mktemp -d)"; mkrecord "$D"; export CLAUDE_PROJECT_DIR="$D"
 node "$S/decisions.mjs" --add '{"question":"Big call?","stakes":"high","default":"yes","by":"prd"}' >/dev/null
 node "$S/tasks.mjs" --add '{"type":"milestone","title":"Skeleton"}' >/dev/null
 node "$S/tasks.mjs" --add '{"type":"epic","milestone":"M1","title":"Auth"}' >/dev/null
-node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"Contract","discipline":"backend","size":"S"}' >/dev/null
-node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"UI","discipline":"frontend","size":"M","deps":["T-001"]}' >/dev/null
+node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"Contract","description":"Do the thing. Done when tested.","discipline":"backend","size":"S"}' >/dev/null
+node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"UI","description":"Build the UI layer.","discipline":"frontend","size":"M","deps":["T-001"]}' >/dev/null
 touch "$D/.sunoku/research/competitors.md"
 OUT="$(cd "$D" && node "$REP")"
 assert_exit0 $? "report: exits 0"
@@ -181,7 +192,7 @@ Q="$HERE/skills/querying-the-record/scripts/query.mjs"
 D="$(mktemp -d)"; mkrecord "$D"; export CLAUDE_PROJECT_DIR="$D"
 node "$S/tasks.mjs" --add '{"type":"milestone","title":"Skeleton"}' >/dev/null
 node "$S/tasks.mjs" --add '{"type":"epic","milestone":"M1","title":"Auth"}' >/dev/null
-node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"Contract","discipline":"backend","size":"S"}' >/dev/null
+node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"Contract","description":"Define the contract.","discipline":"backend","size":"S"}' >/dev/null
 node "$S/decisions.mjs" --add '{"question":"Open one?","by":"plan"}' >/dev/null
 printf '# Competitors\n\nAcme dominates.\n' > "$D/.sunoku/research/competitors.md"
 
@@ -212,8 +223,8 @@ unset CLAUDE_PROJECT_DIR
 
 # --- duplicate id guards ---
 D="$(mktemp -d)"; mkrecord "$D"; export CLAUDE_PROJECT_DIR="$D"
-node "$S/tasks.mjs" --add '{"type":"task","title":"a","discipline":"backend","size":"S"}' >/dev/null
-node "$S/tasks.mjs" --add '{"type":"task","id":"T-001","title":"b","discipline":"backend","size":"S"}' >/dev/null 2>&1
+node "$S/tasks.mjs" --add '{"type":"task","title":"a","description":"Task a.","discipline":"backend","size":"S"}' >/dev/null
+node "$S/tasks.mjs" --add '{"type":"task","id":"T-001","title":"b","description":"Task b.","discipline":"backend","size":"S"}' >/dev/null 2>&1
 assert_exitn $? "tasks: duplicate explicit id rejected"
 node "$S/decisions.mjs" --add '{"question":"q","by":"prd"}' >/dev/null
 node "$S/decisions.mjs" --add '{"question":"q2","id":"D-001","by":"prd"}' >/dev/null 2>&1
