@@ -1,5 +1,22 @@
 # Changelog
 
+## 3.1.0 — 2026-07-10
+
+- **New skill: `sunoku:pruning-the-record`.** User command only (`disable-model-invocation`,
+  never suggested). Deletes what the record no longer needs to stay truthful: fully-done
+  milestones (`tasks.mjs --prune-milestone` — refuses partial milestones and live
+  cross-milestone deps), resolved decisions whose answers are absorbed into the PRD
+  (`decisions.mjs --prune`; the skill quotes the PRD/Change Log line as evidence, keeps
+  unabsorbed ones with an absorb-first offer), and superseded research files. Deleted rows
+  echo to stdout; git history is the archive. The PRD Change Log is never pruned.
+- **Live record viewer.** `sunoku:viewing-the-record` now serves the record from a small
+  local server instead of writing a `.sunoku/record.html` snapshot: open tabs reload
+  themselves when `tasks.jsonl` / `decisions.jsonl` / `status.json` change (SSE +
+  `fs.watch`). Renderer extracted to a pure `render.mjs`; new self-daemonizing
+  `record-server.mjs` binds 127.0.0.1 on an ephemeral port, key-gates every request
+  (constant-time compare), reuses one server per project, and stops itself ~15 minutes
+  after the last tab closes. Still read-only — status flips go through `tasks.mjs`.
+
 ## 3.0.1 — 2026-07-10
 
 - **Task descriptions.** Task rows now require a `description` — self-contained enough
