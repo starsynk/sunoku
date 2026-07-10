@@ -10,8 +10,8 @@ assert_nofile()  { [ -e "$1" ] && fail "should not exist: $1" || ok "absent: $1"
 assert_contains(){ grep -qF -- "$2" "$1" 2>/dev/null && ok "$1 contains: $2" || fail "$1 missing: $2"; }
 assert_absent()  { grep -qF -- "$2" "$1" 2>/dev/null && fail "$1 still contains: $2" || ok "$1 clean of: $2"; }
 
-# Nine skills (gateway + eight processes), each self-contained
-SKILLS="using-sunoku starting-a-product researching writing-the-prd planning-the-work tracking-changes checking-status querying-the-record viewing-the-record"
+# Ten skills (gateway + nine processes), each self-contained
+SKILLS="using-sunoku starting-a-product researching writing-the-prd planning-the-work tracking-changes checking-status querying-the-record viewing-the-record pruning-the-record"
 for s in $SKILLS; do
   assert_file "skills/$s/SKILL.md"
 done
@@ -24,6 +24,7 @@ assert_nofile .sunoku
 
 # Invocability flags
 assert_contains skills/starting-a-product/SKILL.md "disable-model-invocation: true"
+assert_contains skills/pruning-the-record/SKILL.md "disable-model-invocation: true"
 assert_contains skills/tracking-changes/SKILL.md "user-invocable: false"
 assert_contains skills/querying-the-record/SKILL.md "user-invocable: false"
 
