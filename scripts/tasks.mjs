@@ -21,7 +21,7 @@ const { values, positionals } = parseArgs({
 
 const path = recordPath(projectRoot(), 'tasks.jsonl');
 const TYPES = ['milestone', 'epic', 'task'];
-const SETTABLE = ['status', 'title', 'size', 'discipline'];
+const SETTABLE = ['status', 'title', 'size', 'discipline', 'description'];
 
 function validate(row) {
   if (row.status !== undefined && !TASK_STATUSES.includes(row.status)) {
@@ -41,6 +41,7 @@ if (values.add) {
   }
   if (!TYPES.includes(row.type)) die(`invalid type: ${row.type} (${TYPES.join('|')})`);
   if (!row.title) die('title is required');
+  if (row.type === 'task' && !row.description) die('description is required for tasks');
   if (row.type !== 'epic') row.status ??= 'todo';
   if (row.type === 'task') {
     row.deps ??= [];
