@@ -179,6 +179,8 @@ echo "$OUT" | grep -qF '"open": 1' && pass "report: open decisions" || fail "rep
 echo "$OUT" | grep -qF '"Big call?"' && pass "report: high titles" || fail "report: high titles" "$OUT"
 echo "$OUT" | grep -qF '"todo": 2' && pass "report: task counts" || fail "report: task counts" "$OUT"
 echo "$OUT" | grep -qF '"ready": 1' && pass "report: ready frontier" || fail "report: ready frontier" "$OUT"
+echo "$OUT" | grep -qF '"frontier"' && pass "report: frontier rows" || fail "report: frontier rows" "$OUT"
+echo "$OUT" | grep -qF 'Do the thing' && pass "report: frontier has description" || fail "report: frontier has description" "$OUT"
 echo "$OUT" | grep -qF 'competitors.md' && pass "report: research listed" || fail "report: research listed" "$OUT"
 echo "$OUT" | grep -qF '"prd_stub": false' && pass "report: prd filled" || fail "report: prd filled" "$OUT"
 D2="$(mktemp -d)"; CLAUDE_PROJECT_DIR="$D2" node "$HERE/skills/starting-a-product/scripts/scaffold.mjs" --product P >/dev/null

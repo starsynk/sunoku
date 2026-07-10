@@ -20,7 +20,8 @@ The only writes this skill ever makes are the mute/unmute flag flips.
    from its JSON only — never re-derive its facts from record files:
    - one-liner, lifecycle + tracking in plain words;
    - open decisions (count; name high-stakes ones with their recommended defaults);
-   - tasks when present: counts, ready frontier, per-milestone progress ("M1 3/5 done");
+   - tasks when present: counts, ready frontier (each task's id, title, and description),
+     per-milestone progress ("M1 3/5 done");
    - staleness when it signals, as context only: uncommitted work or commits landed since
      the record was last touched.
 3. Suggest ONE next action, first match wins:

@@ -30,7 +30,9 @@ if (taskRows.length > 0) {
       done: inMilestone.filter((r) => r.status === 'done').length,
     };
   });
-  tasks = { counts, ready: readyTasks(taskRows).length, milestones };
+  const frontier = readyTasks(taskRows)
+    .map(({ id, title, description }) => ({ id, title, description }));
+  tasks = { counts, ready: frontier.length, frontier, milestones };
 }
 
 const researchDir = recordPath(root, 'research');
