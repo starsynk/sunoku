@@ -3,6 +3,7 @@
 //
 //   node decisions.mjs --add '{"question":"...","stakes":"high","default":"...","by":"prd"}'
 //   node decisions.mjs --resolve D-002 --answer "usage-based"
+//   node decisions.mjs --prune D-002
 //   node decisions.mjs --list open|resolved|high|all
 import { parseArgs } from 'node:util';
 import {
@@ -16,6 +17,7 @@ const { values } = parseArgs({
     resolve: { type: 'string' },
     answer: { type: 'string' },
     list: { type: 'string' },
+    prune: { type: 'string' },
   },
 });
 
@@ -51,8 +53,15 @@ if (values.add) {
   row.resolved = todayLocal();
   writeJsonl(path, rows);
   process.stdout.write(JSON.stringify(row) + '\n');
+} else if (values.prune) {
+  const rows = readJsonl(path);
+  const row = rows.find((r) => r.id === values.prune);
+  if (!row) die(`no decision with id: ${values.prune}`);
+  if (row.status !== 'resolved') die(`not prunable: ${row.id} is ${row.status} — resolve it first`);
+  writeJsonl(path, rows.filter((r) => r.id !== row.id));
+  process.stdout.write(JSON.stringify(row) + '\n');
 } else if (values.list) {
   process.stdout.write(JSON.stringify(filterDecisions(readJsonl(path), values.list), null, 2) + '\n');
 } else {
-  die('nothing to do: pass --add, --resolve, or --list');
+  die('nothing to do: pass --add, --resolve, --list, or --prune');
 }
