@@ -24,7 +24,7 @@ export function statusPath(root) {
 
 export function readStatus(root) {
   const p = statusPath(root);
-  if (!existsSync(p)) die(`no record: ${p} does not exist — run sunoku:init`);
+  if (!existsSync(p)) die(`no record: ${p} does not exist — run sunoku:starting-a-product`);
   try {
     return JSON.parse(readFileSync(p, 'utf8'));
   } catch (e) {

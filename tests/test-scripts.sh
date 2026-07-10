@@ -134,7 +134,7 @@ assert_exitn $? "decisions: resolve unknown id dies"
 unset CLAUDE_PROJECT_DIR
 
 # --- scaffold.mjs (init) ---
-SCAF="$HERE/skills/init/scripts/scaffold.mjs"
+SCAF="$HERE/skills/starting-a-product/scripts/scaffold.mjs"
 D="$(mktemp -d)"
 OUT="$(CLAUDE_PROJECT_DIR="$D" node "$SCAF" --product "Zed")"
 assert_exit0 $? "scaffold: fresh run exits 0"
@@ -153,7 +153,7 @@ CLAUDE_PROJECT_DIR="$(mktemp -d)" node "$SCAF" >/dev/null 2>&1
 assert_exitn $? "scaffold: product required"
 
 # --- report.mjs (status) ---
-REP="$HERE/skills/status/scripts/report.mjs"
+REP="$HERE/skills/checking-status/scripts/report.mjs"
 D="$(mktemp -d)"; mkrecord "$D"; export CLAUDE_PROJECT_DIR="$D"
 node "$S/decisions.mjs" --add '{"question":"Big call?","stakes":"high","default":"yes","by":"prd"}' >/dev/null
 node "$S/tasks.mjs" --add '{"type":"milestone","title":"Skeleton"}' >/dev/null
@@ -170,14 +170,14 @@ echo "$OUT" | grep -qF '"todo": 2' && pass "report: task counts" || fail "report
 echo "$OUT" | grep -qF '"ready": 1' && pass "report: ready frontier" || fail "report: ready frontier" "$OUT"
 echo "$OUT" | grep -qF 'competitors.md' && pass "report: research listed" || fail "report: research listed" "$OUT"
 echo "$OUT" | grep -qF '"prd_stub": false' && pass "report: prd filled" || fail "report: prd filled" "$OUT"
-D2="$(mktemp -d)"; CLAUDE_PROJECT_DIR="$D2" node "$HERE/skills/init/scripts/scaffold.mjs" --product P >/dev/null
+D2="$(mktemp -d)"; CLAUDE_PROJECT_DIR="$D2" node "$HERE/skills/starting-a-product/scripts/scaffold.mjs" --product P >/dev/null
 OUT="$(CLAUDE_PROJECT_DIR="$D2" node "$REP")"
 echo "$OUT" | grep -qF '"prd_stub": true' && pass "report: stub detected" || fail "report: stub detected" "$OUT"
 echo "$OUT" | grep -qF '"tasks": null' && pass "report: no tasks -> null" || fail "report: no tasks -> null" "$OUT"
 unset CLAUDE_PROJECT_DIR
 
 # --- query.mjs (read) ---
-Q="$HERE/skills/read/scripts/query.mjs"
+Q="$HERE/skills/querying-the-record/scripts/query.mjs"
 D="$(mktemp -d)"; mkrecord "$D"; export CLAUDE_PROJECT_DIR="$D"
 node "$S/tasks.mjs" --add '{"type":"milestone","title":"Skeleton"}' >/dev/null
 node "$S/tasks.mjs" --add '{"type":"epic","milestone":"M1","title":"Auth"}' >/dev/null
