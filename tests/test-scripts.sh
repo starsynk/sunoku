@@ -276,6 +276,30 @@ node "$Q" >/dev/null 2>&1
 assert_exitn $? "query: no flags dies"
 unset CLAUDE_PROJECT_DIR
 
+# --- render.mjs (viewing-the-record) ---
+R="$HERE/skills/viewing-the-record/scripts/render.mjs"
+OUT="$(node -e '
+import(process.argv[1]).then(({ renderHtml, renderNoRecord }) => {
+  const html = renderHtml(
+    { product: "Testo", one_liner: "x" },
+    [{ type: "milestone", id: "M1", title: "Skeleton", status: "todo" },
+     { type: "epic", id: "E-01", milestone: "M1", title: "Auth" },
+     { type: "task", id: "T-001", epic: "E-01", title: "x\"><b>evil</b>", description: "Define auth contract.", discipline: "backend", size: "S", status: "todo", deps: [] }],
+    [{ id: "D-001", question: "Which provider?", stakes: "high", status: "open", by: "plan", asked: "2026-07-10" }]);
+  if (!html.includes("Skeleton")) throw new Error("milestone missing");
+  if (!html.includes("Define auth contract")) throw new Error("description missing");
+  if (!html.includes("Which provider?")) throw new Error("decision missing");
+  if (html.includes("\"><b>evil</b>")) throw new Error("title not escaped");
+  if (!html.includes("EventSource('"'"'/events'"'"' + location.search)")) throw new Error("live-reload script missing");
+  if (/https?:\/\//.test(html)) throw new Error("external asset");
+  const nr = renderNoRecord("/some/path/.sunoku");
+  if (!nr.includes("/some/path/.sunoku")) throw new Error("no-record path missing");
+  if (!nr.includes("EventSource")) throw new Error("no-record page not live");
+  console.log("render-ok");
+});
+' "$R" 2>&1)"
+[ "$OUT" = "render-ok" ] && pass "render: module contract" || fail "render: module contract" "$OUT"
+
 # --- record-html.mjs (viewing-the-record) ---
 V="$HERE/skills/viewing-the-record/scripts/record-html.mjs"
 D="$(mktemp -d)"; mkrecord "$D"; export CLAUDE_PROJECT_DIR="$D"
