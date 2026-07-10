@@ -153,6 +153,23 @@ assert_exit0 $? "prune: upstream prunable after downstream pruned"
 assert_nogrepf "$D/.sunoku/tasks.jsonl" '"id":"T-001"' "prune: upstream rows gone"
 unset CLAUDE_PROJECT_DIR
 
+# --- prune: decisions ---
+D="$(mktemp -d)"; mkrecord "$D"; export CLAUDE_PROJECT_DIR="$D"
+node "$S/decisions.mjs" --add '{"question":"Pricing model?","by":"prd","stakes":"high"}' >/dev/null   # D-001
+
+node "$S/decisions.mjs" --prune D-001 >/dev/null 2>&1
+assert_exitn $? "prune: open decision refused"
+assert_grepf "$D/.sunoku/decisions.jsonl" '"id":"D-001"' "prune: refused decision intact"
+node "$S/decisions.mjs" --prune D-999 >/dev/null 2>&1
+assert_exitn $? "prune: unknown decision dies"
+
+node "$S/decisions.mjs" --resolve D-001 --answer "usage-based" >/dev/null
+OUT="$(node "$S/decisions.mjs" --prune D-001)"
+assert_exit0 $? "prune: resolved decision prunes"
+echo "$OUT" | grep -qF '"usage-based"' && pass "prune: deleted decision echoed" || fail "prune: deleted decision echoed" "$OUT"
+assert_nogrepf "$D/.sunoku/decisions.jsonl" '"id":"D-001"' "prune: decision row gone"
+unset CLAUDE_PROJECT_DIR
+
 # --- decisions.mjs ---
 D="$(mktemp -d)"; mkrecord "$D"; export CLAUDE_PROJECT_DIR="$D"
 node "$S/decisions.mjs" --add '{"question":"Pricing: flat or usage-based?","stakes":"high","default":"flat $29/mo","by":"prd"}' >/dev/null
