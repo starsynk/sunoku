@@ -18,3 +18,8 @@ What a good PM does, encoded:
 5. **Sizes S/M/L, never calendar estimates.** S ≈ one sitting, M ≈ a day-ish of focus, L =
    consider splitting. Unknown-shaped work is a spike (`"spike": true`, size S, timeboxed) plus
    a decision row — never a fake L estimate.
+6. **Description = self-contained task.** Every task row carries a `"description"` an
+   executor can act on without this conversation: what to build, what done looks like
+   (acceptance criteria), key constraints, and the PRD feature/section it serves when
+   applicable. Meaningful prose, typically a few sentences — never a restatement of the
+   title, never a full spec. The script rejects task rows without one.
