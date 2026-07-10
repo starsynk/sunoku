@@ -223,6 +223,24 @@ node "$Q" >/dev/null 2>&1
 assert_exitn $? "query: no flags dies"
 unset CLAUDE_PROJECT_DIR
 
+# --- record-html.mjs (viewing-the-record) ---
+V="$HERE/skills/viewing-the-record/scripts/record-html.mjs"
+D="$(mktemp -d)"; mkrecord "$D"; export CLAUDE_PROJECT_DIR="$D"
+node "$S/tasks.mjs" --add '{"type":"milestone","title":"Skeleton"}' >/dev/null
+node "$S/tasks.mjs" --add '{"type":"epic","milestone":"M1","title":"Auth"}' >/dev/null
+node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"Contract","description":"Define auth contract. Done when agreed.","discipline":"backend","size":"S"}' >/dev/null
+node "$S/decisions.mjs" --add '{"question":"Which auth provider?","stakes":"high","default":"clerk","by":"plan"}' >/dev/null
+OUT="$(node "$V" --no-open)"
+assert_exit0 $? "record-html: exits 0"
+echo "$OUT" | grep -qF 'record.html' && pass "record-html: prints path" || fail "record-html: prints path" "$OUT"
+assert_grepf "$D/.sunoku/record.html" 'Define auth contract' "record-html: task description rendered"
+assert_grepf "$D/.sunoku/record.html" 'Which auth provider?' "record-html: decision rendered"
+assert_grepf "$D/.sunoku/record.html" 'Skeleton' "record-html: milestone rendered"
+grep -qE 'https?://' "$D/.sunoku/record.html" && fail "record-html: no external assets" || pass "record-html: no external assets"
+CLAUDE_PROJECT_DIR="$(mktemp -d)" node "$V" --no-open >/dev/null 2>&1
+assert_exitn $? "record-html: no record dies"
+unset CLAUDE_PROJECT_DIR
+
 # --- duplicate id guards ---
 D="$(mktemp -d)"; mkrecord "$D"; export CLAUDE_PROJECT_DIR="$D"
 node "$S/tasks.mjs" --add '{"type":"task","title":"a","description":"Task a.","discipline":"backend","size":"S"}' >/dev/null
