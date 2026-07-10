@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.1.0 — 2026-07-10
+## 3.0.1 — 2026-07-10
 
 - **Task descriptions.** Task rows now require a `description` — self-contained enough
   for an executor to act on (what, done-when, constraints, PRD ref). Enforced on
