@@ -49,7 +49,8 @@ assert_file skills/starting-a-product/scripts/scaffold.mjs
 assert_file skills/starting-a-product/references/onboarding.md
 assert_file skills/checking-status/scripts/report.mjs
 assert_file skills/querying-the-record/scripts/query.mjs
-assert_file skills/viewing-the-record/scripts/record-html.mjs
+assert_file skills/viewing-the-record/scripts/render.mjs
+assert_file skills/viewing-the-record/scripts/record-server.mjs
 assert_contains skills/using-sunoku/SKILL.md "sunoku:viewing-the-record"
 assert_file skills/planning-the-work/references/methodology.md
 assert_contains skills/planning-the-work/references/methodology.md "Description = self-contained task"

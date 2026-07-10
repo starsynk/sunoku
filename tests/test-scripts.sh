@@ -300,25 +300,61 @@ import(process.argv[1]).then(({ renderHtml, renderNoRecord }) => {
 ' "$R" 2>&1)"
 [ "$OUT" = "render-ok" ] && pass "render: module contract" || fail "render: module contract" "$OUT"
 
-# --- record-html.mjs (viewing-the-record) ---
-V="$HERE/skills/viewing-the-record/scripts/record-html.mjs"
+# --- record-server.mjs (viewing-the-record) ---
+V="$HERE/skills/viewing-the-record/scripts/record-server.mjs"
 D="$(mktemp -d)"; mkrecord "$D"; export CLAUDE_PROJECT_DIR="$D"
 node "$S/tasks.mjs" --add '{"type":"milestone","title":"Skeleton"}' >/dev/null
 node "$S/tasks.mjs" --add '{"type":"epic","milestone":"M1","title":"Auth"}' >/dev/null
 node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"Contract","description":"Define auth contract. Done when agreed.","discipline":"backend","size":"S"}' >/dev/null
-node "$S/decisions.mjs" --add '{"question":"Which auth provider?","stakes":"high","default":"clerk","by":"plan"}' >/dev/null
-OUT="$(node "$V" --no-open)"
-assert_exit0 $? "record-html: exits 0"
-echo "$OUT" | grep -qF 'record.html' && pass "record-html: prints path" || fail "record-html: prints path" "$OUT"
-assert_grepf "$D/.sunoku/record.html" 'Define auth contract' "record-html: task description rendered"
-assert_grepf "$D/.sunoku/record.html" 'Which auth provider?' "record-html: decision rendered"
-assert_grepf "$D/.sunoku/record.html" 'Skeleton' "record-html: milestone rendered"
-grep -qE 'https?://' "$D/.sunoku/record.html" && fail "record-html: no external assets" || pass "record-html: no external assets"
 node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"x\"><b>evil</b>","description":"Escape me. Done when safe.","discipline":"qa","size":"S"}' >/dev/null
-node "$V" --no-open >/dev/null
-assert_nogrepf "$D/.sunoku/record.html" '"><b>evil</b>' "record-html: hostile title escaped"
+node "$S/decisions.mjs" --add '{"question":"Which auth provider?","stakes":"high","default":"clerk","by":"plan"}' >/dev/null
+
+OUT="$(SUNOKU_VIEWER_IDLE_MS=60000 node "$V" --no-open)"
+assert_exit0 $? "record-server: launcher exits 0"
+PORT="$(echo "$OUT" | node -e 'console.log(JSON.parse(require("fs").readFileSync(0,"utf8")).port)')"
+KEY="$(echo "$OUT" | node -e 'console.log(JSON.parse(require("fs").readFileSync(0,"utf8")).key)')"
+PID="$(echo "$OUT" | node -e 'console.log(JSON.parse(require("fs").readFileSync(0,"utf8")).pid)')"
+U="http://127.0.0.1:$PORT"
+
+BODY="$(curl -s "$U/?key=$KEY")"
+echo "$BODY" | grep -qF 'Define auth contract' && pass "record-server: task rendered" || fail "record-server: task rendered"
+echo "$BODY" | grep -qF 'Skeleton' && pass "record-server: milestone rendered" || fail "record-server: milestone rendered"
+echo "$BODY" | grep -qF 'Which auth provider?' && pass "record-server: decision rendered" || fail "record-server: decision rendered"
+echo "$BODY" | grep -qF '"><b>evil</b>' && fail "record-server: hostile title escaped" || pass "record-server: hostile title escaped"
+
+assert_eq "$(curl -s -o /dev/null -w '%{http_code}' "$U/")" "403" "record-server: missing key 403"
+assert_eq "$(curl -s -o /dev/null -w '%{http_code}' "$U/?key=wrong")" "403" "record-server: wrong key 403"
+assert_eq "$(curl -s -o /dev/null -w '%{http_code}' "$U/nope?key=$KEY")" "404" "record-server: unknown path 404"
+
+# live change: SSE emits after a record write, and a fresh GET reflects it
+SSE_OUT="$D/sse.out"
+curl -sN --max-time 3 "$U/events?key=$KEY" > "$SSE_OUT" &
+SSE_PID=$!
+sleep 0.5
+node "$S/tasks.mjs" --set T-001 status=done >/dev/null
+wait "$SSE_PID" 2>/dev/null
+grep -q 'data: change' "$SSE_OUT" && pass "record-server: SSE change event" || fail "record-server: SSE change event" "$(cat "$SSE_OUT")"
+curl -s "$U/?key=$KEY" | grep -qF '"status":"done"' && pass "record-server: fresh GET sees change" || fail "record-server: fresh GET sees change"
+
+# reuse: second launch reports the same server
+OUT2="$(SUNOKU_VIEWER_IDLE_MS=60000 node "$V" --no-open)"
+echo "$OUT2" | grep -qF '"reused":true' && pass "record-server: reuse flagged" || fail "record-server: reuse flagged" "$OUT2"
+PORT2="$(echo "$OUT2" | node -e 'console.log(JSON.parse(require("fs").readFileSync(0,"utf8")).port)')"
+assert_eq "$PORT2" "$PORT" "record-server: reuse same port"
+
+kill "$PID" 2>/dev/null
+
+# no record: launcher dies
 CLAUDE_PROJECT_DIR="$(mktemp -d)" node "$V" --no-open >/dev/null 2>&1
-assert_exitn $? "record-html: no record dies"
+assert_exitn $? "record-server: no record dies"
+
+# idle shutdown: short timeout exits and removes the info file
+INFO="$(node -e 'const{createHash}=require("crypto");const os=require("os");const p=require("path");console.log(p.join(os.tmpdir(),"sunoku-record-server-"+createHash("sha256").update(process.env.CLAUDE_PROJECT_DIR).digest("hex").slice(0,12)+".json"))')"
+OUT3="$(SUNOKU_VIEWER_IDLE_MS=200 node "$V" --no-open)"
+PID3="$(echo "$OUT3" | node -e 'console.log(JSON.parse(require("fs").readFileSync(0,"utf8")).pid)')"
+sleep 2
+kill -0 "$PID3" 2>/dev/null && fail "record-server: idle shutdown" "pid $PID3 still alive" || pass "record-server: idle shutdown"
+[ -f "$INFO" ] && fail "record-server: info file removed on idle exit" || pass "record-server: info file removed on idle exit"
 unset CLAUDE_PROJECT_DIR
 
 # --- duplicate id guards ---
