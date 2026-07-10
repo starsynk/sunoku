@@ -12,25 +12,35 @@ minimum touch: silent by default, asks before tracking, answers questions from i
 
 ## Surface
 
+A gateway skill rides into every session that has a record, and each process is its own
+skill that names the next one.
+
+- **`sunoku:using-sunoku`** (gateway, injected) — when `.sunoku/` exists, a SessionStart hook
+  injects this skill wholesale: the routing table from prompt to skill, plus the red-flags
+  discipline (never auto-track, never execute, never invent history).
+
 One command to learn:
 
-- **`sunoku:init`** — set up a project (user-only). Routes by origin: validate a new idea
-  (research + go/no-go), define a committed idea, or document an existing codebase. A NO-GO
-  wipes `.sunoku/` — nothing to maintain for a dead idea.
+- **`sunoku:starting-a-product`** — set up a project (user-only). Routes by origin: validate
+  a new idea (research + go/no-go), define a committed idea, or document an existing
+  codebase. A NO-GO wipes `.sunoku/` — nothing to maintain for a dead idea.
 
 The rest fires when you need it:
 
-- **`sunoku:research`** — market/demand/competitor validation, or a deep research dive on
-  anything. Cited findings in `.sunoku/research/`.
-- **`sunoku:prd`** — create the PRD (from research or from the codebase) or reshape it. The
-  PRD's Change Log table is the record's only history.
-- **`sunoku:plan`** — PRD → `tasks.jsonl`: vertical-slice milestones, zero cross-epic deps,
-  contract-first tasks that maximize parallel work.
-- **`sunoku:status`** — dashboard + exactly one suggested next action.
-- **`sunoku:track`** (model-invoked) — detects prompts that reshape the PRD and asks first.
-  Never auto-tracks; implementation work is always silent.
-- **`sunoku:read`** (model-invoked) — answers "what does the PRD say / why did we drop X /
-  what's ready to work?" straight from the record, with citations.
+- **`sunoku:researching`** — market/demand/competitor validation, or a deep research dive on
+  anything. Cited findings in `.sunoku/research/`, adversarially red-teamed.
+- **`sunoku:writing-the-prd`** — create the PRD (from research or from the codebase) or
+  reshape it. The PRD's Change Log table is the record's only history.
+- **`sunoku:planning-the-work`** — PRD → `tasks.jsonl`: vertical-slice milestones, zero
+  cross-epic deps, contract-first tasks that maximize parallel work.
+- **`sunoku:checking-status`** — dashboard + exactly one suggested next action.
+- **`sunoku:tracking-changes`** (model-invoked) — detects prompts that reshape the PRD and
+  asks first. Never auto-tracks; implementation work is always silent.
+- **`sunoku:querying-the-record`** (model-invoked) — answers "what does the PRD say / why did
+  we drop X / what's ready to work?" straight from the record, with citations.
+
+Research and PRD skills dispatch generic subagents from skill-owned prompt files
+(`references/*-prompt.md`) — no custom agents.
 
 ## The record
 
@@ -58,13 +68,13 @@ executor you prefer over the record.
 **Drain the backlog (self-paced):**
 
 ```
-/loop run sunoku:status, take a ready task, build it, mark it done, repeat until the frontier is empty
+/loop run sunoku:checking-status, take a ready task, build it, mark it done, repeat until the frontier is empty
 ```
 
-Each tick reads the frontier from `sunoku:status`, builds one task (your executor, not Sunoku),
+Each tick reads the frontier from `sunoku:checking-status`, builds one task (your executor, not Sunoku),
 flips it done via `tasks.mjs --set T-nnn status=done`.
 
-**Watch from the side (fixed interval):** `/loop 15m /sunoku:status` — dashboard on a cadence,
+**Watch from the side (fixed interval):** `/loop 15m /sunoku:checking-status` — dashboard on a cadence,
 silent unless something needs you.
 
 **Opinionated build loop** (needs the `superpowers` plugin). Three variants by how the work
@@ -73,7 +83,7 @@ lands:
 *Build in place* — no branch ceremony:
 
 ```
-/loop Pick a task from /sunoku:status. Never skip these superpowers steps: run
+/loop Pick a task from /sunoku:checking-status. Never skip these superpowers steps: run
 superpowers:brainstorming and take its recommended approach; build it inline or with
 superpowers:subagent-driven-development, taking the recommended option; write specs and plans
 automatically when needed. Do not create branches or worktrees — stay on the current branch.
@@ -83,7 +93,7 @@ Maximum 10 tasks, then stop.
 *One branch, one PR* — all tasks share a branch, single PR at the end:
 
 ```
-/loop Pick a task from /sunoku:status. On the first task create a branch; commit each task to
+/loop Pick a task from /sunoku:checking-status. On the first task create a branch; commit each task to
 it. Never skip these superpowers steps: run superpowers:brainstorming and take its recommended
 approach; build it inline or with superpowers:subagent-driven-development, taking the
 recommended option; write specs and plans automatically when needed. Maximum 10 tasks, then
@@ -93,7 +103,7 @@ open one PR and stop.
 *Branch + PR per task* — isolate every task (fits Sunoku's parallel-ready backlog):
 
 ```
-/loop Pick a task from /sunoku:status. Create a fresh branch off main for the task. Never skip
+/loop Pick a task from /sunoku:checking-status. Create a fresh branch off main for the task. Never skip
 these superpowers steps: run superpowers:brainstorming and take its recommended approach;
 build it inline or with superpowers:subagent-driven-development, taking the recommended
 option; write specs and plans automatically when needed. Open a PR for the task and return to
