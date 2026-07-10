@@ -112,8 +112,9 @@ function render() {
   document.getElementById('tasks').innerHTML = out || '<p class="muted">No tasks yet.</p>';
 }
 
-function filters(el, values, apply) {
-  el.innerHTML = values.map(v => '<button data-v="' + v + '">' + v + '</button>').join('');
+function filters(el, values, apply, countOf) {
+  el.innerHTML = values.map(v =>
+    '<button data-v="' + v + '">' + v + ' (' + countOf(v) + ')</button>').join('');
   const set = v => {
     el.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
     apply(v);
@@ -126,7 +127,9 @@ render();
 filters(document.getElementById('task-filters'),
   ['all', 'todo', 'doing', 'done', 'blocked'],
   v => document.querySelectorAll('.task').forEach(t =>
-    t.hidden = v !== 'all' && t.dataset.status !== v));
+    t.hidden = v !== 'all' && t.dataset.status !== v),
+  v => v === 'all' ? ROWS.filter(r => r.type === 'task').length
+    : ROWS.filter(r => r.type === 'task' && r.status === v).length);
 
 if (DECISIONS.length) {
   document.getElementById('decisions-section').hidden = false;
@@ -143,7 +146,8 @@ if (DECISIONS.length) {
   filters(document.getElementById('decision-filters'),
     ['all', 'open', 'resolved'],
     v => document.querySelectorAll('.decision').forEach(d =>
-      d.hidden = v !== 'all' && d.dataset.status !== v));
+      d.hidden = v !== 'all' && d.dataset.status !== v),
+    v => v === 'all' ? DECISIONS.length : DECISIONS.filter(d => d.status === v).length);
 }
 </script>
 </body>

@@ -237,6 +237,9 @@ assert_grepf "$D/.sunoku/record.html" 'Define auth contract' "record-html: task 
 assert_grepf "$D/.sunoku/record.html" 'Which auth provider?' "record-html: decision rendered"
 assert_grepf "$D/.sunoku/record.html" 'Skeleton' "record-html: milestone rendered"
 grep -qE 'https?://' "$D/.sunoku/record.html" && fail "record-html: no external assets" || pass "record-html: no external assets"
+node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"x\"><b>evil</b>","description":"Escape me. Done when safe.","discipline":"qa","size":"S"}' >/dev/null
+node "$V" --no-open >/dev/null
+assert_nogrepf "$D/.sunoku/record.html" '"><b>evil</b>' "record-html: hostile title escaped"
 CLAUDE_PROJECT_DIR="$(mktemp -d)" node "$V" --no-open >/dev/null 2>&1
 assert_exitn $? "record-html: no record dies"
 unset CLAUDE_PROJECT_DIR
