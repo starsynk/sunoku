@@ -10,8 +10,8 @@ assert_nofile()  { [ -e "$1" ] && fail "should not exist: $1" || ok "absent: $1"
 assert_contains(){ grep -qF -- "$2" "$1" 2>/dev/null && ok "$1 contains: $2" || fail "$1 missing: $2"; }
 assert_absent()  { grep -qF -- "$2" "$1" 2>/dev/null && fail "$1 still contains: $2" || ok "$1 clean of: $2"; }
 
-# Eight skills (gateway + seven processes), each self-contained
-SKILLS="using-sunoku starting-a-product researching writing-the-prd planning-the-work tracking-changes checking-status querying-the-record"
+# Nine skills (gateway + eight processes), each self-contained
+SKILLS="using-sunoku starting-a-product researching writing-the-prd planning-the-work tracking-changes checking-status querying-the-record viewing-the-record"
 for s in $SKILLS; do
   assert_file "skills/$s/SKILL.md"
 done
@@ -38,7 +38,7 @@ done
 
 # Skill anatomy: overview + announce on every working skill (gateway and model-only
 # detector/retrieval skills announce nothing — they are ambient)
-for s in starting-a-product researching writing-the-prd planning-the-work checking-status; do
+for s in starting-a-product researching writing-the-prd planning-the-work checking-status viewing-the-record; do
   assert_contains "skills/$s/SKILL.md" "## Overview"
   assert_contains "skills/$s/SKILL.md" "**Announce at start:**"
 done
@@ -48,6 +48,8 @@ assert_file skills/starting-a-product/scripts/scaffold.mjs
 assert_file skills/starting-a-product/references/onboarding.md
 assert_file skills/checking-status/scripts/report.mjs
 assert_file skills/querying-the-record/scripts/query.mjs
+assert_file skills/viewing-the-record/scripts/record-html.mjs
+assert_contains skills/using-sunoku/SKILL.md "sunoku:viewing-the-record"
 assert_file skills/planning-the-work/references/methodology.md
 assert_contains skills/planning-the-work/references/methodology.md "Description = self-contained task"
 assert_contains skills/planning-the-work/SKILL.md "description"
