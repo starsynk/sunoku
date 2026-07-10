@@ -6,7 +6,7 @@
 //   node record-server.mjs [--no-open]     launcher: reuse or start, print info JSON
 //   (--serve is internal: runs the actual server in the detached child)
 import { execFile, spawn } from 'node:child_process';
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { existsSync, readFileSync, unlinkSync, watch, writeFileSync } from 'node:fs';
 import http from 'node:http';
 import { tmpdir } from 'node:os';
@@ -68,6 +68,11 @@ if (!values.serve) {
 } else {
   // Server (detached child).
   const key = randomBytes(16).toString('hex');
+  const keyBuf = Buffer.from(key);
+  const keyOk = (v) => {
+    const b = Buffer.from(String(v ?? ''));
+    return b.length === keyBuf.length && timingSafeEqual(b, keyBuf);
+  };
   let lastActivity = Date.now();
   const sseClients = new Set();
 
@@ -111,7 +116,7 @@ if (!values.serve) {
   const server = http.createServer((req, res) => {
     lastActivity = Date.now();
     const url = new URL(req.url, 'http://127.0.0.1');
-    if (url.searchParams.get('key') !== key) {
+    if (!keyOk(url.searchParams.get('key'))) {
       res.writeHead(403, { 'content-type': 'text/plain' });
       res.end('forbidden');
       return;
