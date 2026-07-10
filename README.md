@@ -10,37 +10,28 @@ minimum touch: silent by default, asks before tracking, answers questions from i
 /plugin install sunoku
 ```
 
-## Surface
+## Skills
 
-A gateway skill rides into every session that has a record, and each process is its own
-skill that names the next one.
+Eight skills, gateway-driven. When `.sunoku/` exists, a SessionStart hook injects the
+gateway skill wholesale into every session — routing table from prompt to skill, plus the
+red-flags discipline (never auto-track, never execute, never invent history). No record,
+no injection: Sunoku stays silent.
 
-- **`sunoku:using-sunoku`** (gateway, injected) — when `.sunoku/` exists, a SessionStart hook
-  injects this skill wholesale: the routing table from prompt to skill, plus the red-flags
-  discipline (never auto-track, never execute, never invent history).
+| Skill | Invocation | Use when |
+|---|---|---|
+| `sunoku:using-sunoku` | Gateway — injected at session start when a record exists | Routes every product-shaped prompt to the right skill before any response. Implementation work (bugfixes, refactors, in-scope features) stays silent. |
+| `sunoku:starting-a-product` | User command only (model won't self-invoke) | Set up a project. Routes by origin: validate a new idea (research + go/no-go), define a committed idea, or document an existing codebase. A NO-GO wipes `.sunoku/` — nothing to maintain for a dead idea. |
+| `sunoku:researching` | User or model | Market/demand/competitor validation, or a deep cited research dive on anything. Findings land in `.sunoku/research/`, adversarially red-teamed. |
+| `sunoku:writing-the-prd` | User or model | Create the PRD (from research or from the codebase) or reshape it — "we're adding/dropping X". The PRD's Change Log table is the record's only history. |
+| `sunoku:planning-the-work` | User or model | PRD → `tasks.jsonl`: vertical-slice milestones, zero cross-epic deps, contract-first tasks that maximize parallel work. Also re-plans after a PRD change. |
+| `sunoku:checking-status` | User or model | "Status", "what's next", "where are we", mute/unmute tracking. Dashboard + exactly one suggested next action. |
+| `sunoku:tracking-changes` | Internal — model-invoked consent gate | Fires when a work prompt would reshape the PRD (scope, core bet, architecture, target segment, pricing) on a live record. Asks first, never auto-tracks. |
+| `sunoku:querying-the-record` | Internal — model-invoked retrieval | "What does the PRD say", "why did we drop X", "what changed since May", task state — answered from the record with citations, never from memory. |
 
-One command to learn:
-
-- **`sunoku:starting-a-product`** — set up a project (user-only). Routes by origin: validate
-  a new idea (research + go/no-go), define a committed idea, or document an existing
-  codebase. A NO-GO wipes `.sunoku/` — nothing to maintain for a dead idea.
-
-The rest fires when you need it:
-
-- **`sunoku:researching`** — market/demand/competitor validation, or a deep research dive on
-  anything. Cited findings in `.sunoku/research/`, adversarially red-teamed.
-- **`sunoku:writing-the-prd`** — create the PRD (from research or from the codebase) or
-  reshape it. The PRD's Change Log table is the record's only history.
-- **`sunoku:planning-the-work`** — PRD → `tasks.jsonl`: vertical-slice milestones, zero
-  cross-epic deps, contract-first tasks that maximize parallel work.
-- **`sunoku:checking-status`** — dashboard + exactly one suggested next action.
-- **`sunoku:tracking-changes`** (model-invoked) — detects prompts that reshape the PRD and
-  asks first. Never auto-tracks; implementation work is always silent.
-- **`sunoku:querying-the-record`** (model-invoked) — answers "what does the PRD say / why did
-  we drop X / what's ready to work?" straight from the record, with citations.
-
-Research and PRD skills dispatch generic subagents from skill-owned prompt files
-(`references/*-prompt.md`) — no custom agents.
+Every skill shares one anatomy: overview + core principle, announce-at-start, checklists,
+flowcharts at non-obvious decisions, red-flags tables, and integration cross-refs that name
+the next skill. Research and PRD skills dispatch generic subagents from skill-owned prompt
+files (`references/*-prompt.md`) — no custom agent types.
 
 ## The record
 
