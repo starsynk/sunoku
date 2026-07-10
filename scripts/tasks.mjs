@@ -4,6 +4,7 @@
 //   node tasks.mjs --add '{"type":"task","epic":"E-01","title":"...","discipline":"backend","size":"S"}'
 //   node tasks.mjs --set T-002 status=done
 //   node tasks.mjs --list ready|all|status=todo|milestone=M1|epic=E-01
+//   node tasks.mjs --prune-milestone M1
 import { parseArgs } from 'node:util';
 import {
   appendJsonl, die, DISCIPLINES, filterTasks, nextTaskId, projectRoot, readJsonl, recordPath,
@@ -16,6 +17,7 @@ const { values, positionals } = parseArgs({
     add: { type: 'string' },
     set: { type: 'string' },
     list: { type: 'string' },
+    'prune-milestone': { type: 'string' },
   },
 });
 
@@ -68,8 +70,25 @@ if (values.add) {
   validate(row);
   writeJsonl(path, rows);
   process.stdout.write(JSON.stringify(row) + '\n');
+} else if (values['prune-milestone']) {
+  const id = values['prune-milestone'];
+  const rows = readJsonl(path);
+  if (!rows.some((r) => r.type === 'milestone' && r.id === id)) die(`no milestone with id: ${id}`);
+  const doomed = filterTasks(rows, `milestone=${id}`);
+  const doomedIds = new Set(doomed.map((r) => r.id));
+  const notDone = doomed.filter((r) => r.type === 'task' && r.status !== 'done');
+  if (notDone.length) {
+    die(`not prunable: ${notDone.map((r) => `${r.id} (${r.status})`).join(', ')} not done`);
+  }
+  const dependents = rows.filter((r) => r.type === 'task' && !doomedIds.has(r.id)
+    && (r.deps ?? []).some((d) => doomedIds.has(d)));
+  if (dependents.length) {
+    die(`not prunable: ${dependents.map((r) => r.id).join(', ')} depend on pruned tasks — prune their milestone first`);
+  }
+  writeJsonl(path, rows.filter((r) => !doomedIds.has(r.id)));
+  for (const r of doomed) process.stdout.write(JSON.stringify(r) + '\n');
 } else if (values.list) {
   process.stdout.write(JSON.stringify(filterTasks(readJsonl(path), values.list), null, 2) + '\n');
 } else {
-  die('nothing to do: pass --add, --set, or --list');
+  die('nothing to do: pass --add, --set, --list, or --prune-milestone');
 }

@@ -117,6 +117,42 @@ assert_exitn $? "tasks: invalid type rejected"
 while IFS= read -r line; do echo "$line" | node -e 'JSON.parse(require("fs").readFileSync(0,"utf8"))' 2>/dev/null || { fail "tasks: jsonl valid"; break; }; done < "$D/.sunoku/tasks.jsonl" && pass "tasks: jsonl valid"
 unset CLAUDE_PROJECT_DIR
 
+# --- prune: tasks ---
+D="$(mktemp -d)"; mkrecord "$D"; export CLAUDE_PROJECT_DIR="$D"
+node "$S/tasks.mjs" --add '{"type":"milestone","title":"Skeleton"}' >/dev/null            # M1
+node "$S/tasks.mjs" --add '{"type":"epic","milestone":"M1","title":"Auth"}' >/dev/null    # E-01
+node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"Contract","description":"Define the contract. Done when agreed.","discipline":"backend","size":"S"}' >/dev/null   # T-001
+node "$S/tasks.mjs" --add '{"type":"task","epic":"E-01","title":"Form","description":"Build the form. Done when it round-trips.","discipline":"frontend","size":"S"}' >/dev/null    # T-002
+node "$S/tasks.mjs" --set T-001 status=done >/dev/null
+
+node "$S/tasks.mjs" --prune-milestone M9 >/dev/null 2>&1
+assert_exitn $? "prune: unknown milestone dies"
+node "$S/tasks.mjs" --prune-milestone M1 >/dev/null 2>&1
+assert_exitn $? "prune: partial milestone refused"
+assert_grepf "$D/.sunoku/tasks.jsonl" '"id":"T-001"' "prune: refusal leaves rows intact"
+
+node "$S/tasks.mjs" --set T-002 status=done >/dev/null
+node "$S/tasks.mjs" --add '{"type":"milestone","title":"Growth"}' >/dev/null              # M2
+node "$S/tasks.mjs" --add '{"type":"epic","milestone":"M2","title":"Billing"}' >/dev/null # E-02
+node "$S/tasks.mjs" --add '{"type":"task","epic":"E-02","title":"Plans","description":"Model plans on the contract. Done when priced.","discipline":"backend","size":"S","deps":["T-001"]}' >/dev/null  # T-003
+
+node "$S/tasks.mjs" --prune-milestone M1 >/dev/null 2>&1
+assert_exitn $? "prune: live cross-milestone dep refused"
+
+node "$S/tasks.mjs" --set T-003 status=done >/dev/null
+OUT="$(node "$S/tasks.mjs" --prune-milestone M2)"
+assert_exit0 $? "prune: fully-done milestone prunes"
+echo "$OUT" | grep -qF '"T-003"' && pass "prune: deleted rows echoed" || fail "prune: deleted rows echoed" "$OUT"
+assert_nogrepf "$D/.sunoku/tasks.jsonl" '"id":"M2"' "prune: milestone row gone"
+assert_nogrepf "$D/.sunoku/tasks.jsonl" '"id":"E-02"' "prune: epic row gone"
+assert_nogrepf "$D/.sunoku/tasks.jsonl" '"id":"T-003"' "prune: task row gone"
+assert_grepf "$D/.sunoku/tasks.jsonl" '"id":"M1"' "prune: survivors untouched"
+
+node "$S/tasks.mjs" --prune-milestone M1 >/dev/null
+assert_exit0 $? "prune: upstream prunable after downstream pruned"
+assert_nogrepf "$D/.sunoku/tasks.jsonl" '"id":"T-001"' "prune: upstream rows gone"
+unset CLAUDE_PROJECT_DIR
+
 # --- decisions.mjs ---
 D="$(mktemp -d)"; mkrecord "$D"; export CLAUDE_PROJECT_DIR="$D"
 node "$S/decisions.mjs" --add '{"question":"Pricing: flat or usage-based?","stakes":"high","default":"flat $29/mo","by":"prd"}' >/dev/null
