@@ -49,6 +49,8 @@ assert_file skills/starting-a-product/references/onboarding.md
 assert_file skills/checking-status/scripts/report.mjs
 assert_file skills/querying-the-record/scripts/query.mjs
 assert_file skills/planning-the-work/references/methodology.md
+assert_contains skills/planning-the-work/references/methodology.md "Description = self-contained task"
+assert_contains skills/planning-the-work/SKILL.md "description"
 assert_file skills/writing-the-prd/templates/PRD.md
 for f in create existing reshape product-owner-prompt codebase-analyst-prompt; do
   assert_file "skills/writing-the-prd/references/$f.md"

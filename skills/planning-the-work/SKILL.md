@@ -19,7 +19,8 @@ it — the decomposition rules are not optional.
 1. Guard: `.sunoku/PRD.md` exists and is not stub-sentineled; otherwise route to
    sunoku:writing-the-prd and stop.
 2. Decompose per the methodology (inline — no subagents): milestones → epics → tasks with
-   discipline, size, deps.
+   discipline, size, deps, and a self-contained description (what, done-when, constraints,
+   PRD ref — required; the script rejects task rows without one).
 3. Present the shape for approval BEFORE writing: milestones with their epics, task counts
    per epic, and the ready frontier of M1. One checkpoint.
 4. On approval write every row via the script, milestones first, then epics, then tasks (deps
@@ -28,7 +29,7 @@ it — the decomposition rules are not optional.
 5. Spikes: unknown-shaped work gets `"spike": true` AND a decision row
    (`decisions.mjs --add`, `"by":"plan"`) naming what must be answered.
 6. Re-plan (after a reshape): patch, don't rebuild — supersede invalidated tasks by flipping
-   them (`--set T-nnn status=blocked`) and adding replacement rows; never delete history.
+   them (`--set T-nnn status=blocked`) and adding replacement rows (each with a full description); never delete history.
 
 ## Red Flags
 
