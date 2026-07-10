@@ -1,9 +1,9 @@
 # Changelog
 
-## Unreleased
+## 3.0.0 — 2026-07-10
 
 Full transformation to a gateway-driven skill architecture. Breaking: skill names change and
-custom agents are removed (suggest releasing as 3.0.0).
+custom agents are removed.
 
 - **Gateway skill + injection.** New `sunoku:using-sunoku` skill (routing table, red-flags
   discipline). The SessionStart hook now injects its full content, wrapped in
