@@ -110,8 +110,8 @@ assert_contains hooks/scripts/guard-record-writes.mjs "tasks.mjs"
 assert_contains hooks/scripts/guard-record-writes.mjs "decisions.mjs"
 
 # Version aligned
-assert_contains .claude-plugin/plugin.json '"version": "2.1.2"'
-assert_contains CHANGELOG.md "## 2.1.2"
+assert_contains .claude-plugin/plugin.json '"version": "3.0.0"'
+assert_contains CHANGELOG.md "## 3.0.0"
 
 # CI still runs all three suites
 for t in test-structure.sh test-scripts.sh test-hooks.sh; do
