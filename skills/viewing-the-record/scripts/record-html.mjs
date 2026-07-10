@@ -6,7 +6,7 @@
 import { execFile } from 'node:child_process';
 import { parseArgs } from 'node:util';
 import {
-  die, projectRoot, readJsonl, readStatus, recordPath, writeFileAtomic,
+  projectRoot, readJsonl, readStatus, recordPath, writeFileAtomic,
 } from '../../../scripts/lib.mjs';
 
 const { values } = parseArgs({ options: { 'no-open': { type: 'boolean' } } });
@@ -18,7 +18,7 @@ const decisions = readJsonl(recordPath(root, 'decisions.jsonl'));
 
 // JSON inlined into a <script> block: escape "<" so "</script>" in data can't break out.
 const inline = (v) => JSON.stringify(v).replace(/</g, '\\u003c');
-const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 const generated = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
 
@@ -78,7 +78,7 @@ const html = `<!doctype html>
 const ROWS = ${inline(tasks)};
 const DECISIONS = ${inline(decisions)};
 
-const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const badge = (v, kind) => '<span class="badge ' + kind + '-' + esc(v) + '">' + esc(v) + '</span>';
 
 function taskHtml(t) {
