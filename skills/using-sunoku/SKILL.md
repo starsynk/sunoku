@@ -27,6 +27,7 @@ features) is silent: no record write, no mention of Sunoku.
 |---|---|
 | "status", "what's next", "where are we", mute/unmute tracking | sunoku:checking-status |
 | "show tasks", "task board", "open the backlog in a browser", "show decisions visually" | sunoku:viewing-the-record |
+| "prune the record", "clear out done milestones", "clean up old decisions" | sunoku:pruning-the-record — user command only; if the model cannot invoke it, tell the user to run /sunoku:pruning-the-record |
 | "what does the PRD say", "why did we drop X", "what changed since May", task state | sunoku:querying-the-record |
 | "write/update the PRD", "we're adding/dropping X", "refresh PRD from code" | sunoku:writing-the-prd |
 | "break this into tasks", "plan the build", "re-plan" | sunoku:planning-the-work |

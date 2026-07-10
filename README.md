@@ -12,7 +12,7 @@ minimum touch: silent by default, asks before tracking, answers questions from i
 
 ## Skills
 
-Nine skills, gateway-driven. When `.sunoku/` exists, a SessionStart hook injects the
+Ten skills, gateway-driven. When `.sunoku/` exists, a SessionStart hook injects the
 gateway skill wholesale into every session — routing table from prompt to skill, plus the
 red-flags discipline (never auto-track, never execute, never invent history). No record,
 no injection: Sunoku stays silent.
@@ -26,6 +26,7 @@ no injection: Sunoku stays silent.
 | `sunoku:planning-the-work` | User or model | PRD → `tasks.jsonl`: vertical-slice milestones, zero cross-epic deps, contract-first tasks that maximize parallel work. Also re-plans after a PRD change. |
 | `sunoku:checking-status` | User or model | "Status", "what's next", "where are we", mute/unmute tracking. Dashboard + exactly one suggested next action. |
 | `sunoku:viewing-the-record` | User or model | "Show tasks", "task board", "open the backlog". Renders tasks + decisions into a self-contained `.sunoku/record.html` snapshot and opens it — read-only, no server. |
+| `sunoku:pruning-the-record` | User command only (model won't self-invoke) | Prune the record: fully-done milestones, resolved decisions already absorbed into the PRD, superseded research files. Evidence shown, one confirm, git is the archive. Change Log never touched. |
 | `sunoku:tracking-changes` | Internal — model-invoked consent gate | Fires when a work prompt would reshape the PRD (scope, core bet, architecture, target segment, pricing) on a live record. Asks first, never auto-tracks. |
 | `sunoku:querying-the-record` | Internal — model-invoked retrieval | "What does the PRD say", "why did we drop X", "what changed since May", task state — answered from the record with citations, never from memory. |
 
