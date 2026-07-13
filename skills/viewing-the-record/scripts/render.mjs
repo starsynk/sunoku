@@ -57,12 +57,20 @@ export function renderHtml(status, tasks, decisions) {
                     border-radius:6px; background:var(--card); color:var(--fg); cursor:pointer; }
   .filters button.on { border-color:var(--doing); font-weight:600; }
   .decision { background:var(--card); border-radius:6px; padding:.6rem .8rem; margin:.4rem 0; }
+  .tabs { margin:1rem 0; }
+  .archived-group { opacity:.65; }
   footer { margin-top:2rem; font-size:.8rem; color:var(--muted); }
 </style>
 </head>
 <body>
 <h1>${esc(status.product)} <span class="muted">— ${esc(status.one_liner ?? '')}</span></h1>
 
+<nav class="filters tabs" id="tabs" hidden>
+  <button data-v="tasks" class="on">Tasks</button>
+  <button data-v="archive">Archive</button>
+</nav>
+
+<section id="tasks-tab">
 <h2>Tasks</h2>
 <div class="filters" id="task-filters"></div>
 <div id="tasks"></div>
@@ -72,14 +80,22 @@ export function renderHtml(status, tasks, decisions) {
 <div class="filters" id="decision-filters"></div>
 <div id="decisions"></div>
 </section>
+</section>
+
+<section id="archive-tab" hidden>
+<h2>Archive</h2>
+<div id="archive"></div>
+</section>
 
 <footer>Live view rendered ${generated} — reloads when the record changes. Read-only;
 flip status via <code>tasks.mjs</code>. The server stops itself ~15 min after the last
 tab closes.</footer>
 
 <script>
-const ROWS = ${inline(tasks)};
+const ALL_ROWS = ${inline(tasks)};
 const DECISIONS = ${inline(decisions)};
+const ROWS = ALL_ROWS.filter(r => !r.archived);
+const ARCHIVED = ALL_ROWS.filter(r => r.archived);
 
 const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const badge = (v, kind) => '<span class="badge ' + kind + '-' + esc(v) + '">' + esc(v) + '</span>';
@@ -95,14 +111,15 @@ function taskHtml(t) {
     + '</div>';
 }
 
-function render() {
-  const milestones = ROWS.filter(r => r.type === 'milestone');
-  const epics = ROWS.filter(r => r.type === 'epic');
-  const tasks = ROWS.filter(r => r.type === 'task');
+function groupHtml(rows, extraClass, chipOf) {
+  const milestones = rows.filter(r => r.type === 'milestone');
+  const epics = rows.filter(r => r.type === 'epic');
+  const tasks = rows.filter(r => r.type === 'task');
   const used = new Set();
   let out = '';
   for (const m of milestones) {
-    out += '<div class="milestone"><strong>' + esc(m.id) + '</strong> ' + esc(m.title);
+    out += '<div class="milestone' + extraClass + '"><strong>' + esc(m.id) + '</strong> ' + esc(m.title)
+      + (chipOf ? chipOf(m) : '');
     for (const e of epics.filter(e => e.milestone === m.id)) {
       out += '<div class="epic"><strong>' + esc(e.id) + '</strong> ' + esc(e.title);
       for (const t of tasks.filter(t => t.epic === e.id)) { used.add(t.id); out += taskHtml(t); }
@@ -111,9 +128,12 @@ function render() {
     out += '</div>';
   }
   const loose = tasks.filter(t => !used.has(t.id));
-  if (loose.length) out += '<div class="milestone">Ungrouped' + loose.map(taskHtml).join('') + '</div>';
-  document.getElementById('tasks').innerHTML = out || '<p class="muted">No tasks yet.</p>';
+  if (loose.length) out += '<div class="milestone' + extraClass + '">Ungrouped' + loose.map(taskHtml).join('') + '</div>';
+  return out;
 }
+
+document.getElementById('tasks').innerHTML =
+  groupHtml(ROWS, '', null) || '<p class="muted">No tasks yet.</p>';
 
 function filters(el, values, apply, countOf) {
   el.innerHTML = values.map(v =>
@@ -126,13 +146,26 @@ function filters(el, values, apply, countOf) {
   set('all');
 }
 
-render();
 filters(document.getElementById('task-filters'),
   ['all', 'todo', 'doing', 'done', 'blocked'],
-  v => document.querySelectorAll('.task').forEach(t =>
+  v => document.querySelectorAll('#tasks .task').forEach(t =>
     t.hidden = v !== 'all' && t.dataset.status !== v),
   v => v === 'all' ? ROWS.filter(r => r.type === 'task').length
     : ROWS.filter(r => r.type === 'task' && r.status === v).length);
+
+if (ARCHIVED.length) {
+  const tabs = document.getElementById('tabs');
+  tabs.hidden = false;
+  document.getElementById('archive').innerHTML = groupHtml(ARCHIVED, ' archived-group',
+    m => '<span class="chip">archived ' + esc(m.archived_at ?? '') + '</span>');
+  tabs.addEventListener('click', e => {
+    const v = e.target.dataset.v;
+    if (!v) return;
+    tabs.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+    document.getElementById('tasks-tab').hidden = v !== 'tasks';
+    document.getElementById('archive-tab').hidden = v !== 'archive';
+  });
+}
 
 if (DECISIONS.length) {
   document.getElementById('decisions-section').hidden = false;
