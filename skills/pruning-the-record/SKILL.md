@@ -8,11 +8,14 @@ disable-model-invocation: true
 
 ## Overview
 
-Prune deletes what the record no longer needs to stay truthful: fully-done milestones,
+Prune clears what the record no longer needs to stay truthful: fully-done milestones,
 resolved decisions whose answers already live in the PRD, superseded research files.
-Git history is the archive — nothing moves to an archive file, nothing is summarized.
-A row or file is prunable only when everything it asserts is finished or represented
-elsewhere in the record. Prune never deletes the only copy of an answer.
+Milestones are archived in place — rows stay in `tasks.jsonl` flagged `archived`, drop
+out of every list and status count, and appear in the record viewer's Archive tab;
+`--unarchive-milestone` restores one. Decisions and research files are deleted — git
+history is their archive. A row or file is prunable only when everything it asserts is
+finished or represented elsewhere in the record. Prune never deletes the only copy of
+an answer.
 
 **Announce at start:** "I'm using the sunoku:pruning-the-record skill to prune the record."
 
@@ -39,11 +42,13 @@ elsewhere in the record. Prune never deletes the only copy of an answer.
    anything not approved survives.
 5. Execute approved items only:
    - `node "${CLAUDE_PLUGIN_ROOT}/scripts/tasks.mjs" --prune-milestone <M-id>` per milestone
+     (archives the rows; `--unarchive-milestone <M-id>` undoes a mistake)
    - `node "${CLAUDE_PLUGIN_ROOT}/scripts/decisions.mjs" --prune <D-id>` per decision
    - `rm` per approved research file
    If a script refuses, report its message verbatim and move on — never work around it.
-6. Report what was deleted (the scripts echo deleted rows) and suggest the user commit.
-   An empty candidate list is a valid outcome: say "nothing prunable" and stop.
+6. Report what was archived (milestones) and deleted (decisions, research) — the scripts
+   echo the affected rows — and suggest the user commit. An empty candidate list is a
+   valid outcome: say "nothing prunable" and stop.
 
 ## Red Flags
 
@@ -53,7 +58,7 @@ elsewhere in the record. Prune never deletes the only copy of an answer.
 | "The Change Log is huge, prune old entries" | The Change Log is the record's only history. Never pruned. |
 | "This decision is resolved, that's enough" | Resolved is necessary, not sufficient. No PRD/Change Log trace = not prunable; offer absorb-first. |
 | "Milestone is 9/10 done, close enough" | The script refuses partial milestones. Do not flip the last task or edit the file to force it. |
-| "The guard hook blocked my edit, I'll write the JSONL another way" | Correct behavior. The prune verbs are the only deletion path. |
+| "The guard hook blocked my edit, I'll write the JSONL another way" | Correct behavior. The prune/unarchive verbs are the only archive path. |
 
 ## Integration
 

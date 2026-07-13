@@ -10,8 +10,10 @@ description: Use when the user wants to see the backlog or decisions in a browse
 Human-readable live view of the record: a small local server renders `tasks.jsonl`
 (milestones → epics → tasks with descriptions, status badges, filters) and
 `decisions.jsonl`, and open tabs reload themselves whenever the record changes.
-Read-only — the page never writes back. The server binds 127.0.0.1 with a session
-key in the URL and stops itself ~15 minutes after the last tab closes.
+Pruned (archived) milestones live under an Archive tab that appears only when
+something is archived. Read-only — the page never writes back. The server binds
+127.0.0.1 with a session key in the URL and stops itself ~15 minutes after the last
+tab closes.
 
 **Announce at start:** "I'm using the sunoku:viewing-the-record skill to open the record."
 
