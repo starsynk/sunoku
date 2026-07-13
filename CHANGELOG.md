@@ -1,5 +1,20 @@
 # Changelog
 
+## 3.2.0 — 2026-07-13
+
+- **Task prune archives instead of deleting.** `tasks.mjs --prune-milestone` now stamps
+  `archived: true` + `archived_at` on the milestone, its epics, and their tasks — rows
+  stay in `tasks.jsonl`. All refusal checks kept (partial milestone, live cross-milestone
+  dep, unknown id) plus a new one: already-archived milestones refuse a second prune.
+  New `--unarchive-milestone` restores a mistake. Archived rows drop out of every query
+  (`--list all|ready|status=|milestone=|epic=`, status counts, ready frontier); a new
+  `--list archived` filter shows them. Decisions and research pruning unchanged — still
+  deleted, git history is their archive.
+- **Archive tab in the record viewer.** The live view splits into Tasks | Archive tabs
+  when anything is archived: archived milestones render dimmed in the same hierarchy
+  with an `archived <date>` chip. Tab bar hidden when nothing is archived; status
+  filters and the Decisions section stay under the Tasks tab.
+
 ## 3.1.0 — 2026-07-10
 
 - **New skill: `sunoku:pruning-the-record`.** User command only (`disable-model-invocation`,
