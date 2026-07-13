@@ -15,7 +15,7 @@ const decisions = readJsonl(recordPath(root, 'decisions.jsonl'));
 const open = filterDecisions(decisions, 'open');
 const high = filterDecisions(decisions, 'high');
 
-const taskRows = readJsonl(recordPath(root, 'tasks.jsonl'));
+const taskRows = readJsonl(recordPath(root, 'tasks.jsonl')).filter((r) => !r.archived);
 let tasks = null;
 if (taskRows.length > 0) {
   const counts = { todo: 0, doing: 0, done: 0, blocked: 0 };
