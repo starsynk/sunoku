@@ -115,6 +115,22 @@ assert_exitn $? "tasks: invalid discipline rejected"
 node "$S/tasks.mjs" --add '{"type":"phase","title":"x"}' >/dev/null 2>&1
 assert_exitn $? "tasks: invalid type rejected"
 while IFS= read -r line; do echo "$line" | node -e 'JSON.parse(require("fs").readFileSync(0,"utf8"))' 2>/dev/null || { fail "tasks: jsonl valid"; break; }; done < "$D/.sunoku/tasks.jsonl" && pass "tasks: jsonl valid"
+# archived rows invisible to every filter except `archived`
+node -e '
+  const fs = require("fs"); const p = process.argv[1];
+  const rows = fs.readFileSync(p, "utf8").split("\n").filter(Boolean).map(JSON.parse);
+  for (const r of rows) if (r.id === "T-002") { r.archived = true; r.archived_at = "2026-07-13"; }
+  fs.writeFileSync(p, rows.map(r => JSON.stringify(r)).join("\n") + "\n");
+' "$D/.sunoku/tasks.jsonl"
+OUT="$(node "$S/tasks.mjs" --list all)"
+echo "$OUT" | grep -qF '"T-002"' && fail "lib: archived hidden from all" || pass "lib: archived hidden from all"
+OUT="$(node "$S/tasks.mjs" --list ready)"
+echo "$OUT" | grep -qF '"T-002"' && fail "lib: archived never ready" || pass "lib: archived never ready"
+OUT="$(node "$S/tasks.mjs" --list status=todo)"
+echo "$OUT" | grep -qF '"T-002"' && fail "lib: archived hidden from status filter" || pass "lib: archived hidden from status filter"
+OUT="$(node "$S/tasks.mjs" --list archived)"
+echo "$OUT" | grep -qF '"T-002"' && pass "lib: --list archived returns archived" || fail "lib: --list archived returns archived" "$OUT"
+echo "$OUT" | grep -qE '"id": ?"T-001"' && fail "lib: --list archived excludes live" || pass "lib: --list archived excludes live"
 unset CLAUDE_PROJECT_DIR
 
 # --- prune: tasks ---

@@ -116,23 +116,26 @@ export function nextTaskId(rows, type) {
 // --- tasks queries (shared by tasks.mjs --list and read's query.mjs) ---
 
 export function readyTasks(rows) {
-  const done = new Set(rows.filter((r) => r.type === 'task' && r.status === 'done').map((r) => r.id));
-  return rows.filter((r) => r.type === 'task' && r.status === 'todo'
+  const live = rows.filter((r) => !r.archived);
+  const done = new Set(live.filter((r) => r.type === 'task' && r.status === 'done').map((r) => r.id));
+  return live.filter((r) => r.type === 'task' && r.status === 'todo'
     && (r.deps ?? []).every((d) => done.has(d)));
 }
 
 export function filterTasks(rows, expr) {
-  if (expr === 'all') return rows;
-  if (expr === 'ready') return readyTasks(rows);
+  if (expr === 'archived') return rows.filter((r) => r.archived);
+  const live = rows.filter((r) => !r.archived);
+  if (expr === 'all') return live;
+  if (expr === 'ready') return readyTasks(live);
   const eq = expr.indexOf('=');
-  if (eq === -1) die(`invalid task filter: ${expr} (all|ready|status=X|milestone=X|epic=X)`);
+  if (eq === -1) die(`invalid task filter: ${expr} (all|ready|archived|status=X|milestone=X|epic=X)`);
   const k = expr.slice(0, eq);
   const v = expr.slice(eq + 1);
-  if (k === 'status') return rows.filter((r) => r.status === v);
-  if (k === 'epic') return rows.filter((r) => r.epic === v || (r.type === 'epic' && r.id === v));
+  if (k === 'status') return live.filter((r) => r.status === v);
+  if (k === 'epic') return live.filter((r) => r.epic === v || (r.type === 'epic' && r.id === v));
   if (k === 'milestone') {
-    const epics = new Set(rows.filter((r) => r.type === 'epic' && r.milestone === v).map((r) => r.id));
-    return rows.filter((r) => (r.type === 'task' && epics.has(r.epic))
+    const epics = new Set(live.filter((r) => r.type === 'epic' && r.milestone === v).map((r) => r.id));
+    return live.filter((r) => (r.type === 'task' && epics.has(r.epic))
       || (r.type === 'epic' && r.milestone === v)
       || (r.type === 'milestone' && r.id === v));
   }
