@@ -3,12 +3,13 @@
 //
 //   node tasks.mjs --add '{"type":"task","epic":"E-01","title":"...","discipline":"backend","size":"S"}'
 //   node tasks.mjs --set T-002 status=done
-//   node tasks.mjs --list ready|all|status=todo|milestone=M1|epic=E-01
-//   node tasks.mjs --prune-milestone M1
+//   node tasks.mjs --list ready|all|archived|status=todo|milestone=M1|epic=E-01
+//   node tasks.mjs --prune-milestone M1      (archives — rows stay, flagged archived)
+//   node tasks.mjs --unarchive-milestone M1
 import { parseArgs } from 'node:util';
 import {
   appendJsonl, die, DISCIPLINES, filterTasks, nextTaskId, projectRoot, readJsonl, recordPath,
-  TASK_STATUSES, writeJsonl,
+  TASK_STATUSES, todayLocal, writeJsonl,
 } from './lib.mjs';
 
 const { values, positionals } = parseArgs({
@@ -18,6 +19,7 @@ const { values, positionals } = parseArgs({
     set: { type: 'string' },
     list: { type: 'string' },
     'prune-milestone': { type: 'string' },
+    'unarchive-milestone': { type: 'string' },
   },
 });
 
@@ -73,22 +75,39 @@ if (values.add) {
 } else if (values['prune-milestone']) {
   const id = values['prune-milestone'];
   const rows = readJsonl(path);
-  if (!rows.some((r) => r.type === 'milestone' && r.id === id)) die(`no milestone with id: ${id}`);
+  const milestone = rows.find((r) => r.type === 'milestone' && r.id === id);
+  if (!milestone) die(`no milestone with id: ${id}`);
+  if (milestone.archived) die(`already archived: ${id}`);
   const doomed = filterTasks(rows, `milestone=${id}`);
   const doomedIds = new Set(doomed.map((r) => r.id));
   const notDone = doomed.filter((r) => r.type === 'task' && r.status !== 'done');
   if (notDone.length) {
     die(`not prunable: ${notDone.map((r) => `${r.id} (${r.status})`).join(', ')} not done`);
   }
-  const dependents = rows.filter((r) => r.type === 'task' && !doomedIds.has(r.id)
+  const dependents = rows.filter((r) => r.type === 'task' && !r.archived && !doomedIds.has(r.id)
     && (r.deps ?? []).some((d) => doomedIds.has(d)));
   if (dependents.length) {
     die(`not prunable: ${dependents.map((r) => r.id).join(', ')} depend on pruned tasks — prune their milestone first`);
   }
-  writeJsonl(path, rows.filter((r) => !doomedIds.has(r.id)));
+  const stamp = todayLocal();
+  for (const r of doomed) { r.archived = true; r.archived_at = stamp; }
+  writeJsonl(path, rows);
   for (const r of doomed) process.stdout.write(JSON.stringify(r) + '\n');
+} else if (values['unarchive-milestone']) {
+  const id = values['unarchive-milestone'];
+  const rows = readJsonl(path);
+  const milestone = rows.find((r) => r.type === 'milestone' && r.id === id);
+  if (!milestone) die(`no milestone with id: ${id}`);
+  if (!milestone.archived) die(`not archived: ${id}`);
+  const epics = new Set(rows.filter((r) => r.type === 'epic' && r.milestone === id).map((r) => r.id));
+  const restored = rows.filter((r) => r.archived && (r.id === id
+    || (r.type === 'epic' && r.milestone === id)
+    || (r.type === 'task' && epics.has(r.epic))));
+  for (const r of restored) { delete r.archived; delete r.archived_at; }
+  writeJsonl(path, rows);
+  for (const r of restored) process.stdout.write(JSON.stringify(r) + '\n');
 } else if (values.list) {
   process.stdout.write(JSON.stringify(filterTasks(readJsonl(path), values.list), null, 2) + '\n');
 } else {
-  die('nothing to do: pass --add, --set, --list, or --prune-milestone');
+  die('nothing to do: pass --add, --set, --list, --prune-milestone, or --unarchive-milestone');
 }

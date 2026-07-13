@@ -133,7 +133,7 @@ echo "$OUT" | grep -qF '"T-002"' && pass "lib: --list archived returns archived"
 echo "$OUT" | grep -qE '"id": ?"T-001"' && fail "lib: --list archived excludes live" || pass "lib: --list archived excludes live"
 unset CLAUDE_PROJECT_DIR
 
-# --- prune: tasks ---
+# --- prune: tasks (archive semantics) ---
 D="$(mktemp -d)"; mkrecord "$D"; export CLAUDE_PROJECT_DIR="$D"
 node "$S/tasks.mjs" --add '{"type":"milestone","title":"Skeleton"}' >/dev/null            # M1
 node "$S/tasks.mjs" --add '{"type":"epic","milestone":"M1","title":"Auth"}' >/dev/null    # E-01
@@ -145,7 +145,7 @@ node "$S/tasks.mjs" --prune-milestone M9 >/dev/null 2>&1
 assert_exitn $? "prune: unknown milestone dies"
 node "$S/tasks.mjs" --prune-milestone M1 >/dev/null 2>&1
 assert_exitn $? "prune: partial milestone refused"
-assert_grepf "$D/.sunoku/tasks.jsonl" '"id":"T-001"' "prune: refusal leaves rows intact"
+assert_nogrepf "$D/.sunoku/tasks.jsonl" '"archived":true' "prune: refusal stamps nothing"
 
 node "$S/tasks.mjs" --set T-002 status=done >/dev/null
 node "$S/tasks.mjs" --add '{"type":"milestone","title":"Growth"}' >/dev/null              # M2
@@ -158,15 +158,37 @@ assert_exitn $? "prune: live cross-milestone dep refused"
 node "$S/tasks.mjs" --set T-003 status=done >/dev/null
 OUT="$(node "$S/tasks.mjs" --prune-milestone M2)"
 assert_exit0 $? "prune: fully-done milestone prunes"
-echo "$OUT" | grep -qF '"T-003"' && pass "prune: deleted rows echoed" || fail "prune: deleted rows echoed" "$OUT"
-assert_nogrepf "$D/.sunoku/tasks.jsonl" '"id":"M2"' "prune: milestone row gone"
-assert_nogrepf "$D/.sunoku/tasks.jsonl" '"id":"E-02"' "prune: epic row gone"
-assert_nogrepf "$D/.sunoku/tasks.jsonl" '"id":"T-003"' "prune: task row gone"
-assert_grepf "$D/.sunoku/tasks.jsonl" '"id":"M1"' "prune: survivors untouched"
+echo "$OUT" | grep -qF '"T-003"' && pass "prune: archived rows echoed" || fail "prune: archived rows echoed" "$OUT"
+echo "$OUT" | grep -qF '"archived":true' && pass "prune: echo carries archived flag" || fail "prune: echo carries archived flag" "$OUT"
+assert_grepf "$D/.sunoku/tasks.jsonl" '"id":"M2"' "prune: milestone row kept"
+assert_grepf "$D/.sunoku/tasks.jsonl" '"id":"T-003"' "prune: task row kept"
+grep -F '"id":"T-003"' "$D/.sunoku/tasks.jsonl" | grep -qF '"archived":true' && pass "prune: task row stamped" || fail "prune: task row stamped"
+grep -F '"id":"T-003"' "$D/.sunoku/tasks.jsonl" | grep -qE '"archived_at":"[0-9]{4}-[0-9]{2}-[0-9]{2}"' && pass "prune: archived_at stamped" || fail "prune: archived_at stamped"
+grep -F '"id":"M1"' "$D/.sunoku/tasks.jsonl" | grep -qF '"archived"' && fail "prune: survivors untouched" || pass "prune: survivors untouched"
+
+OUT="$(node "$S/tasks.mjs" --list all)"
+echo "$OUT" | grep -qF '"M2"' && fail "prune: archived hidden from list all" || pass "prune: archived hidden from list all"
+OUT="$(node "$S/tasks.mjs" --list archived)"
+echo "$OUT" | grep -qF '"T-003"' && pass "prune: list archived shows pruned" || fail "prune: list archived shows pruned" "$OUT"
+
+node "$S/tasks.mjs" --prune-milestone M2 >/dev/null 2>&1
+assert_exitn $? "prune: double prune dies"
 
 node "$S/tasks.mjs" --prune-milestone M1 >/dev/null
-assert_exit0 $? "prune: upstream prunable after downstream pruned"
-assert_nogrepf "$D/.sunoku/tasks.jsonl" '"id":"T-001"' "prune: upstream rows gone"
+assert_exit0 $? "prune: upstream prunable after downstream archived"
+grep -F '"id":"T-001"' "$D/.sunoku/tasks.jsonl" | grep -qF '"archived":true' && pass "prune: upstream rows stamped" || fail "prune: upstream rows stamped"
+
+# unarchive
+node "$S/tasks.mjs" --unarchive-milestone M9 >/dev/null 2>&1
+assert_exitn $? "unarchive: unknown milestone dies"
+OUT="$(node "$S/tasks.mjs" --unarchive-milestone M2)"
+assert_exit0 $? "unarchive: archived milestone restores"
+echo "$OUT" | grep -qF '"T-003"' && pass "unarchive: restored rows echoed" || fail "unarchive: restored rows echoed" "$OUT"
+grep -F '"id":"T-003"' "$D/.sunoku/tasks.jsonl" | grep -qF '"archived"' && fail "unarchive: flags removed" || pass "unarchive: flags removed"
+OUT="$(node "$S/tasks.mjs" --list all)"
+echo "$OUT" | grep -qF '"T-003"' && pass "unarchive: visible in list all again" || fail "unarchive: visible in list all again" "$OUT"
+node "$S/tasks.mjs" --unarchive-milestone M2 >/dev/null 2>&1
+assert_exitn $? "unarchive: live milestone dies"
 unset CLAUDE_PROJECT_DIR
 
 # --- prune: decisions ---
